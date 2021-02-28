@@ -9,24 +9,44 @@
 </template>
 
 <style lang="scss">
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
+  font-size: 16px;
   color: #2c3e50;
 }
 
 #nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
   padding: 30px;
 
   a {
     font-weight: bold;
+    text-decoration: none;
     color: #2c3e50;
 
     &.router-link-exact-active {
       color: #42b983;
     }
   }
+}
+
+.page {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  padding-top: 100px;
+  display: flex;
 }
 </style>
