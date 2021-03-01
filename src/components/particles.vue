@@ -1,5 +1,5 @@
 <template>
-  <svg version="1.1" xmlns="http://www.w3.org/2000/svg" id="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+  <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas particles-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
       <circle v-for="(p, index) in particles" :key="'particle-'+index" :cx="p.x" :cy="p.y" :r="radius" fill="white" opacity="0.5"/>
       <line v-for="(l, index) in lines" :key="'line-'+index" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" stroke="white" :opacity="l.opacity"/>
   </svg>
@@ -48,8 +48,10 @@ export default {
     },
     methods: {
         calculateLineRange: (width, height) => {
-            const divider = 7;
-            return Math.min(width/divider, height/divider);
+            const divider = 10;
+            let range = Math.max(width/divider, height/divider);
+            range = 80;
+            return range;
         },
         makeParticles: (particles, num, width, height) => {
             for (let i = 0; i < num; i++) {
@@ -125,13 +127,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-    #canvas {
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: -1;
-        width: 100%;
-        height: 100%;
+    .particles-canvas {
         background-color: rgb(38, 38, 77);
     }
 
