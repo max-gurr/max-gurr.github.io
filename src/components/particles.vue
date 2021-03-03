@@ -33,9 +33,10 @@ export default {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
             this.lineRange = this.calculateLineRange(this.width, this.height);
+            this.particles = this.makeParticles(this.num, this.width, this.height);
         });
 
-        this.makeParticles(this.particles, this.num, this.width, this.height);
+        this.particles = this.makeParticles(this.num, this.width, this.height);
 
         this.drawCycle = setInterval(async function() {
             await Promise.all(this.particles.map(async (p) => {
@@ -48,13 +49,18 @@ export default {
     },
     methods: {
         calculateLineRange: (width, height) => {
-            const divider = 10;
-            let range = Math.max(width/divider, height/divider);
-            range = 80;
+            const divider = 15;
+            let range = Math.max(80, Math.max(width/divider, height/divider));
+
             return range;
         },
-        makeParticles: (particles, num, width, height) => {
-            for (let i = 0; i < num; i++) {
+        makeParticles: (num, width, height) => {
+            let particles = [];
+
+            const responsiveNum = width/15 + height/15;
+            const numParticles = Math.min(num, responsiveNum);
+            
+            for (let i = 0; i < numParticles; i++) {
                 var xVel = Math.sin(Math.random()*360);
                 var yVel = Math.sin(Math.random()*360);
                 const mag = Math.sqrt(xVel * xVel + yVel * yVel);
@@ -75,6 +81,8 @@ export default {
                     yVel: yVel,
                 });
             }
+
+            return particles;
         },
         updateParticle: async (p, width, height, range) => {
             p.x += p.xVel;

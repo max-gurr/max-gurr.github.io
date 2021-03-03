@@ -8,12 +8,19 @@
   </div>
 </template>
 
+<script>
+export default {
+  name: "App"
+};
+</script>
+
 <style lang="scss">
 *, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -46,7 +53,6 @@
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  padding-top: 100px;
   display: flex;
 }
 
@@ -57,5 +63,11 @@
     z-index: -1;
     width: 100%;
     height: 100%;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
