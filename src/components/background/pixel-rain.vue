@@ -54,39 +54,41 @@ export default {
 </script>
 
 <style lang="scss">
-    .pixel-rain-canvas {
-        background-color: rgb(38, 38, 77);
+@import '../../assets/variables.scss';
 
-        .square-container {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            display: flex;
-            flex-direction: column;
-            @for $i from 1 to 99 {
-                .square:nth-child(#{$i}) { animation-delay: $i * 0.1s; }
-            }
+.pixel-rain-canvas {
+    background-color: $bg-dark-blue;
 
-            .square {
-                min-width: 10px;
-                min-height: 10px;
-                border-radius: 50%;
-                opacity: 0;
-                box-shadow: 0 0 2px 4px rgba(255, 255, 255, 0.2);
-                background-color: rgba(255, 255, 255, 0.25);
-                animation: square-animate 0.5s ease;
-            }
+    .square-container {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        @for $i from 1 to 99 {
+            .square:nth-child(#{$i}) { animation-delay: $i * 0.1s; }
         }
 
-        @keyframes square-animate {
-            0% {
-                opacity: 0;
-            }
-            50% {
-                opacity: 1;
-            }
-            100% { 
-                opacity: 0;
-            }
+        .square {
+            min-width: 10px;
+            min-height: 10px;
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 2px 4px rgba(255, 255, 255, 0.2);
+            background-color: rgba(255, 255, 255, 0.25);
+            animation: square-animate 0.5s ease;
         }
     }
+
+    @keyframes square-animate {
+        0% {
+            opacity: 0;
+        }
+        50% {
+            opacity: 0.4;
+        }
+        100% { 
+            opacity: 0;
+        }
+    }
+}
 </style>

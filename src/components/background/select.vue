@@ -29,9 +29,10 @@ export default {
 
 <style scoped lang="scss">
 .bg-select {
-    $bg-color: #52e293;
-    $node-color: #10bd5e;
+    $node-color: rgb(10, 10, 30);
+    $node-highlight: #00ff73;
     $node-color-active: #83ecb3;
+    $bg-color: $node-color;
     position: absolute;
     z-index: 97;
     bottom: 10px;
@@ -47,15 +48,17 @@ export default {
         width: 70px;
         height: 70px;
         background-color: $bg-color;
-        opacity: 0;
         border-radius: 50%;
         transition: all 0.5s ease;
+        border: solid 2px $node-highlight;
+        box-shadow: 0px 0px 2px $node-highlight,
+                    0px 0px 8px $node-highlight,
+                    0px 0px 20px $node-highlight;
     }
 
     &--active::before {
-        width: 250px;
-        height: 250px;
-        opacity: 1;
+        width: 230px;
+        height: 230px;
     }
 
     &__base {
@@ -68,17 +71,19 @@ export default {
         height: 70px;
         border-radius: 50%;
         font-size: 1.5em;
-        border: solid 3px $node-color;
+        color: $node-highlight;
 
         &:hover {
             @media (min-width: 720px) {
                 background-color: $node-color-active;
+                color: $node-color;
             };
         }
 
         &:active {
             @media (max-width: 719px) {
                 background-color: $node-color-active;
+                color: $node-color;
             };
         }
     }
@@ -89,32 +94,35 @@ export default {
         background-color: $node-color;
         bottom: 10px;
         left: 15px;
-        width: 40px;
-        height: 40px;
+        width: 35px;
+        height: 35px;
         border-radius: 50%;
-        font-size: 1.25em;
+        font-size: 1.125em;
         transition: transform 0.5s ease;
+        color: $node-highlight;
 
         @for $i from 1 to 99 {
             $translationLength: 80px;
-            $rotationAngle: 40deg;
+            $rotationAngle: 30deg;
 
             &--active:nth-of-type(#{$i}) { 
-                transform:  rotate(($i - 1) * $rotationAngle)
+                transform:  rotate(($i - 1.25) * $rotationAngle)
                             translateY(-$translationLength)
-                            rotate(($i - 1) * -$rotationAngle);
+                            rotate(($i - 1.25) * -$rotationAngle);
             }
         }
 
         &:hover {
             @media (min-width: 720px) {
                 background-color: $node-color-active;
+                color: $node-color;
             };
         }
 
         &:active {
             @media (max-width: 719px) {
                 background-color: $node-color-active;
+                color: $node-color;
             };
         }
     }

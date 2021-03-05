@@ -14,6 +14,7 @@ import backgroundSelect from '@/components/background/select.vue';
 import connectedParticles from '@/components/background/connected-particles.vue';
 import pixelRain from '@/components/background/pixel-rain.vue';
 import rippleGrid from '@/components/background/ripple-grid.vue';
+import waterSurface from '@/components/background/water-surface.vue';
 
 export default {
   name: 'Home',
@@ -21,7 +22,8 @@ export default {
     connectedParticles,
     pixelRain,
     backgroundSelect,
-    rippleGrid
+    rippleGrid,
+    waterSurface
   },
   data: () => ({
     selectedBackground: null,
@@ -37,6 +39,10 @@ export default {
       {
         display: 'G',
         value: 'ripple-grid'
+      },
+      {
+        display: 'W',
+        value: 'water-surface'
       }
     ]
   }),
@@ -69,11 +75,11 @@ export default {
       height: calc(100% - 85px);
     }
 
-    &:hover, &:active {
-      background-color: rgba(0, 0, 0, 0.2);
-      transition: all 0.5s ease;
-      transition-delay: 0.4s;
-    }
+    // &:hover, &:active {
+    //   background-color: rgba(0, 0, 0, 0.5);
+    //   transition: all 0.5s ease;
+    //   transition-delay: 0.4s;
+    // }
 
     $weight: 5px;
     &::before {
@@ -105,11 +111,11 @@ export default {
       box-shadow: 0px 0px 10px 2px rgba(255, 255, 255, 0.5);
     }
 
-    &:hover::before, &:hover::after, &:active::before, &:active::after, &:focus::before, &:focus::after {
-      height: 100%;
-      width: 100%;
-      transition-delay: 0s;
-    }
+    // &:hover::before, &:hover::after, &:active::before, &:active::after, &:focus::before, &:focus::after {
+    //   height: 100%;
+    //   width: 100%;
+    //   transition-delay: 0s;
+    // }
 
     h1 {
       font-size: calc(min(5em, 10vw));
