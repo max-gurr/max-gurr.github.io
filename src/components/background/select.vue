@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-select">
-      <span class="bg-select__base flex-center" v-on:click="active = !active">BG</span>
+  <div class="bg-select" :class="{ 'bg-select--active' : active}">
+      <span class="bg-select__base flex-center" v-on:click="active = !active" :class="{ 'bg-select__base--active' : active}">BG</span>
       <div v-for="(bg, index) in backgrounds" :key="index" class="bg-select__item flex-center" :class="{ 'bg-select__item--active' : active}" v-on:click="bgClick(bg.value)">
           <span>{{bg.display}}</span>
       </div>
@@ -30,10 +30,30 @@ export default {
 <style scoped lang="scss">
 .bg-select {
     position: absolute;
+    z-index: 97;
     bottom: 10px;
     left: 10px;
-    width: auto;
-    height: auto;
+
+    &::before {
+        content: "";
+        position: absolute;
+        z-index: -99;
+        bottom: 35px;
+        left: 35px;
+        transform: translate(-50%, 50%);
+        width: 70px;
+        height: 70px;
+        background-color: rgb(190, 190, 24);
+        opacity: 0;
+        border-radius: 50%;
+        transition: all 0.5s ease;
+    }
+
+    &--active::before {
+        width: 250px;
+        height: 250px;
+        opacity: 1;
+    }
 
     &__base {
         position: absolute;
@@ -48,16 +68,24 @@ export default {
         border: solid 3px #e6e934;
 
         &:hover {
-            background-color: #fdffa4;
+            @media (min-width: 720px) {
+                background-color: #fdffa4;
+            };
+        }
+
+        &:active {
+            @media (max-width: 719px) {
+                background-color: #fdffa4;
+            };
         }
     }
 
     &__item {
         position: absolute;
-        z-index: 98;
+        z-index: 0;
         background-color: #e6e934;
         bottom: 10px;
-        left: 20px;
+        left: 15px;
         width: 40px;
         height: 40px;
         border-radius: 50%;
@@ -65,8 +93,8 @@ export default {
         transition: transform 0.5s ease;
 
         @for $i from 1 to 99 {
-            $translationLength: 100px;
-            $rotationAngle: 35deg;
+            $translationLength: 80px;
+            $rotationAngle: 40deg;
 
             &--active:nth-of-type(#{$i}) { 
                 transform:  rotate(($i - 1) * $rotationAngle)
@@ -76,7 +104,15 @@ export default {
         }
 
         &:hover {
-            background-color: #fdffa4;
+            @media (min-width: 720px) {
+                background-color: #fdffa4;
+            };
+        }
+
+        &:active {
+            @media (max-width: 719px) {
+                background-color: #fdffa4;
+            };
         }
     }
 }

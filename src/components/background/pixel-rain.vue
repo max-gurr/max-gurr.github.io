@@ -1,12 +1,11 @@
 <template>
-  <div class="canvas falling-squares-canvas" ref="canvas">
-      
+  <div class="canvas pixel-rain-canvas" ref="canvas">
   </div>
 </template>
 
 <script>
 export default {
-    name: 'falling-squares',
+    name: 'pixel-rain',
     props: {
         numSquares: {
             type: Number,
@@ -55,7 +54,7 @@ export default {
 </script>
 
 <style lang="scss">
-    .falling-squares-canvas {
+    .pixel-rain-canvas {
         background-color: rgb(38, 38, 77);
 
         .square-container {

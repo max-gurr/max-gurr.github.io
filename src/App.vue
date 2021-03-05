@@ -35,7 +35,7 @@ export default {
   top: 0;
   left: 0;
   z-index: 100;
-  padding: 30px;
+  padding: 20px;
 
   a {
     font-weight: bold;

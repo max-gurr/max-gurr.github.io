@@ -1,34 +1,42 @@
 <template>
   <div class="home page">
+    <div class="container flex-center">
+      <h1>Welcome</h1>
+    </div>
     <component v-bind:is="selectedBackground" />
-    <h1>Welcome</h1>
     <backgroundSelect :backgrounds="backgroundComponents" @click="setBackground"></backgroundSelect>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import particles from '@/components/particles';
-import fallingSquares from '@/components/falling-squares.vue';
 import backgroundSelect from '@/components/background/select.vue';
+// Backgrounds:
+import connectedParticles from '@/components/background/connected-particles.vue';
+import pixelRain from '@/components/background/pixel-rain.vue';
+import rippleGrid from '@/components/background/ripple-grid.vue';
 
 export default {
   name: 'Home',
   components: {
-    particles,
-    fallingSquares,
-    backgroundSelect
+    connectedParticles,
+    pixelRain,
+    backgroundSelect,
+    rippleGrid
   },
   data: () => ({
     selectedBackground: null,
     backgroundComponents: [
       {
         display: 'P',
-        value: 'particles'
+        value: 'connected-particles'
       }, 
       {
-        display: 'S',
-        value: 'falling-squares'
+        display: 'R',
+        value: 'pixel-rain'
+      },
+      {
+        display: 'G',
+        value: 'ripple-grid'
       }
     ]
   }),
@@ -49,22 +57,63 @@ export default {
   justify-content: center;
   flex-direction: column;
 
-  h1 {
-    font-size: 5em;
-    color: rgba(49, 91, 189, 0.8);
-  }
+  .container {
+    position: relative;
+    width: calc(100% - 150px);
+    height: calc(100% - 150px);
+    transition: all 0.5s ease;
+    transition-delay: 0s;
 
-  .bg-btn {
-    padding: 10px;
-    border: solid 2px white;
-    margin: 10px;
-    color: white;
-    font-size: 1.5em;
-    background-color: rgba(255, 255, 255, 0.2);
-    outline: none;
+    @media (max-width: 720px) {
+      width: calc(100% - 85px);
+      height: calc(100% - 85px);
+    }
 
-    &:active {
-      background-color: rgba(255, 255, 255, 0.5);
+    &:hover, &:active {
+      background-color: rgba(0, 0, 0, 0.2);
+      transition: all 0.5s ease;
+      transition-delay: 0.4s;
+    }
+
+    $weight: 5px;
+    &::before {
+      content: "";
+      background-color: white;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 15%;
+      width: 15%;
+      clip-path: polygon(-50% -50%, 150% -50%, 100% 0, 100% $weight, $weight $weight, $weight 100%, 0 100%, -50% 150%);
+      transition: all 0.75s ease;
+      transition-delay: 0.1s;
+      box-shadow: 0px 0px 10px 2px rgba(255, 255, 255, 0.5);
+    }
+
+    &::after {
+      content: "";
+      background-color: white;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      height: 15%;
+      width: 15%;
+      clip-path: polygon(-50% -50%, 150% -50%, 100% 0, 100% $weight, $weight $weight, $weight 100%, 0 100%, -50% 150%);
+      transform: rotate(180deg);
+      transition: all 0.75s ease;
+      transition-delay: 0.1s;
+      box-shadow: 0px 0px 10px 2px rgba(255, 255, 255, 0.5);
+    }
+
+    &:hover::before, &:hover::after, &:active::before, &:active::after, &:focus::before, &:focus::after {
+      height: 100%;
+      width: 100%;
+      transition-delay: 0s;
+    }
+
+    h1 {
+      font-size: calc(min(5em, 10vw));
+      color: rgb(49, 91, 189);
     }
   }
 }
