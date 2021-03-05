@@ -29,6 +29,9 @@ export default {
 
 <style scoped lang="scss">
 .bg-select {
+    $bg-color: #52e293;
+    $node-color: #10bd5e;
+    $node-color-active: #83ecb3;
     position: absolute;
     z-index: 97;
     bottom: 10px;
@@ -43,7 +46,7 @@ export default {
         transform: translate(-50%, 50%);
         width: 70px;
         height: 70px;
-        background-color: rgb(190, 190, 24);
+        background-color: $bg-color;
         opacity: 0;
         border-radius: 50%;
         transition: all 0.5s ease;
@@ -60,22 +63,22 @@ export default {
         bottom: 0;
         left: 0;
         z-index: 99;
-        background-color: #e6e934;
+        background-color: $node-color;
         width: 70px;
         height: 70px;
         border-radius: 50%;
         font-size: 1.5em;
-        border: solid 3px #e6e934;
+        border: solid 3px $node-color;
 
         &:hover {
             @media (min-width: 720px) {
-                background-color: #fdffa4;
+                background-color: $node-color-active;
             };
         }
 
         &:active {
             @media (max-width: 719px) {
-                background-color: #fdffa4;
+                background-color: $node-color-active;
             };
         }
     }
@@ -83,7 +86,7 @@ export default {
     &__item {
         position: absolute;
         z-index: 0;
-        background-color: #e6e934;
+        background-color: $node-color;
         bottom: 10px;
         left: 15px;
         width: 40px;
@@ -105,13 +108,13 @@ export default {
 
         &:hover {
             @media (min-width: 720px) {
-                background-color: #fdffa4;
+                background-color: $node-color-active;
             };
         }
 
         &:active {
             @media (max-width: 719px) {
-                background-color: #fdffa4;
+                background-color: $node-color-active;
             };
         }
     }
