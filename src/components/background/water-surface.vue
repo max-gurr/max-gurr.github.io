@@ -48,11 +48,16 @@ export default {
                 ripple.className = "ripple";
                 ripple.style.top = Math.round(yPos) + 'px';
                 ripple.style.left = Math.round(xPos) + 'px';
-                ripple.style.animationDelay = (i * 0.3) + 's';
+                ripple.style.animationDelay = (i * 0.6) + 's';
 
-                const opacity = this.rippleGap / ((i + 1)*2);
-                ripple.style.boxShadow = '0px 0px 10px 2px rgba(255, 255, 255, ' + opacity + '),0px 0px 15px 2px rgba(255, 255, 255, ' + opacity + '),0px 0px 50px 2px rgba(255, 255, 255, ' + opacity + ')';
-                
+                const opacity = this.rippleGap / ((i + 1)*2.5);
+                ripple.style.boxShadow = '0px 0px 10px 2px rgba(255, 255, 255, '+opacity+'),\
+                                            0px 0px 15px 2px rgba(255, 255, 255, '+opacity+'),\
+                                            0px 0px 50px 2px rgba(255, 255, 255, '+opacity+'),\
+                                            inset 0px 0px 10px 2px rgba(255, 255, 255, '+opacity+'),\
+                                            inset 0px 0px 15px 2px rgba(255, 255, 255, '+opacity+'),\
+                                            inset 0px 0px 50px 2px rgba(255, 255, 255, '+opacity+')';
+
                 ripple.addEventListener( 'animationend', function() {
                     canvas.removeChild(ripple);
                 }.bind(this));
@@ -93,8 +98,8 @@ export default {
             opacity: 1;
         }
         100% { 
-            min-width: 100px;
-            min-height: 100px;
+            min-width: 120px;
+            min-height: 120px;
             opacity: 0;
         }
     }

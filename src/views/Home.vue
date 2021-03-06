@@ -15,6 +15,7 @@ import connectedParticles from '@/components/background/connected-particles.vue'
 import pixelRain from '@/components/background/pixel-rain.vue';
 import rippleGrid from '@/components/background/ripple-grid.vue';
 import waterSurface from '@/components/background/water-surface.vue';
+import followers from '@/components/background/followers.vue';
 
 export default {
   name: 'Home',
@@ -23,7 +24,8 @@ export default {
     pixelRain,
     backgroundSelect,
     rippleGrid,
-    waterSurface
+    waterSurface,
+    followers
   },
   data: () => ({
     selectedBackground: null,
@@ -38,7 +40,7 @@ export default {
       },
       {
         display: 'G',
-        value: 'ripple-grid'
+        value: 'followers'
       },
       {
         display: 'W',
@@ -111,15 +113,15 @@ export default {
       box-shadow: 0px 0px 10px 2px rgba(255, 255, 255, 0.5);
     }
 
-    // &:hover::before, &:hover::after, &:active::before, &:active::after, &:focus::before, &:focus::after {
-    //   height: 100%;
-    //   width: 100%;
-    //   transition-delay: 0s;
-    // }
+    &:hover::before, &:hover::after, &:active::before, &:active::after, &:focus::before, &:focus::after {
+      height: 100%;
+      width: 100%;
+      transition-delay: 0s;
+    }
 
     h1 {
       font-size: calc(min(5em, 10vw));
-      color: rgb(49, 91, 189);
+      color: #0e81b6;
     }
   }
 }

@@ -1,8 +1,17 @@
 <template>
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas connected-particles-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
-        
-        <circle v-if="mouseParticle" :cx="mouseParticle.x" :cy="mouseParticle.y" :r="mouseParticle.radius*1.5" fill="rgba(255, 255, 255, 0.6)" id="mouse-particle"/>
-        <circle v-for="(p, index) in particles" :key="'particle-'+index" :cx="p.x" :cy="p.y" :r="radius" fill="white" opacity="0.25" class="particle" />
+        <defs>
+            <radialGradient id="gradientFill">
+                <stop offset="25%" stop-color="rgba(255, 255, 255, 0.3)" />
+                <stop offset="100%" stop-color="transparent" />
+            </radialGradient>
+            <radialGradient id="mouseParticleFill">
+                <stop offset="25%" stop-color="rgba(255, 255, 255, 0.5)" />
+                <stop offset="100%" stop-color="transparent" />
+            </radialGradient>
+        </defs>
+        <circle v-if="mouseParticle" :cx="mouseParticle.x" :cy="mouseParticle.y" :r="mouseParticle.radius" fill="url(#mouseParticleFill)" id="mouse-particle"/>
+        <circle v-for="(p, index) in particles" :key="'particle-'+index" :cx="p.x" :cy="p.y" :r="radius" fill="url(#gradientFill)" class="particle" />
         <line v-for="(l, index) in lines" :key="'line-'+index" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" stroke="white" :opacity="l.opacity"/>
     </svg>
 </template>
@@ -17,7 +26,7 @@ export default {
         },
         radius: {
             type: Number,
-            default: 3
+            default: 8
         }
     },
     data: () => ({
@@ -65,7 +74,7 @@ export default {
         this.mouseParticle = {
             x: -10,
             y: -10,
-            radius: this.radius,
+            radius: this.radius*2,
             nextX: 0,
             nextY: 0
         }

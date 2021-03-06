@@ -1,7 +1,7 @@
 <template>
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas ripple-grid-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
         <g v-for="(row, index) in grid" :key="'row-' + index">
-            <circle class="cell" v-for="(cell, index) in row" :key="'cell-' + index" :cx="cell.x + size/2" :cy="cell.y + size/2" :r="size/2 * cell.opacity" fill="rgb(5, 5, 30)"/>
+            <circle class="cell" v-for="(cell, index) in row" :key="'cell-' + index" :cx="cell.x + size/2" :cy="cell.y + size/2" :r="size/2 * cell.opacity" fill="rgb(10, 10, 35)"/>
         </g>
     </svg>
 </template>
@@ -16,11 +16,15 @@ export default {
         },
         mouseRadius: {
             type: Number,
-            default: 150
+            default: 100
         },
         frequency: {
             type: Number,
             default: 20
+        },
+        dotColor: {
+            type: String,
+            defualt: 'rgb(10, 10, 35)'
         }
     },
     data: () => ({
@@ -33,14 +37,7 @@ export default {
         actualHeight: 1
     }),
     created() {
-        this.drawCycle = setInterval(async function() {
-            this.grid.map((row, i) => {
-                row.map((cell, j) => {
-                    cell.opacity += 0.05;
-                    cell.opacity = Math.min(1, cell.opacity);
-                });
-            });
-        }.bind(this), 40);
+        
     },
     mounted() {
         window.addEventListener('resize', this.resizeHandler((e) => {
@@ -64,7 +61,7 @@ export default {
                 for (let j = 0; j < this.grid[i].length; j++) {
                     const cell = this.grid[i][j];
                     const dist = this.getDist(cell.x, cell.y, e.clientX, e.clientY);
-                    this.addDistToCell(cell, dist, this.mouseRadius*3);
+                    this.addDistToCell(cell, dist, this.mouseRadius*2);
                 }
             }
         });
@@ -88,12 +85,18 @@ export default {
         addInverseDistToCell(cell, dist, radius) {
             if (dist < radius) {
                 cell.opacity = -dist / radius + 1;
+            } else {
+                cell.opacity += 0.05;
             }
+            cell.opacity = Math.min(1, cell.opacity);
         },
         addDistToCell(cell, dist, radius) {
             if (dist < radius) {
                 cell.opacity = dist/radius;
+            } else {
+                cell.opacity += 0.05;
             }
+            cell.opacity = Math.min(1, cell.opacity);
         },
         createGrid() {
             const padding = 1;
