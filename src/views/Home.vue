@@ -77,11 +77,11 @@ export default {
       height: calc(100% - 85px);
     }
 
-    // &:hover, &:active {
-    //   background-color: rgba(0, 0, 0, 0.5);
-    //   transition: all 0.5s ease;
-    //   transition-delay: 0.4s;
-    // }
+    &:hover, &:active {
+      background-color: rgba(79, 161, 141, 0.2);
+      transition: all 0.5s ease;
+      transition-delay: 0.4s;
+    }
 
     $weight: 5px;
     &::before {
@@ -121,7 +121,7 @@ export default {
 
     h1 {
       font-size: calc(min(5em, 10vw));
-      color: #0e81b6;
+      color: #29bd7f;
     }
   }
 }

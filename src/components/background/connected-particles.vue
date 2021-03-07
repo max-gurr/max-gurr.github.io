@@ -2,7 +2,7 @@
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas connected-particles-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
         <defs>
             <radialGradient id="gradientFill">
-                <stop offset="30%" stop-color="rgba(255, 255, 255, 0.4)" />
+                <stop offset="25%" stop-color="rgba(255, 255, 255, 0.3)" />
                 <stop offset="100%" stop-color="transparent" />
             </radialGradient>
             <radialGradient id="mouseParticleFill">
@@ -26,7 +26,7 @@ export default {
         },
         radius: {
             type: Number,
-            default: 6
+            default: 8
         }
     },
     data: () => ({
@@ -36,7 +36,8 @@ export default {
         width: window.innerWidth,
         height: window.innerHeight,
         drawCycle: null,
-        lineRange: 100,
+        lineRange: 0,
+        maxLineRange: 150,
         maxOpacity: 0.25
     }),
     created() {
@@ -81,14 +82,15 @@ export default {
             }
         },
         calculateLineRange() {
-            const divider = 10;
+            const divider = 6;
             let range = Math.max(this.width/divider, this.height/divider);
 
-            this.lineRange = Math.max(this.lineRange, range);
+            this.lineRange = Math.min(this.maxLineRange, range);
         },
         async makeParticles() {
+            const divider = 25;
             const particles = [];
-            const responsiveNum = this.width/15 + this.height/15;
+            const responsiveNum = this.width/divider + this.height/divider;
             const numParticles = Math.min(this.num, responsiveNum);
             
             for (let i = 0; i < numParticles; i++) {
@@ -119,16 +121,16 @@ export default {
             p.x += p.xVel;
             p.y += p.yVel;
 
-            if (p.x < -range) {
-                p.x += this.width + 2 * range;
-            } else if (p.x > this.width + range) {
-                p.x -= (this.width + 2 * range);
+            if (p.x < -range/2) {
+                p.x += this.width + range;
+            } else if (p.x > this.width + range/2) {
+                p.x -= (this.width + range);
             }
 
-            if (p.y < -range) {
-                p.y += this.height + 2 * range;
-            } else if (p.y > this.height + range) {
-                p.y -= (this.height + 2 * range);
+            if (p.y < -range/2) {
+                p.y += this.height + range;
+            } else if (p.y > this.height + range/2) {
+                p.y -= (this.height + range);
             }
         },
         async makeLines (range) {

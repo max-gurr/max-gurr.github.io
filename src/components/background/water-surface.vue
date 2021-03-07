@@ -20,7 +20,7 @@ export default {
         width: window.innerWidth,
         height: window.innerHeight,
         drawCycle: null,
-        frequency: 750
+        frequency: 400
     }),
     created() {
         this.drawCycle = setInterval(this.draw.bind(this), this.frequency);
@@ -52,7 +52,8 @@ export default {
                 ripple.style.left = Math.round(xPos) + 'px';
                 ripple.style.animationDelay = (i * this.rippleGap) + 's';
 
-                const opacity = (this.rippleGap*this.rippleLength)/(i*i + 1)*0.2;
+                const adjustment = 0.1;
+                const opacity = (this.rippleGap*this.rippleLength)/(i*i + 1)*adjustment;
                 ripple.style.boxShadow = '0px 0px 25px rgba(255, 255, 255, '+opacity+'),\
                                             0px 0px 75px rgba(255, 255, 255, '+opacity+'),\
                                             inset 0px 0px 25px rgba(255, 255, 255, '+opacity+'),\

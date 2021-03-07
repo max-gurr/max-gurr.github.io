@@ -3,16 +3,14 @@
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
             <defs>
                 <radialGradient id="gradientFill">
-                    <stop offset="1%" stop-color="rgba(255, 255, 255, 0.2)" />
-                    <stop offset="3%" stop-color="rgba(255, 255, 255, 0.12)" />
+                    <!-- <stop offset="1%" stop-color="rgba(255, 255, 255, 0.20)" /> -->
+                    <stop offset="3%" stop-color="rgba(200, 255, 200, 0.175)" />
                     <stop offset="100%" stop-color="transparent" />
                 </radialGradient>
             </defs>
             
             <g v-for="(follower, followerIndex) in followers" :key="'follower-'+followerIndex">
                 <circle class="follower" :cx="follower.x" :cy="follower.y" :r="size" fill="url(#gradientFill)"/>
-                <!-- <path v-if="follower.historyPath" :d="follower.historyPath" fill="none" stroke="rgba(255, 255, 255, 0.1)" /> -->
-                <!-- <circle v-for="(history, historyIndex) in follower.history" :key="'follower-'+followerIndex+'-history-'+historyIndex" :r="2-historyIndex*0.2" :cx="history.x" :cy="history.y" fill="rgba(255, 255, 255, 0.1)" /> -->
             </g>
         </svg>
     </div>
@@ -28,15 +26,11 @@ export default {
         },
         numFollowers: {
             type: Number,
-            default: 20
+            default: 15
         },
         mouseRadius: {
             type: Number,
             default: 150
-        },
-        trailLength: {
-            type: Number,
-            default: 15
         }
     },
     data: () => ({
@@ -48,8 +42,7 @@ export default {
         maxForce: 0.5,
         mouseX: 0,
         mouseY: 0,
-        squareMouseRadius: 0,
-        historyStateGap: 2
+        squareMouseRadius: 0
     }),
     created() {
         this.drawCycle = setInterval(this.draw.bind(this), 40);
@@ -111,9 +104,7 @@ export default {
                     xVel: 0,
                     yVel: 0,
                     xAcc: 0,
-                    yAcc: 0,
-                    history: [],
-                    frame: 0
+                    yAcc: 0
                 }
                 this.randomiseVelocity(newFollower);
                 followers.push(newFollower);
@@ -121,77 +112,7 @@ export default {
 
             return followers;
         },
-        opposedLine(pointA, pointB) {
-            // https://medium.com/@francoisromain/smooth-a-svg-path-with-cubic-bezier-curves-e37b49d46c74
-            
-            const lengthX = pointB[0] - pointA[0]
-            const lengthY = pointB[1] - pointA[1]
-            return {
-                length: Math.sqrt(Math.pow(lengthX, 2) + Math.pow(lengthY, 2)),
-                angle: Math.atan2(lengthY, lengthX)
-            }
-        },
-        controlPoint(current, previous, next, reverse) {
-            // https://medium.com/@francoisromain/smooth-a-svg-path-with-cubic-bezier-curves-e37b49d46c74
-
-            // When 'current' is the first or last point of the array
-            // 'previous' or 'next' don't exist.
-            // Replace with 'current'
-            const p = previous || current
-            const n = next || current
-            // The smoothing ratio
-            const smoothing = 0.2
-            // Properties of the opposed-line
-            const o = this.opposedLine(p, n)
-            // If is end-control-point, add PI to the angle to go backward
-            const angle = o.angle + (reverse ? Math.PI : 0)
-            const length = o.length * smoothing
-            // The control point position is relative to the current point
-            const x = current[0] + Math.cos(angle) * length
-            const y = current[1] + Math.sin(angle) * length
-            return [x, y]
-        },
-        bezierCommand(point, i, a) {
-            // https://medium.com/@francoisromain/smooth-a-svg-path-with-cubic-bezier-curves-e37b49d46c74
-
-            // start control point
-            const [cpsX, cpsY] = this.controlPoint(a[i - 1], a[i - 2], point)
-            // end control point
-            const [cpeX, cpeY] = this.controlPoint(point, a[i - 1], a[i + 1], true)
-            return `C ${cpsX},${cpsY} ${cpeX},${cpeY} ${point[0]},${point[1]}`
-        },
-        svgPath(points, command) {
-            // https://medium.com/@francoisromain/smooth-a-svg-path-with-cubic-bezier-curves-e37b49d46c74
-
-            // build the d attributes by looping over the points
-            const path = points.reduce((acc, point, i, a) => i === 0
-                // if first point
-                ? `M ${point[0]},${point[1]}`
-                // else
-                : `${acc} ${command(point, i, a)}`
-            , '')
-            return path;
-        },
         async updateFollower(f) {
-            // Push back history
-            f.frame += 1;
-            if (f.frame > this.historyStateGap) {
-                f.frame = 0;
-                for (let i = Math.min(f.history.length, this.trailLength)-1; i > 0; i--) {
-                    f.history[i] = f.history[i-1]
-                }
-                const newHistoryPos = {
-                    x: f.x,
-                    y: f.y
-                }
-                // Store pos in history
-                if (f.history.length < this.trailLength) {
-                    f.history.unshift(newHistoryPos)
-                } else {
-                    f.history[0] = newHistoryPos;
-                }
-            }
-            
             // Add acc to vel
             f.xVel += f.xAcc;
             f.yVel += f.yAcc;
@@ -203,18 +124,14 @@ export default {
             // Adjust x-pos
             if (f.x < -this.size/2) {
                 f.x += this.width + this.size;
-                f.history = [];
             } else if (f.x > this.width + this.size/2) {
                 f.x -= this.width + this.size;
-                f.history = [];
             }
             // Adjust y-pos
             if (f.y < -this.size/2) {
                 f.y += this.height + this.size;
-                f.history = [];
             } else if (f.y > this.height + this.size/2) {
                 f.y -= this.height + this.size;
-                f.history = [];
             }
 
             // Adjust vel
@@ -227,16 +144,6 @@ export default {
             // Reset acc
             f.xAcc /= 2;
             f.yAcc /= 2;
-
-            // History path
-            if (f.history.length > 0) {
-                const currentState = {x: f.x, y: f.y};
-                const fullStateArray = [currentState, ...f.history].map((s) => [s.x, s.y]);
-                f.historyPath = this.svgPath(fullStateArray, this.bezierCommand);
-            } else {
-                f.historyPath = null;
-            }
-            
         },
         async pointTowardsMouse(f, e) {
             const xDist = this.mouseX - f.x;
@@ -272,8 +179,6 @@ export default {
 
                 f.xAcc += Math.min(xForce, this.maxForce * 20);
                 f.yAcc += Math.min(yForce, this.maxForce * 20);
-
-                // f.history = [];
             }
         },
         randomiseVelocity(f) {
