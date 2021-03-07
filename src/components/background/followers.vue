@@ -20,9 +20,9 @@
 export default {
     name: 'followers',
     props: {
-        size: {
+        maxSize: {
             type: Number,
-            default: 150
+            default: 300
         },
         numFollowers: {
             type: Number,
@@ -42,7 +42,8 @@ export default {
         maxForce: 0.5,
         mouseX: 0,
         mouseY: 0,
-        squareMouseRadius: 0
+        squareMouseRadius: 0,
+        size: 0
     }),
     created() {
         this.drawCycle = setInterval(this.draw.bind(this), 40);
@@ -54,6 +55,8 @@ export default {
     mounted() {
         this.followers = this.makeFollowers(this.numFollowers);
         this.squareMouseRadius = this.mouseRadius * this.mouseRadius;
+
+        this.resizeHandler();
     },
     methods: {
         async draw() {
@@ -71,6 +74,9 @@ export default {
         resizeHandler() {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
+
+            const divider = 2;
+            this.size = Math.min(this.maxSize, Math.min(this.width/divider, this.height/divider));
         },
         async mouseMoveHandler(e) {
             this.mouseX = e.clientX;
@@ -122,16 +128,16 @@ export default {
             f.y += f.yVel;
 
             // Adjust x-pos
-            if (f.x < -this.size/2) {
-                f.x += this.width + this.size;
-            } else if (f.x > this.width + this.size/2) {
-                f.x -= this.width + this.size;
+            if (f.x < -this.size) {
+                f.x += this.width + this.size*2;
+            } else if (f.x > this.width + this.size) {
+                f.x -= this.width + this.size*2;
             }
             // Adjust y-pos
-            if (f.y < -this.size/2) {
-                f.y += this.height + this.size;
-            } else if (f.y > this.height + this.size/2) {
-                f.y -= this.height + this.size;
+            if (f.y < -this.size) {
+                f.y += this.height + this.size*2;
+            } else if (f.y > this.height + this.size) {
+                f.y -= this.height + this.size*2;
             }
 
             // Adjust vel
