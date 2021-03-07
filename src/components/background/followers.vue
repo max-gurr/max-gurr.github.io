@@ -1,16 +1,16 @@
 <template>
     <div class="canvas follower-canvas" ref="canvasContainer">
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
-            <defs>
-                <radialGradient id="gradientFill">
-                    <!-- <stop offset="1%" stop-color="rgba(255, 255, 255, 0.20)" /> -->
-                    <stop offset="3%" stop-color="rgba(200, 255, 200, 0.175)" />
-                    <stop offset="100%" stop-color="transparent" />
-                </radialGradient>
-            </defs>
-            
             <g v-for="(follower, followerIndex) in followers" :key="'follower-'+followerIndex">
-                <circle class="follower" :cx="follower.x" :cy="follower.y" :r="size" fill="url(#gradientFill)"/>
+                <defs>
+                    <radialGradient :id="'gradientFill-'+followerIndex">
+                        <!-- <stop offset="0%" stop-color="rgba(255, 255, 255, 0.10)" /> -->
+                        <stop offset="3%" :stop-color="'rgba('+80*(follower.xAcc+follower.yAcc)+', '+(255*follower.x/width)+', '+(255*(follower.y/height))+', 0.175)'" />
+                        <stop offset="100%" stop-color="transparent" />
+                    </radialGradient>
+                </defs>
+            
+                <circle class="follower" :cx="follower.x" :cy="follower.y" :r="size" :fill="'url(#gradientFill-'+followerIndex+')'"/>
             </g>
         </svg>
     </div>

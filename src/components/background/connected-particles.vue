@@ -1,17 +1,21 @@
 <template>
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas connected-particles-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+        <g v-for="(p, index) in particles" :key="'particle-'+index" >
+            <defs>
+                <radialGradient :id="'gradientFill-'+index">
+                    <stop offset="25%" :stop-color="'rgba('+255*p.mouseDist+', '+(255*p.x/width)+', '+(255*p.y/height)+', '+(maxOpacity+0.3*p.mouseDist)+')'" />
+                    <stop offset="100%" stop-color="transparent" />
+                </radialGradient>
+            </defs>
+            <circle :cx="p.x" :cy="p.y" :r="radius" :fill="'url(#gradientFill-'+index+')'" class="particle" />
+        </g>
         <defs>
-            <radialGradient id="gradientFill">
-                <stop offset="25%" stop-color="rgba(255, 255, 255, 0.3)" />
-                <stop offset="100%" stop-color="transparent" />
-            </radialGradient>
             <radialGradient id="mouseParticleFill">
-                <stop offset="25%" stop-color="rgba(255, 255, 255, 0.5)" />
+                <stop offset="25%" :stop-color="'rgba(255, 255, 255, '+maxOpacity*2+')'" />
                 <stop offset="100%" stop-color="transparent" />
             </radialGradient>
         </defs>
         <circle v-if="mouseParticle" :cx="mouseParticle.x" :cy="mouseParticle.y" :r="mouseParticle.radius" fill="url(#mouseParticleFill)" id="mouse-particle"/>
-        <circle v-for="(p, index) in particles" :key="'particle-'+index" :cx="p.x" :cy="p.y" :r="radius" fill="url(#gradientFill)" class="particle" />
         <line v-for="(l, index) in lines" :key="'line-'+index" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" stroke="white" :opacity="l.opacity"/>
     </svg>
 </template>
@@ -48,13 +52,6 @@ export default {
         window.addEventListener('mousemove', this.mouseMoveHandler);
 
         this.resizeHandler();
-        this.mouseParticle = {
-            x: -10,
-            y: -10,
-            radius: this.radius*2,
-            nextX: 0,
-            nextY: 0
-        }
     },
     methods: {
         async draw() {
@@ -62,7 +59,7 @@ export default {
                 this.updateParticle(p, this.lineRange);          
             }));
 
-            if (this.mouseParticle.nextX !== 0) {
+            if (this.mouseParticle && this.mouseParticle.nextX !== 0) {
                 this.mouseParticle.x = this.mouseParticle.nextX;
                 this.mouseParticle.y = this.mouseParticle.nextY;
             }
@@ -76,10 +73,17 @@ export default {
             this.makeParticles();
         },
         mouseMoveHandler(e) {
-            if (this.mouseParticle) {
-                this.mouseParticle.nextX = e.clientX;
-                this.mouseParticle.nextY = e.clientY;
+            if (!this.mouseParticle) {
+                this.mouseParticle = {
+                    x: -500,
+                    y: -500,
+                    radius: this.radius*2,
+                    nextX: 0,
+                    nextY: 0
+                }
             }
+            this.mouseParticle.nextX = e.clientX;
+            this.mouseParticle.nextY = e.clientY;
         },
         calculateLineRange() {
             const divider = 6;
@@ -112,12 +116,14 @@ export default {
                     y: Math.random()*this.height,
                     xVel: xVel,
                     yVel: yVel,
+                    mouseDist: 0
                 });
             }
 
             this.particles = particles;
         },
         async updateParticle (p, range) {
+            // Position
             p.x += p.xVel;
             p.y += p.yVel;
 
@@ -136,8 +142,10 @@ export default {
         async makeLines (range) {
             const lines = [];
             const squareRange = range * range;
-            const particles = [...this.particles, this.mouseParticle];
+            const particles = [...this.particles];
 
+            let line;
+            // Lines between particles
             for (let i = 0; i < particles.length; i++) {
                 const p1 = particles[i];
                 for (let j = i+1; j < particles.length; j++) {
@@ -148,7 +156,7 @@ export default {
                     const squareDist = xDist * xDist + yDist * yDist;
 
                     if (squareDist < squareRange) {
-                        const opacity = this.maxOpacity * 1.5 * (squareRange - squareDist)/squareRange;
+                        const opacity = this.maxOpacity * (squareRange - squareDist)/squareRange;
                         lines.push({
                             x1: p1.x,
                             y1: p1.y,
@@ -159,6 +167,30 @@ export default {
                     }
                 }
             }
+
+            // Mouse lines
+            this.particles.forEach((p) => {
+                if (this.mouseParticle) {
+                    const xDist = this.mouseParticle.x - p.x;
+                    const yDist = this.mouseParticle.y - p.y;
+                    const squareDist = xDist * xDist + yDist * yDist;
+
+                    if (squareDist < squareRange) {
+                        const opacity = this.maxOpacity * (squareRange - squareDist)/squareRange;
+                        lines.push({
+                            x1: p.x,
+                            y1: p.y,
+                            x2: this.mouseParticle.x,
+                            y2: this.mouseParticle.y,
+                            opacity: opacity
+                        });
+
+                        p.mouseDist = 1 - squareDist/squareRange;
+                    } else {
+                        p.mouseDist = 0;
+                    }
+                }
+            })
 
             return lines;
         }

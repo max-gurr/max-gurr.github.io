@@ -77,11 +77,11 @@ export default {
       height: calc(100% - 85px);
     }
 
-    &:hover, &:active {
-      background-color: rgba(79, 161, 141, 0.2);
-      transition: all 0.5s ease;
-      transition-delay: 0.4s;
-    }
+    // &:hover, &:active {
+    //   background-color: rgba(79, 161, 141, 0.2);
+    //   transition: all 0.5s ease;
+    //   transition-delay: 0.4s;
+    // }
 
     $weight: 5px;
     &::before {

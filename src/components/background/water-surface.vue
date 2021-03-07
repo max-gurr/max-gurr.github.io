@@ -20,7 +20,7 @@ export default {
         width: window.innerWidth,
         height: window.innerHeight,
         drawCycle: null,
-        frequency: 400
+        frequency: 500
     }),
     created() {
         this.drawCycle = setInterval(this.draw.bind(this), this.frequency);
@@ -52,14 +52,14 @@ export default {
                 ripple.style.left = Math.round(xPos) + 'px';
                 ripple.style.animationDelay = (i * this.rippleGap) + 's';
 
-                const adjustment = 0.1;
+                const adjustment = 0.15;
                 const opacity = (this.rippleGap*this.rippleLength)/(i*i + 1)*adjustment;
+                // ripple.style.boxShadow = '0px 0px 25px rgba(255, 255, 255, '+opacity+'),\
+                //                             0px 0px 75px rgba(255, 255, 255, '+opacity+'),\
+                //                             inset 0px 0px 25px rgba(255, 255, 255, '+opacity+'),\
+                //                             inset 0px 0px 75px rgba(255, 255, 255, '+opacity+')';
                 ripple.style.boxShadow = '0px 0px 25px rgba(255, 255, 255, '+opacity+'),\
-                                            0px 0px 75px rgba(255, 255, 255, '+opacity+'),\
-                                            inset 0px 0px 25px rgba(255, 255, 255, '+opacity+'),\
-                                            inset 0px 0px 75px rgba(255, 255, 255, '+opacity+')';
-                // ripple.style.boxShadow = '0px 0px 20px rgba(255, 255, 255, '+opacity+'),\
-                //                           inset 0px 0px 20px rgba(255, 255, 255, '+opacity+')';
+                                          inset 0px 0px 25px rgba(255, 255, 255, '+opacity+')';
 
                 ripple.addEventListener( 'animationend', function() {
                     canvas.removeChild(ripple);
