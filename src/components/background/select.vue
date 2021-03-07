@@ -30,9 +30,10 @@ export default {
 <style scoped lang="scss">
 .bg-select {
     $node-color: rgb(10, 10, 30);
-    $node-highlight: #00ff73;
+    $node-highlight: #00ff9d;
     $node-color-active: #83ecb3;
     $bg-color: $node-color;
+    
     position: absolute;
     z-index: 97;
     bottom: 10px;

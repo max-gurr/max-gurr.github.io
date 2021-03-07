@@ -2,7 +2,7 @@
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas connected-particles-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
         <defs>
             <radialGradient id="gradientFill">
-                <stop offset="25%" stop-color="rgba(255, 255, 255, 0.3)" />
+                <stop offset="30%" stop-color="rgba(255, 255, 255, 0.4)" />
                 <stop offset="100%" stop-color="transparent" />
             </radialGradient>
             <radialGradient id="mouseParticleFill">
@@ -26,7 +26,7 @@ export default {
         },
         radius: {
             type: Number,
-            default: 8
+            default: 6
         }
     },
     data: () => ({
@@ -40,7 +40,23 @@ export default {
         maxOpacity: 0.25
     }),
     created() {
-        this.drawCycle = setInterval(async function() {
+        this.drawCycle = setInterval(this.draw.bind(this), 40);
+    },
+    mounted() {
+        window.addEventListener('resize', this.resizeHandler);
+        window.addEventListener('mousemove', this.mouseMoveHandler);
+
+        this.resizeHandler();
+        this.mouseParticle = {
+            x: -10,
+            y: -10,
+            radius: this.radius*2,
+            nextX: 0,
+            nextY: 0
+        }
+    },
+    methods: {
+        async draw() {
             await Promise.all(this.particles.map(async (p) => {
                 this.updateParticle(p, this.lineRange);          
             }));
@@ -51,51 +67,27 @@ export default {
             }
 
             this.lines = await this.makeLines(this.lineRange);
-        }.bind(this), 40);
-    },
-    mounted() {
-        this.lineRange = this.calculateLineRange();
-
-        window.addEventListener('resize', this.resizeHandler((e) => {
+        },
+        resizeHandler() {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
-            this.lineRange = this.calculateLineRange();
-            this.particles = this.makeParticles();
-        }));
-
-        window.addEventListener('mousemove', (e) => {
+            this.calculateLineRange();
+            this.makeParticles();
+        },
+        mouseMoveHandler(e) {
             if (this.mouseParticle) {
                 this.mouseParticle.nextX = e.clientX;
                 this.mouseParticle.nextY = e.clientY;
             }
-        });
-
-        this.particles = this.makeParticles();
-        this.mouseParticle = {
-            x: -10,
-            y: -10,
-            radius: this.radius*2,
-            nextX: 0,
-            nextY: 0
-        }
-    },
-    methods: {
-        resizeHandler (func) {
-            let timer;
-            return (event) => {
-                if(timer) clearTimeout(timer);
-                timer = setTimeout(func,500,event);
-            };
         },
-        calculateLineRange () {
+        calculateLineRange() {
             const divider = 10;
             let range = Math.max(this.width/divider, this.height/divider);
 
-            return Math.max(this.lineRange, range);
+            this.lineRange = Math.max(this.lineRange, range);
         },
-        makeParticles () {
-            let particles = [];
-
+        async makeParticles() {
+            const particles = [];
             const responsiveNum = this.width/15 + this.height/15;
             const numParticles = Math.min(this.num, responsiveNum);
             
@@ -121,7 +113,7 @@ export default {
                 });
             }
 
-            return particles;
+            this.particles = particles;
         },
         async updateParticle (p, range) {
             p.x += p.xVel;
@@ -171,6 +163,8 @@ export default {
     },
     beforeDestroy() {
        clearInterval(this.drawCycle);
+       window.removeEventListener('resize', this.resizeHandler);
+       window.removeEventListener('mousemove', this.mouseMoveHandler);
     }
 }
 </script>

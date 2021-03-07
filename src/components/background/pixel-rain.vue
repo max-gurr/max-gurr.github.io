@@ -17,13 +17,13 @@ export default {
         height: window.innerHeight,
         drawCycle: null
     }),
-    mounted() {
-        window.addEventListener('resize', () => {
-            this.width = window.innerWidth;
-            this.height = window.innerHeight;
-        });
+    created() {
+        this.drawCycle = setInterval(this.draw.bind(this), 100);
 
-        this.drawCycle = setInterval(async function() {
+        window.addEventListener('resize', this.resizeHandler);
+    },
+    methods: {
+        async draw() {
             const canvas = this.$refs['canvas']
             const squareContainer = document.createElement("div");
             squareContainer.className = "square-container";
@@ -42,13 +42,15 @@ export default {
             }.bind(this));
 
             canvas.appendChild(squareContainer);
-        }.bind(this), 100);
-    },
-    methods: {
-        
+        },
+        resizeHandler() {
+            this.width = window.innerWidth;
+            this.height = window.innerHeight;
+        }
     },
     beforeDestroy() {
        clearInterval(this.drawCycle);
+       window.clearInterval('resize', this.resizeHandler);
     }
 }
 </script>

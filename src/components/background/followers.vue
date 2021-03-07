@@ -4,12 +4,16 @@
             <defs>
                 <radialGradient id="gradientFill">
                     <stop offset="1%" stop-color="rgba(255, 255, 255, 0.2)" />
-                    <stop offset="6%" stop-color="rgba(255, 255, 255, 0.125)" />
+                    <stop offset="3%" stop-color="rgba(255, 255, 255, 0.12)" />
                     <stop offset="100%" stop-color="transparent" />
                 </radialGradient>
             </defs>
             
-            <circle class="follower"  v-for="(follower, index) in followers" :key="'follower-' + index" :cx="follower.x" :cy="follower.y" :r="size/2" fill="url(#gradientFill)"/>
+            <g v-for="(follower, followerIndex) in followers" :key="'follower-'+followerIndex">
+                <circle class="follower" :cx="follower.x" :cy="follower.y" :r="size" fill="url(#gradientFill)"/>
+                <!-- <path v-if="follower.historyPath" :d="follower.historyPath" fill="none" stroke="rgba(255, 255, 255, 0.1)" /> -->
+                <!-- <circle v-for="(history, historyIndex) in follower.history" :key="'follower-'+followerIndex+'-history-'+historyIndex" :r="2-historyIndex*0.2" :cx="history.x" :cy="history.y" fill="rgba(255, 255, 255, 0.1)" /> -->
+            </g>
         </svg>
     </div>
 </template>
@@ -20,7 +24,7 @@ export default {
     props: {
         size: {
             type: Number,
-            default: 250
+            default: 150
         },
         numFollowers: {
             type: Number,
@@ -29,6 +33,10 @@ export default {
         mouseRadius: {
             type: Number,
             default: 150
+        },
+        trailLength: {
+            type: Number,
+            default: 15
         }
     },
     data: () => ({
@@ -36,14 +44,26 @@ export default {
         height: window.innerHeight,
         drawCycle: null,
         followers: [],
-        maxVel: 2,
+        maxVel: 1,
         maxForce: 0.5,
         mouseX: 0,
         mouseY: 0,
-        squareMouseRadius: 0
+        squareMouseRadius: 0,
+        historyStateGap: 2
     }),
     created() {
-        this.drawCycle = setInterval(async function() {
+        this.drawCycle = setInterval(this.draw.bind(this), 40);
+
+        window.addEventListener('resize', this.resizeHandler);
+        window.addEventListener('mousemove', this.mouseMoveHandler);
+        window.addEventListener('click', this.clickHandler);
+    },
+    mounted() {
+        this.followers = this.makeFollowers(this.numFollowers);
+        this.squareMouseRadius = this.mouseRadius * this.mouseRadius;
+    },
+    methods: {
+        async draw() {
             await Promise.all(this.followers.map(async (f) => {
                 this.updateFollower(f);
                 if (this.mouseX > 0 || this.mouseY > 0) {
@@ -54,37 +74,14 @@ export default {
             // Reset mouse attractor point
             this.mouseX = 0;
             this.mouseY = 0;
-        }.bind(this), 40);
-    },
-    mounted() {
-        window.addEventListener('resize', this.resizeHandler((e) => {
+        },
+        resizeHandler() {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
-        }));
-
-        window.addEventListener('mousemove', (e) => {
+        },
+        async mouseMoveHandler(e) {
             this.mouseX = e.clientX;
             this.mouseY = e.clientY;
-        });
-
-        window.addEventListener('click', async (e) => {
-            await this.clickHandler(e);
-
-            await Promise.all(this.followers.map(async (f) => {
-                this.repelFromMouse(f, e);
-            }));
-        });
-
-        this.followers = this.makeFollowers(this.numFollowers);
-        this.squareMouseRadius = this.mouseRadius * this.mouseRadius;
-    },
-    methods: {
-        resizeHandler(func) {
-            let timer;
-            return (event) => {
-                if(timer) clearTimeout(timer);
-                timer = setTimeout(func,500,event);
-            };
         },
         async clickHandler(e) {
             const canvas = this.$refs['canvasContainer']
@@ -99,6 +96,10 @@ export default {
             }.bind(this));
 
             canvas.appendChild(clickElm);
+
+            await Promise.all(this.followers.map(async (f) => {
+                this.repelFromMouse(f, e);
+            }));
         },
         makeFollowers (num) {
             let followers = [];
@@ -110,7 +111,9 @@ export default {
                     xVel: 0,
                     yVel: 0,
                     xAcc: 0,
-                    yAcc: 0
+                    yAcc: 0,
+                    history: [],
+                    frame: 0
                 }
                 this.randomiseVelocity(newFollower);
                 followers.push(newFollower);
@@ -118,7 +121,77 @@ export default {
 
             return followers;
         },
+        opposedLine(pointA, pointB) {
+            // https://medium.com/@francoisromain/smooth-a-svg-path-with-cubic-bezier-curves-e37b49d46c74
+            
+            const lengthX = pointB[0] - pointA[0]
+            const lengthY = pointB[1] - pointA[1]
+            return {
+                length: Math.sqrt(Math.pow(lengthX, 2) + Math.pow(lengthY, 2)),
+                angle: Math.atan2(lengthY, lengthX)
+            }
+        },
+        controlPoint(current, previous, next, reverse) {
+            // https://medium.com/@francoisromain/smooth-a-svg-path-with-cubic-bezier-curves-e37b49d46c74
+
+            // When 'current' is the first or last point of the array
+            // 'previous' or 'next' don't exist.
+            // Replace with 'current'
+            const p = previous || current
+            const n = next || current
+            // The smoothing ratio
+            const smoothing = 0.2
+            // Properties of the opposed-line
+            const o = this.opposedLine(p, n)
+            // If is end-control-point, add PI to the angle to go backward
+            const angle = o.angle + (reverse ? Math.PI : 0)
+            const length = o.length * smoothing
+            // The control point position is relative to the current point
+            const x = current[0] + Math.cos(angle) * length
+            const y = current[1] + Math.sin(angle) * length
+            return [x, y]
+        },
+        bezierCommand(point, i, a) {
+            // https://medium.com/@francoisromain/smooth-a-svg-path-with-cubic-bezier-curves-e37b49d46c74
+
+            // start control point
+            const [cpsX, cpsY] = this.controlPoint(a[i - 1], a[i - 2], point)
+            // end control point
+            const [cpeX, cpeY] = this.controlPoint(point, a[i - 1], a[i + 1], true)
+            return `C ${cpsX},${cpsY} ${cpeX},${cpeY} ${point[0]},${point[1]}`
+        },
+        svgPath(points, command) {
+            // https://medium.com/@francoisromain/smooth-a-svg-path-with-cubic-bezier-curves-e37b49d46c74
+
+            // build the d attributes by looping over the points
+            const path = points.reduce((acc, point, i, a) => i === 0
+                // if first point
+                ? `M ${point[0]},${point[1]}`
+                // else
+                : `${acc} ${command(point, i, a)}`
+            , '')
+            return path;
+        },
         async updateFollower(f) {
+            // Push back history
+            f.frame += 1;
+            if (f.frame > this.historyStateGap) {
+                f.frame = 0;
+                for (let i = Math.min(f.history.length, this.trailLength)-1; i > 0; i--) {
+                    f.history[i] = f.history[i-1]
+                }
+                const newHistoryPos = {
+                    x: f.x,
+                    y: f.y
+                }
+                // Store pos in history
+                if (f.history.length < this.trailLength) {
+                    f.history.unshift(newHistoryPos)
+                } else {
+                    f.history[0] = newHistoryPos;
+                }
+            }
+            
             // Add acc to vel
             f.xVel += f.xAcc;
             f.yVel += f.yAcc;
@@ -126,30 +199,44 @@ export default {
             // Add vel to pos
             f.x += f.xVel;
             f.y += f.yVel;
+
+            // Adjust x-pos
+            if (f.x < -this.size/2) {
+                f.x += this.width + this.size;
+                f.history = [];
+            } else if (f.x > this.width + this.size/2) {
+                f.x -= this.width + this.size;
+                f.history = [];
+            }
+            // Adjust y-pos
+            if (f.y < -this.size/2) {
+                f.y += this.height + this.size;
+                f.history = [];
+            } else if (f.y > this.height + this.size/2) {
+                f.y -= this.height + this.size;
+                f.history = [];
+            }
+
+            // Adjust vel
             const velMag = Math.sqrt(f.xVel * f.xVel + f.yVel * f.yVel);   
             if (velMag !== 0) {        
                 f.xVel = this.maxVel * (f.xVel/velMag);
                 f.yVel = this.maxVel * (f.yVel/velMag);
             }
 
-            // Adjust x-pos
-            if (f.x < -this.size/2) {
-                f.x += this.width + this.size;
-            } else if (f.x > this.width + this.size/2) {
-                f.x -= this.width + this.size;
-            }
-            // Adjust y-pos
-            if (f.y < -this.size/2) {
-                f.y += this.height + this.size;
-            } else if (f.y > this.height + this.size/2) {
-                f.y -= this.height + this.size;
-            }
-
             // Reset acc
             f.xAcc /= 2;
             f.yAcc /= 2;
 
-            console.log(this.width + ': ' + f.x + '    ' + this.height + ': ' + f.y);
+            // History path
+            if (f.history.length > 0) {
+                const currentState = {x: f.x, y: f.y};
+                const fullStateArray = [currentState, ...f.history].map((s) => [s.x, s.y]);
+                f.historyPath = this.svgPath(fullStateArray, this.bezierCommand);
+            } else {
+                f.historyPath = null;
+            }
+            
         },
         async pointTowardsMouse(f, e) {
             const xDist = this.mouseX - f.x;
@@ -186,7 +273,7 @@ export default {
                 f.xAcc += Math.min(xForce, this.maxForce * 20);
                 f.yAcc += Math.min(yForce, this.maxForce * 20);
 
-                console.log(maxMag);
+                // f.history = [];
             }
         },
         randomiseVelocity(f) {
@@ -203,7 +290,10 @@ export default {
         }
     },
     beforeDestroy() {
-       clearInterval(this.drawCycle);
+        clearInterval(this.drawCycle);
+        window.removeEventListener('resize', this.resizeHandler);
+        window.removeEventListener('click', this.clickHandler);
+        window.removeEventListener('mousemove', this.mouseMoveHandler);
     }
 }
 </script>
@@ -217,23 +307,22 @@ export default {
     .click-ripple {
         position: absolute;
         border-radius: 50%;
-        animation: ripple-animate 0.5s;
+        animation: ripple-animate 0.4s;
         transform: translate(-50%, -50%);
     }
 
     @keyframes ripple-animate {
         0% {
+            $opacity: 0.3;
             min-width: 0px;
             min-height: 0px;
-            border: solid 5px rgba(255, 255, 255, 0.3);
-            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.25),
-                    0px 0px 30px rgba(255, 255, 255, 0.25),
-                    0px 0px 100px rgba(255, 255, 255, 0.25);
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, $opacity),
+                    0px 0px 30px rgba(255, 255, 255, $opacity),
+                    0px 0px 100px rgba(255, 255, 255, $opacity);
         }
         100% {
             min-width: 300px;
             min-height: 300px;
-            border: solid 5px rgba(255, 255, 255, 0);
             box-shadow: none;
         }
     }

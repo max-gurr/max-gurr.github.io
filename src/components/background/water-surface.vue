@@ -13,50 +13,52 @@ export default {
         },
         rippleGap: {
             type: Number,
-            default: 0.25
+            default: 0.35
         }
     },
     data: () => ({
         width: window.innerWidth,
         height: window.innerHeight,
         drawCycle: null,
-        frequency: 500
+        frequency: 750
     }),
     created() {
-        this.drawCycle = setInterval(async function() {
+        this.drawCycle = setInterval(this.draw.bind(this), this.frequency);
+
+        window.addEventListener('resize', this.resizeHandler);
+        window.addEventListener('click', this.clickHandler);
+    },
+    methods: {
+        async draw() {
             const xPos = Math.random() * this.width;
             const yPos = Math.random() * this.height;
 
             const canvas = this.$refs['canvas'];
             this.createRipple(xPos, yPos, canvas);
-        }.bind(this), this.frequency);
-    },
-    mounted() {
-        const canvas = this.$refs['canvas'];
-        window.addEventListener('resize', () => {
+        },
+        resizeHandler() {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
-        });
-        window.addEventListener('click', (e) => {
+        },
+        clickHandler(e) {
+            const canvas = this.$refs['canvas'];
             this.createRipple(e.clientX, e.clientY, canvas);
-        });
-    },
-    methods: {
+        },
         createRipple(xPos, yPos, canvas) {
             for (let i = 0; i < this.rippleLength; i++) {
                 const ripple = document.createElement("div");
                 ripple.className = "ripple";
                 ripple.style.top = Math.round(yPos) + 'px';
                 ripple.style.left = Math.round(xPos) + 'px';
-                ripple.style.animationDelay = (i * 0.6) + 's';
+                ripple.style.animationDelay = (i * this.rippleGap) + 's';
 
-                const opacity = this.rippleGap / ((i + 1)*2.5);
-                ripple.style.boxShadow = '0px 0px 10px 2px rgba(255, 255, 255, '+opacity+'),\
-                                            0px 0px 15px 2px rgba(255, 255, 255, '+opacity+'),\
-                                            0px 0px 50px 2px rgba(255, 255, 255, '+opacity+'),\
-                                            inset 0px 0px 10px 2px rgba(255, 255, 255, '+opacity+'),\
-                                            inset 0px 0px 15px 2px rgba(255, 255, 255, '+opacity+'),\
-                                            inset 0px 0px 50px 2px rgba(255, 255, 255, '+opacity+')';
+                const opacity = (this.rippleGap*this.rippleLength)/(i*i + 1)*0.2;
+                ripple.style.boxShadow = '0px 0px 25px rgba(255, 255, 255, '+opacity+'),\
+                                            0px 0px 75px rgba(255, 255, 255, '+opacity+'),\
+                                            inset 0px 0px 25px rgba(255, 255, 255, '+opacity+'),\
+                                            inset 0px 0px 75px rgba(255, 255, 255, '+opacity+')';
+                // ripple.style.boxShadow = '0px 0px 20px rgba(255, 255, 255, '+opacity+'),\
+                //                           inset 0px 0px 20px rgba(255, 255, 255, '+opacity+')';
 
                 ripple.addEventListener( 'animationend', function() {
                     canvas.removeChild(ripple);
@@ -68,6 +70,8 @@ export default {
     },
     beforeDestroy() {
        clearInterval(this.drawCycle);
+       window.removeEventListener('resize', this.resizeHandler);
+       window.removeEventListener('click', this.clickHandler);
     }
 }
 </script>
@@ -83,23 +87,22 @@ export default {
         min-width: 0;
         min-height: 0;
         border-radius: 50%;
-        opacity: 0;
-        animation: ripple-animate 1.5s ease;
+        animation: ripple 1.5s ease-out;
         transform: translate(-50%, -50%);
     }
 
-    @keyframes ripple-animate {
+    @keyframes ripple {
         0% {
             opacity: 0;
             min-width: 0;
             min-height: 0;
         }
-        15% {
+        20% {
             opacity: 1;
         }
         100% { 
-            min-width: 120px;
-            min-height: 120px;
+            min-width: 200px;
+            min-height: 200px;
             opacity: 0;
         }
     }
