@@ -1,5 +1,5 @@
 <template>
-    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas connected-particles-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas constellations-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
         <g v-for="(p, index) in particles" :key="'particle-'+index" >
             <defs>
                 <radialGradient :id="'gradientFill-'+index">
@@ -206,7 +206,7 @@ export default {
 <style scoped lang="scss">
 @import '../../assets/variables.scss';
 
-.connected-particles-canvas {
+.constellations-canvas {
     background: $bg-dark-blue;
     background: radial-gradient(circle, rgba(18,12,35,1) 0%, $bg-dark-blue 100%);
 }

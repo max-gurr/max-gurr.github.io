@@ -1,11 +1,11 @@
 <template>
-  <div class="canvas water-surface-canvas" ref="canvas">
+  <div class="canvas ripples-canvas" ref="canvas">
   </div>
 </template>
 
 <script>
 export default {
-    name: 'water-surface',
+    name: 'ripples',
     props: {
         rippleLength: {
             type: Number,
@@ -80,7 +80,7 @@ export default {
 <style lang="scss">
 @import '../../assets/variables.scss';
 
-.water-surface-canvas {
+.ripples-canvas {
     background-color: $bg-dark-blue;
 
     .ripple {

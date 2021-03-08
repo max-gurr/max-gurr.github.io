@@ -11,20 +11,18 @@
 <script>
 import backgroundSelect from '@/components/background/select.vue';
 // Backgrounds:
-import connectedParticles from '@/components/background/connected-particles.vue';
+import constellations from '@/components/background/constellations.vue';
 import pixelRain from '@/components/background/pixel-rain.vue';
-import rippleGrid from '@/components/background/ripple-grid.vue';
-import waterSurface from '@/components/background/water-surface.vue';
+import ripples from '@/components/background/ripples.vue';
 import followers from '@/components/background/followers.vue';
 
 export default {
   name: 'Home',
   components: {
-    connectedParticles,
+    constellations,
     pixelRain,
     backgroundSelect,
-    rippleGrid,
-    waterSurface,
+    ripples,
     followers
   },
   data: () => ({
@@ -32,7 +30,7 @@ export default {
     backgroundComponents: [
       {
         display: 'P',
-        value: 'connected-particles'
+        value: 'constellations'
       }, 
       {
         display: 'R',
@@ -44,7 +42,7 @@ export default {
       },
       {
         display: 'W',
-        value: 'water-surface'
+        value: 'ripples'
       }
     ]
   }),
