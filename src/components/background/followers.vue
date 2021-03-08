@@ -5,7 +5,7 @@
                 <defs>
                     <radialGradient :id="'gradientFill-'+followerIndex">
                         <!-- <stop offset="0%" stop-color="rgba(255, 255, 255, 0.10)" /> -->
-                        <stop offset="3%" :stop-color="'rgba('+80*(follower.xAcc+follower.yAcc)+', '+(255*follower.x/width)+', '+(255*(follower.y/height))+', 0.175)'" />
+                        <stop offset="3%" :stop-color="'rgba('+(50 + 80*(follower.xAcc+follower.yAcc))+', '+(255*follower.x/width)+', '+(255*(follower.y/height))+', 0.20)'" />
                         <stop offset="100%" stop-color="transparent" />
                     </radialGradient>
                 </defs>
@@ -26,7 +26,7 @@ export default {
         },
         numFollowers: {
             type: Number,
-            default: 15
+            default: 20
         },
         mouseRadius: {
             type: Number,
@@ -38,7 +38,7 @@ export default {
         height: window.innerHeight,
         drawCycle: null,
         followers: [],
-        maxVel: 1,
+        maxVel: 1.6,
         maxForce: 0.5,
         mouseX: 0,
         mouseY: 0,

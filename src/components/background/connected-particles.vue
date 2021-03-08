@@ -3,7 +3,7 @@
         <g v-for="(p, index) in particles" :key="'particle-'+index" >
             <defs>
                 <radialGradient :id="'gradientFill-'+index">
-                    <stop offset="25%" :stop-color="'rgba('+255*p.mouseDist+', '+(255*p.x/width)+', '+(255*p.y/height)+', '+(maxOpacity+0.3*p.mouseDist)+')'" />
+                    <stop offset="25%" :stop-color="'rgba('+(155 + 100*p.mouseDist)+', '+(155 + 100*p.x/width)+', '+(155 + 100*p.y/height)+', '+(maxOpacity+0.3*p.mouseDist)+')'" />
                     <stop offset="100%" stop-color="transparent" />
                 </radialGradient>
             </defs>
@@ -41,8 +41,8 @@ export default {
         height: window.innerHeight,
         drawCycle: null,
         lineRange: 0,
-        maxLineRange: 150,
-        maxOpacity: 0.25
+        maxLineRange: 165,
+        maxOpacity: 0.3
     }),
     created() {
         this.drawCycle = setInterval(this.draw.bind(this), 40);
@@ -207,6 +207,7 @@ export default {
 @import '../../assets/variables.scss';
 
 .connected-particles-canvas {
-    background-color: $bg-dark-blue;
+    background: $bg-dark-blue;
+    background: radial-gradient(circle, rgba(18,12,35,1) 0%, $bg-dark-blue 100%);
 }
 </style>
