@@ -15,15 +15,17 @@ import constellations from '@/components/background/constellations.vue';
 import pixelRain from '@/components/background/pixel-rain.vue';
 import ripples from '@/components/background/ripples.vue';
 import followers from '@/components/background/followers.vue';
+import fish from '@/components/background/fish.vue';
 
 export default {
   name: 'Home',
   components: {
+    backgroundSelect,
     constellations,
     pixelRain,
-    backgroundSelect,
     ripples,
-    followers
+    followers,
+    fish
   },
   data: () => ({
     selectedBackground: null,
@@ -42,7 +44,7 @@ export default {
       },
       {
         display: 'W',
-        value: 'ripples'
+        value: 'fish'
       }
     ]
   }),
@@ -69,6 +71,8 @@ export default {
     height: calc(100% - 150px);
     transition: all 0.5s ease;
     transition-delay: 0s;
+    // border-top-right-radius: 25%;
+    // border-bottom-left-radius: 25%;
 
     @media (max-width: 720px) {
       width: calc(100% - 85px);
@@ -111,11 +115,11 @@ export default {
       box-shadow: 0px 0px 10px 2px rgba(255, 255, 255, 0.5);
     }
 
-    &:hover::before, &:hover::after, &:active::before, &:active::after, &:focus::before, &:focus::after {
-      height: 100%;
-      width: 100%;
-      transition-delay: 0s;
-    }
+    // &:hover::before, &:hover::after, &:active::before, &:active::after, &:focus::before, &:focus::after {
+    //   height: 100%;
+    //   width: 100%;
+    //   transition-delay: 0s;
+    // }
 
     h1 {
       font-size: calc(min(5em, 10vw));

@@ -188,8 +188,8 @@ export default {
             }
         },
         randomiseVelocity(f) {
-            var xVel = Math.sin(Math.random()*360);
-            var yVel = Math.sin(Math.random()*360);
+            let xVel = Math.sin(Math.random()*360);
+            let yVel = Math.sin(Math.random()*360);
 
             if (xVel === 0 && yVel === 0) {
                 xVel = 0.5;
