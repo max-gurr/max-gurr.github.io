@@ -36,6 +36,7 @@ export default {
     data: () => ({
         width: window.innerWidth,
         height: window.innerHeight,
+        drawCycle: null,
         followers: [],
         maxVel: 1.6,
         maxForce: 0.5,
@@ -43,7 +44,7 @@ export default {
         mouseY: 0,
         squareMouseRadius: 0,
         size: 0,
-        animationRate: 50
+        frameRate: 50
     }),
     created() {
         window.addEventListener('resize', this.resizeHandler);
@@ -56,7 +57,8 @@ export default {
 
         this.resizeHandler();
 
-        window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
+        this.drawCycle = setInterval(this.draw.bind(this), this.frameRate);
+        // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.frameRate);
     },
     methods: {
         async draw() {
@@ -71,7 +73,7 @@ export default {
             this.mouseX = 0;
             this.mouseY = 0;
 
-            window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
+            // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.frameRate);
         },
         resizeHandler() {
             this.width = window.innerWidth;
@@ -203,6 +205,7 @@ export default {
         }
     },
     beforeDestroy() {
+        clearInterval(this.drawCycle);
         window.removeEventListener('resize', this.resizeHandler);
         window.removeEventListener('click', this.clickHandler);
         window.removeEventListener('mousemove', this.mouseMoveHandler);

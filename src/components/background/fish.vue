@@ -12,6 +12,7 @@
                 ' q '+fishSize/2+' -'+fishSize/2+' '+fishSize+' 0 Z'" 
             :fill="fishColour"
             :transform="'rotate('+f.rotation+', '+f.x+', '+f.y+')'" />
+            <!-- <line v-for="(n, nindex) in f.neighbours" :key="'fish-'+index+'-neighbour-'+nindex" :x1="f.x" :y1="f.y" :x2="n.fish.x" :y2="n.fish.y" stroke="white"/> -->
         </g>
     </svg>
 </template>
@@ -20,43 +21,41 @@
 export default {
     name: 'fish',
     props: {
-        numFish: {
-            type: Number,
-            default: 20
-        },
         fishSize: {
             type: Number,
             default: 15
         },
         neighbourRadius: {
             type: Number,
-            default: 100
+            default: 150
         }
     },
     data: () => ({
         fish: [],
         width: window.innerWidth,
         height: window.innerHeight,
+        drawCycle: null,
         fishOpacity: 0.3,
-        maxVel: 2,
-        maxForce: 0.6,
-        cohesionScale: 1,
-        alignmentScale: 1,
-        separationScale: 1,
+        maxVel: 4,
+        maxForce: 0.2,
+        cohesionScale: 0.5,
+        alignmentScale: 0.1,
+        separationScale: 2,
         fishColour: 'rgb(255, 100, 100)',
-        animationFrequency: 50,
-        squareNeighbourRadius: 0
+        frameRate: 35,
+        numFish: 20
     }),
     created() {
         window.addEventListener('resize', this.resizeHandler);
         window.addEventListener('click', this.clickHandler);
+        window.addEventListener('mousemove', this.mousemoveHandler);
     },
     mounted() {
-        this.makeFish();
-        this.squareNeighbourRadius = this.neighbourRadius * this.neighbourRadius;
+        this.resizeHandler();
 
         // Start animation
-        window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationFrequency);
+        // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.frameRate);
+        this.drawCycle = setInterval(this.draw.bind(this), this.frameRate);
     },
     methods: {
         async draw() {
@@ -64,33 +63,40 @@ export default {
             await Promise.all(this.fish.map(async (f) => {
                 this.updateFish(f, this.fishSize);          
             }));
-
-            window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationFrequency);
+            // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.frameRate);
         },
         resizeHandler() {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
+
+            const divider = 20;
+            this.numFish = Math.round(Math.min(this.width/divider, this.height/divider)) || 25;
+
+            this.makeFish();
         },
         async clickHandler(e) {
            
         },
+        async mousemoveHandler(e) {
+
+        },
         async makeFish() {
-            const fish = [];
+            this.fish = [];
             
             for (let i = 0; i < this.numFish; i++) {
                 var xVel = Math.sin(Math.random()*360);
                 var yVel = Math.sin(Math.random()*360);
-                const mag = Math.sqrt(xVel * xVel + yVel * yVel);
 
+                const mag = Math.sqrt(xVel * xVel + yVel * yVel);
                 if (mag === 0) {
                     xVel = 0.5;
                     yVel = 0.5;
                 }
+                const scale = this.maxVel/mag;
+                xVel = scale * xVel;
+                yVel = scale * yVel;
 
-                xVel = this.maxVel * (xVel/mag);
-                yVel = this.maxVel * (yVel/mag);
-
-                fish.push({
+                this.fish.push({
                     x: Math.random()*this.width,
                     y: Math.random()*this.height,
                     xVel: xVel,
@@ -101,66 +107,65 @@ export default {
                     neighbours: []
                 });
             }
-
-            this.fish = fish;
         },
         async updateFish(f, range) {
             // Apply flocking forces from neighbours
             if (f.neighbours.length > 0) {
                 let cohesionX = 0;
                 let cohesionY = 0;
-                f.neighbours.forEach((n) => {
-                    // Alignment
+                let alignmentX = 0;
+                let alignmentY = 0;
+                let separationX = 0;
+                let separationY = 0;
+                let separationCount = 0;
 
-                    // Cohesion
-                    cohesionX += n.x;
-                    cohesionY += n.y;
+                f.neighbours.forEach((n) => {
+                    // Alignment //
+                    alignmentX += n.fish.xVel;
+                    alignmentY += n.fish.yVel;
+
+                    // Cohesion //
+                    cohesionX += n.fish.x;
+                    cohesionY += n.fish.y;
 
                     // Separation
+                    const xDist = (f.x - n.fish.x)/n.dist;
+                    const yDist = (f.y - n.fish.y)/n.dist;
+
+                    separationX += xDist;
+                    separationY += yDist;
+                    separationCount += 1;
                 });
-                // Cohesion //
-                // Scale to avg measurement
-                cohesionX /= f.neighbours.length;
-                cohesionY /= f.neighbours.length;
-
-                // Desired velocity
-                const cohesionXDist = cohesionX - f.x;
-                const cohesionYDist = cohesionY - f.y;
-                // Force to get to desired velocity
-                let cohesionXForce = cohesionXDist - f.xVel;
-                let cohesionYForce = cohesionYDist - f.yVel;
-
-                // Scale to max force
-                const cohesionMag = Math.sqrt(cohesionXForce * cohesionXForce + cohesionYForce * cohesionYForce);
-                if (cohesionMag > this.maxForce) {
-                    cohesionXForce = this.maxForce * cohesionXForce/cohesionMag;
-                    cohesionYForce = this.maxForce * cohesionYForce/cohesionMag;
+                if (cohesionX !== 0 || cohesionY !== 0) {
+                    cohesionX /= f.neighbours.length;
+                    cohesionY /= f.neighbours.length;
+                    this.applyCohesion(f, cohesionX, cohesionY);
                 }
 
-                // Scale by behaviour multiplier
-                cohesionXForce *= this.cohesionScale;
-                cohesionYForce *= this.cohesionScale;
-
-                // Add to acceleration
-                f.xAcc += cohesionXForce;
-                f.yAcc += cohesionYForce;
-
-                console.log(cohesionXForce, cohesionYForce);
-                // End of cohesion //
-
-                // Separation //
-
-                // End of separation //
-
-                // Alignment //
-
-                // End of alignment //
+                if (alignmentX !== 0 || alignmentY !== 0) {
+                    alignmentX /= f.neighbours.length;
+                    alignmentY /= f.neighbours.length;
+                    this.applyAlignment(f, alignmentX, alignmentY);
+                }
+                
+                if (separationCount > 0 && (separationX !== 0 || separationY !== 0)) {
+                    separationX /= separationCount;
+                    separationY /= separationCount;
+                    this.applySeparation(f, separationX, separationY);
+                }
             }
 
             // Add acc to vel
             f.xVel += f.xAcc;
             f.yVel += f.yAcc;
 
+            // Scale velocity to maxVel
+            const velMag = Math.sqrt(f.xVel * f.xVel + f.yVel * f.yVel);
+            if (velMag > 0) {
+                f.xVel *= this.maxVel/velMag;
+                f.yVel *= this.maxVel/velMag;
+            }
+            
             // Add vel to pos
             f.x += f.xVel;
             f.y += f.yVel;
@@ -181,13 +186,6 @@ export default {
             // Calculate rotation
             f.rotation = (Math.atan2(f.yVel, f.xVel)/Math.PI) * 180 + 90;
 
-            // Scale velocity to maxVel
-            const velMag = f.xVel * f.xVel + f.yVel * f.yVel;
-            if (velMag !== 0) {
-                f.xVel = this.maxVel * f.xVel/velMag;
-                f.yVel = this.maxVel * f.yVel/velMag;
-            }
-
             // Reset acc
             f.xAcc /= 2;
             f.yAcc /= 2;
@@ -196,7 +194,7 @@ export default {
             // Go through each fish
             for (let i = 0; i < this.fish.length; i++) {
                 const f1 = this.fish[i];
-                const newNeighbours = [];
+                f1.neighbours = [];
 
                 // Go through each other fish
                 for (let j = i+1; j < this.fish.length; j++) {
@@ -205,23 +203,86 @@ export default {
                     // Calculate dist between fish
                     const xDist = f1.x - f2.x;
                     const yDist = f1.y - f2.y;
-                    const squareMag = xDist * xDist + yDist * yDist;
+                    const mag = Math.sqrt(xDist * xDist + yDist * yDist);
 
                     // If distance is less than neighbour radius
                     // , f2 is a neighbour of f1
-                    if (squareMag < this.squareNeighbourRadius) {
-                        newNeighbours.push(f2);
+                    if (mag < this.neighbourRadius) {
+                        // Need to add both ways, as will not make another comparison between the same 2 fish
+                        f1.neighbours.push({fish: f2, dist: mag});
+                        f2.neighbours.push({fish: f1, dist: mag});
                     }
                 }
-
-                // Assign new neighbours to f1
-                f1.neighbours = newNeighbours;
             }
+        },
+        async applyCohesion(f, cohesionX, cohesionY) {
+            // Desired velocity
+            const cohesionXDist = cohesionX - f.x;
+            const cohesionYDist = cohesionY - f.y;
+            // Force to get to desired velocity
+            let cohesionXForce = cohesionXDist - f.xVel;
+            let cohesionYForce = cohesionYDist - f.yVel;
+
+            // Scale to max force
+            const cohesionMag = Math.sqrt(cohesionXForce * cohesionXForce + cohesionYForce * cohesionYForce);
+            if (cohesionMag > this.maxForce) {
+                cohesionXForce = this.maxForce * cohesionXForce/cohesionMag;
+                cohesionYForce = this.maxForce * cohesionYForce/cohesionMag;
+            }
+
+            // Scale by behaviour multiplier
+            cohesionXForce *= this.cohesionScale;
+            cohesionYForce *= this.cohesionScale;
+
+            // Add to acceleration
+            f.xAcc += cohesionXForce;
+            f.yAcc += cohesionYForce;
+        },
+        async applySeparation(f, separationX, separationY) {
+            // Force = different in velocity
+            let xForce = separationX - f.xVel;
+            let yForce = separationY - f.yVel;
+
+            // Scale to max force
+            const separationMag = Math.sqrt(xForce * xForce + yForce * yForce);
+            if (separationMag > this.maxForce) {
+                xForce = this.maxForce * xForce/separationMag;
+                yForce = this.maxForce * yForce/separationMag;
+            }
+
+            // Adjust by behaviour multipler
+            xForce *= this.separationScale;
+            yForce *= this.separationScale;
+
+            // Add to acc
+            f.xAcc += xForce;
+            f.yAcc += yForce;
+        },
+        async applyAlignment(f, alignmentX, alignmentY) {
+            // Force = different in velocity
+            let xForce = alignmentX - f.xVel;
+            let yForce = alignmentY - f.yVel;
+
+            // Scale to max force
+            const alignmentMag = Math.sqrt(xForce * xForce + yForce * yForce);
+            if (alignmentMag > this.maxForce) {
+                xForce = this.maxForce * xForce/alignmentMag;
+                yForce = this.maxForce * yForce/alignmentMag;
+            }
+
+            // Adjust by behaviour multipler
+            xForce *= this.alignmentScale;
+            yForce *= this.alignmentScale;
+
+            // Add to acc
+            f.xAcc += xForce;
+            f.yAcc += yForce;
         }
     },
     beforeDestroy() {
-       window.removeEventListener('resize', this.resizeHandler);
-       window.removeEventListener('click', this.mouseMoveHandler);
+        clearInterval(this.drawCycle);
+        window.removeEventListener('resize', this.resizeHandler);
+        window.removeEventListener('click', this.mouseMoveHandler);
     }
 }
 </script>

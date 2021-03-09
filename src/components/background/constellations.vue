@@ -58,7 +58,8 @@ export default {
         this.resizeHandler();
 
         // Start animation
-        window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
+        // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
+        this.drawCycle = setInterval(this.draw.bind(this), this.animationRate);
     },
     methods: {
         async draw() {
@@ -74,7 +75,7 @@ export default {
             this.lines = await this.makeLines(this.lineRange);
 
             // Reset animation timeout
-            window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
+            // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
         },
         resizeHandler() {
             this.width = window.innerWidth;
@@ -205,8 +206,9 @@ export default {
         }
     },
     beforeDestroy() {
-       window.removeEventListener('resize', this.resizeHandler);
-       window.removeEventListener('mousemove', this.mouseMoveHandler);
+        clearInterval(this.drawCycle);
+        window.removeEventListener('resize', this.resizeHandler);
+        window.removeEventListener('mousemove', this.mouseMoveHandler);
     }
 }
 </script>
