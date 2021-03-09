@@ -12,7 +12,6 @@
                 ' q '+fishSize/2+' -'+fishSize/2+' '+fishSize+' 0 Z'" 
             :fill="fishColour"
             :transform="'rotate('+f.rotation+', '+f.x+', '+f.y+')'" />
-            <!-- <line v-for="(n, nindex) in f.neighbours" :key="'fish-'+index+'-neighbour-'+nindex" :x1="f.x" :y1="f.y" :x2="n.fish.x" :y2="n.fish.y" stroke="white"/> -->
         </g>
     </svg>
 </template>
@@ -40,7 +39,7 @@ export default {
         maxForce: 0.2,
         cohesionScale: 0.5,
         alignmentScale: 0.1,
-        separationScale: 2,
+        separationScale: 3,
         fishColour: 'rgb(255, 100, 100)',
         frameRate: 35,
         numFish: 20
@@ -103,58 +102,11 @@ export default {
                     yVel: yVel,
                     xAcc: 0,
                     yAcc: 0,
-                    rotation: 0,
-                    neighbours: []
+                    rotation: 0
                 });
             }
         },
         async updateFish(f, range) {
-            // Apply flocking forces from neighbours
-            if (f.neighbours.length > 0) {
-                let cohesionX = 0;
-                let cohesionY = 0;
-                let alignmentX = 0;
-                let alignmentY = 0;
-                let separationX = 0;
-                let separationY = 0;
-                let separationCount = 0;
-
-                f.neighbours.forEach((n) => {
-                    // Alignment //
-                    alignmentX += n.fish.xVel;
-                    alignmentY += n.fish.yVel;
-
-                    // Cohesion //
-                    cohesionX += n.fish.x;
-                    cohesionY += n.fish.y;
-
-                    // Separation
-                    const xDist = (f.x - n.fish.x)/n.dist;
-                    const yDist = (f.y - n.fish.y)/n.dist;
-
-                    separationX += xDist;
-                    separationY += yDist;
-                    separationCount += 1;
-                });
-                if (cohesionX !== 0 || cohesionY !== 0) {
-                    cohesionX /= f.neighbours.length;
-                    cohesionY /= f.neighbours.length;
-                    this.applyCohesion(f, cohesionX, cohesionY);
-                }
-
-                if (alignmentX !== 0 || alignmentY !== 0) {
-                    alignmentX /= f.neighbours.length;
-                    alignmentY /= f.neighbours.length;
-                    this.applyAlignment(f, alignmentX, alignmentY);
-                }
-                
-                if (separationCount > 0 && (separationX !== 0 || separationY !== 0)) {
-                    separationX /= separationCount;
-                    separationY /= separationCount;
-                    this.applySeparation(f, separationX, separationY);
-                }
-            }
-
             // Add acc to vel
             f.xVel += f.xAcc;
             f.yVel += f.yAcc;
@@ -194,7 +146,13 @@ export default {
             // Go through each fish
             for (let i = 0; i < this.fish.length; i++) {
                 const f1 = this.fish[i];
-                f1.neighbours = [];
+                let neighbourCount = 0;
+                let cohesionX = 0;
+                let cohesionY = 0;
+                let alignmentX = 0;
+                let alignmentY = 0;
+                let separationX = 0;
+                let separationY = 0;
 
                 // Go through each other fish
                 for (let j = i+1; j < this.fish.length; j++) {
@@ -208,10 +166,40 @@ export default {
                     // If distance is less than neighbour radius
                     // , f2 is a neighbour of f1
                     if (mag < this.neighbourRadius) {
-                        // Need to add both ways, as will not make another comparison between the same 2 fish
-                        f1.neighbours.push({fish: f2, dist: mag});
-                        f2.neighbours.push({fish: f1, dist: mag});
+                        // Apply flocking forces from neighbours
+                        alignmentX += f2.xVel;
+                        alignmentY += f2.yVel;
+
+                        // Cohesion //
+                        cohesionX += f2.x;
+                        cohesionY += f2.y;
+
+                        // Separation
+                        const separationXDist = xDist/mag;
+                        const separationYDist = yDist/mag;
+
+                        separationX += separationXDist;
+                        separationY += separationYDist;
+
+                        neighbourCount += 1;
                     }
+                }
+                if (cohesionX !== 0 || cohesionY !== 0) {
+                    cohesionX /= neighbourCount;
+                    cohesionY /= neighbourCount;
+                    this.applyCohesion(f1, cohesionX, cohesionY);
+                }
+
+                if (alignmentX !== 0 || alignmentY !== 0) {
+                    alignmentX /= neighbourCount;
+                    alignmentY /= neighbourCount;
+                    this.applyAlignment(f1, alignmentX, alignmentY);
+                }
+                
+                if (separationX !== 0 || separationY !== 0) {
+                    separationX /= neighbourCount;
+                    separationY /= neighbourCount;
+                    this.applySeparation(f1, separationX, separationY);
                 }
             }
         },
