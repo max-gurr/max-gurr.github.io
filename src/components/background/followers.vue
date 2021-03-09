@@ -36,18 +36,16 @@ export default {
     data: () => ({
         width: window.innerWidth,
         height: window.innerHeight,
-        drawCycle: null,
         followers: [],
         maxVel: 1.6,
         maxForce: 0.5,
         mouseX: 0,
         mouseY: 0,
         squareMouseRadius: 0,
-        size: 0
+        size: 0,
+        animationRate: 50
     }),
     created() {
-        this.drawCycle = setInterval(this.draw.bind(this), 40);
-
         window.addEventListener('resize', this.resizeHandler);
         window.addEventListener('mousemove', this.mouseMoveHandler);
         window.addEventListener('click', this.clickHandler);
@@ -57,6 +55,8 @@ export default {
         this.squareMouseRadius = this.mouseRadius * this.mouseRadius;
 
         this.resizeHandler();
+
+        window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
     },
     methods: {
         async draw() {
@@ -70,6 +70,8 @@ export default {
             // Reset mouse attractor point
             this.mouseX = 0;
             this.mouseY = 0;
+
+            window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
         },
         resizeHandler() {
             this.width = window.innerWidth;
@@ -201,7 +203,6 @@ export default {
         }
     },
     beforeDestroy() {
-        clearInterval(this.drawCycle);
         window.removeEventListener('resize', this.resizeHandler);
         window.removeEventListener('click', this.clickHandler);
         window.removeEventListener('mousemove', this.mouseMoveHandler);

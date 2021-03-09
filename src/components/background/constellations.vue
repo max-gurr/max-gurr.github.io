@@ -24,9 +24,13 @@
 export default {
     name: 'connected-particles',
     props: {
-        num: {
+        minNumParticles: {
             type: Number,
-            default: 80
+            default: 40
+        },
+        maxNumParticles: {
+            type: Number,
+            default: 150
         },
         radius: {
             type: Number,
@@ -41,17 +45,20 @@ export default {
         height: window.innerHeight,
         drawCycle: null,
         lineRange: 0,
-        maxLineRange: 165,
-        maxOpacity: 0.3
+        maxLineRange: 150,
+        maxOpacity: 0.3,
+        animationRate: 50
     }),
     created() {
-        this.drawCycle = setInterval(this.draw.bind(this), 40);
-    },
-    mounted() {
         window.addEventListener('resize', this.resizeHandler);
         window.addEventListener('mousemove', this.mouseMoveHandler);
-
+    },
+    mounted() {
+        // Initialise responsive variables
         this.resizeHandler();
+
+        // Start animation
+        window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
     },
     methods: {
         async draw() {
@@ -65,6 +72,9 @@ export default {
             }
 
             this.lines = await this.makeLines(this.lineRange);
+
+            // Reset animation timeout
+            window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
         },
         resizeHandler() {
             this.width = window.innerWidth;
@@ -86,16 +96,16 @@ export default {
             this.mouseParticle.nextY = e.clientY;
         },
         calculateLineRange() {
-            const divider = 6;
-            let range = Math.max(this.width/divider, this.height/divider);
+            const divider = 5;
 
-            this.lineRange = Math.min(this.maxLineRange, range);
+            let range = Math.min(this.width/divider, this.height/divider);
+            this.lineRange = Math.max(100, Math.min(this.maxLineRange, range));
         },
         async makeParticles() {
-            const divider = 25;
+            const divider = 10000;
             const particles = [];
-            const responsiveNum = this.width/divider + this.height/divider;
-            const numParticles = Math.min(this.num, responsiveNum);
+            const responsiveNum = (this.width * this.height)/divider;
+            const numParticles = Math.max(this.minNumParticles, Math.min(this.maxNumParticles, responsiveNum));
             
             for (let i = 0; i < numParticles; i++) {
                 var xVel = Math.sin(Math.random()*360);
@@ -144,7 +154,6 @@ export default {
             const squareRange = range * range;
             const particles = [...this.particles];
 
-            let line;
             // Lines between particles
             for (let i = 0; i < particles.length; i++) {
                 const p1 = particles[i];
@@ -196,7 +205,6 @@ export default {
         }
     },
     beforeDestroy() {
-       clearInterval(this.drawCycle);
        window.removeEventListener('resize', this.resizeHandler);
        window.removeEventListener('mousemove', this.mouseMoveHandler);
     }

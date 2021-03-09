@@ -5,21 +5,6 @@
         </filter>
         
         <g v-for="(f, index) in fish" :key="'fish-'+index" :transform="'rotate('+f.rotation+', '+f.x+', '+f.y+')'" :opacity="fishOpacity" filter="url(#blurFilter)">
-            <!-- Fish shape path
-                <path :d="
-                    'M ' + (f.x) + ' ' + (f.y-fishSize) + 
-                    ' c -'+fishSize+' '+fishSize*0.25+' -'+fishSize+ ' '+fishSize*1.85+' 0 '+fishSize*2+
-                    ' m 0 -'+fishSize/2+
-                    ' l -'+fishSize*0.75+' '+fishSize+
-                    ' q '+fishSize*0.75+' -'+fishSize*0.5+' '+fishSize*2*0.75+' 0'+
-                    ' l -'+fishSize*0.75+' -'+fishSize+
-                    ' M ' + (f.x) + ' ' + (f.y+fishSize) + 
-                    ' c '+fishSize+' -'+fishSize*0.15+' '+fishSize+' -'+fishSize*1.75+' 0 -'+fishSize*2+
-                    ' m -'+fishSize/2+' '+fishSize+
-                    ' q '+fishSize/2+' -'+fishSize+' '+fishSize+' 0'+
-                    ' q -'+fishSize/2+' -'+fishSize/2+' -'+fishSize+' 0'
-                " :fill="fishColour" /> -->
-
             <!-- Triangle shape path -->
             <path :d="
                 'M ' + (f.x) + ' ' + (f.y-fishSize)+
@@ -47,25 +32,28 @@ export default {
         fish: [],
         width: window.innerWidth,
         height: window.innerHeight,
-        drawCycle: null,
         fishOpacity: 0.3,
         maxVel: 2,
-        fishColour: 'rgb(255, 100, 100)'
+        fishColour: 'rgb(255, 100, 100)',
+        animationFrequency: 50
     }),
     created() {
-        this.drawCycle = setInterval(this.draw.bind(this), 40);
-    },
-    mounted() {
         window.addEventListener('resize', this.resizeHandler);
         window.addEventListener('click', this.clickHandler);
-
+    },
+    mounted() {
         this.makeFish();
+
+        // Start animation
+        window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationFrequency);
     },
     methods: {
         async draw() {
             await Promise.all(this.fish.map(async (f) => {
                 this.updateFish(f, this.fishSize);          
             }));
+
+            window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationFrequency);
         },
         resizeHandler() {
             this.width = window.innerWidth;
@@ -123,7 +111,6 @@ export default {
         },
     },
     beforeDestroy() {
-       clearInterval(this.drawCycle);
        window.removeEventListener('resize', this.resizeHandler);
        window.removeEventListener('click', this.mouseMoveHandler);
     }
