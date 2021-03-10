@@ -31,20 +31,20 @@ export default {
     selectedBackground: null,
     backgroundComponents: [
       {
-        display: 'P',
-        value: 'constellations'
+        value: 'constellations',
+        icon: 'constellationsIcon'
       }, 
       {
-        display: 'R',
-        value: 'pixel-rain'
+        value: 'pixel-rain',
+        icon: 'constellationsIcon'
       },
       {
-        display: 'G',
-        value: 'followers'
+        value: 'followers',
+        icon: 'followersIcon'
       },
       {
-        display: 'W',
-        value: 'fish'
+        value: 'fish',
+        icon: 'fishIcon'
       }
     ]
   }),

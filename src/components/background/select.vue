@@ -1,15 +1,30 @@
 <template>
   <div class="bg-select" :class="{ 'bg-select--active' : active}">
-      <span class="bg-select__base flex-center" v-on:click="active = !active" :class="{ 'bg-select__base--active' : active}">BG</span>
-      <div v-for="(bg, index) in backgrounds" :key="index" class="bg-select__item flex-center" :class="{ 'bg-select__item--active' : active}" v-on:click="bgClick(bg.value)">
-          <span>{{bg.display}}</span>
-      </div>
-  </div>
+        <span class="bg-select__base flex-center" v-on:click="active = !active" :class="{ 'bg-select__base--active' : active}">
+            <selectIcon class="icon"/>
+        </span>
+        <div v-for="(bg, index) in backgrounds" :key="index" class="bg-select__item flex-center" :class="{ 'bg-select__item--active' : active}" v-on:click="bgClick(bg.value)">
+            <span class="flex-center">
+                <component :is="bg.icon" class="icon"/>
+            </span>
+        </div>
+    </div>
 </template>
 
 <script>
+import selectIcon from '@/assets/background/icons/select-icon.svg';
+import constellationsIcon from '@/assets/background/icons/constellations-icon.svg';
+import fishIcon from '@/assets/background/icons/fish-icon.svg';
+import followersIcon from '@/assets/background/icons/followers-icon.svg';
+
 export default {
     name: 'background-select',
+    components: {
+        selectIcon,
+        constellationsIcon,
+        fishIcon,
+        followersIcon
+    },
     props: {
         backgrounds: {
             type: Array,
@@ -77,14 +92,20 @@ export default {
         &:hover {
             @media (min-width: 720px) {
                 background-color: $node-color-active;
-                color: $node-color;
+                
+                .icon {
+                    stroke: $node-color;
+                }
             };
         }
 
         &:active {
             @media (max-width: 719px) {
                 background-color: $node-color-active;
-                color: $node-color;
+                
+                .icon {
+                    stroke: $node-color;
+                }
             };
         }
     }
@@ -116,16 +137,28 @@ export default {
         &:hover {
             @media (min-width: 720px) {
                 background-color: $node-color-active;
-                color: $node-color;
+                
+                .icon {
+                    stroke: $node-color;
+                }
             };
         }
 
         &:active {
             @media (max-width: 719px) {
                 background-color: $node-color-active;
-                color: $node-color;
+                
+                .icon {
+                    stroke: $node-color;
+                }
             };
         }
+    }
+
+    .icon {
+        width: 60%;
+        height: 60%;
+        stroke: $node-highlight;
     }
 }
 </style>

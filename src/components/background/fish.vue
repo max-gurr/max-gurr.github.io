@@ -14,10 +14,6 @@
             :transform="'rotate('+f.rotation+', '+f.x+', '+f.y+')'" />
             <!-- <circle :cx="f.x" :cy="f.y" :r="neighbourRadius" fill="rgba(255, 255, 255, 0.2)" /> -->
         </g>
-
-        <!-- <g v-for="(r, index) in ripples" :key="'ripple-'+index">
-            <rect :x="r.x" :y="r.y" width="100" height="100" stroke="rgba(255, 255, 255, 1)" class="ripple"/>
-        </g> -->
     </svg>
 </div>
 </template>
@@ -32,7 +28,7 @@ export default {
         },
         neighbourRadius: {
             type: Number,
-            default: 150
+            default: 200
         }
     },
     data: () => ({
@@ -44,7 +40,7 @@ export default {
         fishOpacity: 0.3,
         maxVel: 3,
         maxForce: 0.05,
-        cohesionScale: 1.3,
+        cohesionScale: 1.5,
         alignmentScale: 0.2,
         separationScale: 5,
         fishColour: 'rgb(255, 100, 100)',
