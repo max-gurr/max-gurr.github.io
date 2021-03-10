@@ -322,8 +322,6 @@ export default {
         animation: fish-ripple-animate 0.8s ease;
         transform: translate(-50%, -50%);
         box-shadow: 0px 0px 10px rgba(255, 255, 255, 1);
-    
-
     }
 
     @keyframes fish-ripple-animate {

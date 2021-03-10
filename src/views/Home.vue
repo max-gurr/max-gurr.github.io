@@ -31,16 +31,16 @@ export default {
     selectedBackground: null,
     backgroundComponents: [
       {
+        value: 'followers',
+        icon: 'followersIcon'
+      },
+      {
         value: 'constellations',
         icon: 'constellationsIcon'
       }, 
       {
         value: 'pixel-rain',
         icon: 'constellationsIcon'
-      },
-      {
-        value: 'followers',
-        icon: 'followersIcon'
       },
       {
         value: 'fish',

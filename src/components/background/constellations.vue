@@ -8,6 +8,8 @@
                 </radialGradient>
             </defs>
             <circle :cx="p.x" :cy="p.y" :r="radius" :fill="'url(#gradientFill-'+index+')'" class="particle" />
+        
+            <!-- <line v-for="(l, lineIndex) in particles" :key="'line-'+lineIndex" v-if="(p.x - l.x)*(p.x - l.x)+(p.y - l.y)*(p.y - l.y) < squareMaxLineRange" :x1="p.x" :y1="p.y" :x2="l.x" :y2="l.y" stroke="white" /> -->
         </g>
         <defs>
             <radialGradient id="mouseParticleFill">
@@ -16,7 +18,10 @@
             </radialGradient>
         </defs>
         <circle v-if="mouseParticle" :cx="mouseParticle.x" :cy="mouseParticle.y" :r="mouseParticle.radius" fill="url(#mouseParticleFill)" id="mouse-particle"/>
-        <line v-for="(l, index) in lines" :key="'line-'+index" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" stroke="white" :opacity="l.opacity"/>
+        
+        <g stroke-width="0.7">
+            <line v-for="(l, index) in lines" :key="'line-'+index" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" stroke="white" :opacity="l.opacity"/>
+        </g>
     </svg>
 </template>
 
@@ -34,7 +39,7 @@ export default {
         },
         radius: {
             type: Number,
-            default: 8
+            default: 5
         }
     },
     data: () => ({
@@ -45,7 +50,7 @@ export default {
         height: window.innerHeight,
         drawCycle: null,
         lineRange: 0,
-        maxLineRange: 150,
+        maxLineRange: 120,
         maxOpacity: 0.3,
         animationRate: 50
     }),
@@ -78,8 +83,8 @@ export default {
             // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
         },
         resizeHandler() {
-            this.width = window.innerWidth;
-            this.height = window.innerHeight;
+            this.width = window.innerWidth/1.5;
+            this.height = window.innerHeight/1.5;
             this.calculateLineRange();
             this.makeParticles();
         },
@@ -93,14 +98,14 @@ export default {
                     nextY: 0
                 }
             }
-            this.mouseParticle.nextX = e.clientX;
-            this.mouseParticle.nextY = e.clientY;
+            this.mouseParticle.nextX = Math.round(e.clientX/1.5);
+            this.mouseParticle.nextY = Math.round(e.clientY/1.5);
         },
         calculateLineRange() {
-            const divider = 5;
+            const divider = 4.5;
 
             let range = Math.min(this.width/divider, this.height/divider);
-            this.lineRange = Math.max(100, Math.min(this.maxLineRange, range));
+            this.lineRange = Math.max(this.maxLineRange/2, Math.min(this.maxLineRange, range));
         },
         async makeParticles() {
             const divider = 10000;
@@ -111,16 +116,15 @@ export default {
             for (let i = 0; i < numParticles; i++) {
                 var xVel = Math.sin(Math.random()*360);
                 var yVel = Math.sin(Math.random()*360);
-                const mag = Math.sqrt(xVel * xVel + yVel * yVel);
 
-                if (mag == 0) {
+                if (xVel === 0 && yVel === 0) {
                     xVel = 1;
-                    yVel = 1;
+                    yVel = -0.6;
                 }
 
-                const scale = Math.random() * 0.5 + 0.5;
-                xVel = scale * (xVel/mag);
-                yVel = scale * (yVel/mag);
+                const mag = Math.sqrt(xVel * xVel + yVel * yVel);
+                xVel *= 1/mag;
+                yVel *= 1/mag;
 
                 particles.push({
                     x: Math.random()*this.width,
@@ -134,21 +138,23 @@ export default {
             this.particles = particles;
         },
         async updateParticle (p, range) {
-            // Position
             p.x += p.xVel;
             p.y += p.yVel;
 
-            if (p.x < -range/2) {
-                p.x += this.width + range;
-            } else if (p.x > this.width + range/2) {
-                p.x -= (this.width + range);
+            if (p.x < 0) {
+                p.x += this.width;
+            } else if (p.x > this.width) {
+                p.x -= (this.width);
             }
 
-            if (p.y < -range/2) {
-                p.y += this.height + range;
-            } else if (p.y > this.height + range/2) {
-                p.y -= (this.height + range);
+            if (p.y < 0) {
+                p.y += this.height;
+            } else if (p.y > this.height) {
+                p.y -= (this.height );
             }
+
+            p.x = Math.round(p.x);
+            p.y = Math.round(p.y);
         },
         async makeLines (range) {
             const lines = [];
@@ -168,11 +174,11 @@ export default {
                     if (squareDist < squareRange) {
                         const opacity = this.maxOpacity * (squareRange - squareDist)/squareRange;
                         lines.push({
-                            x1: p1.x,
-                            y1: p1.y,
-                            x2: p2.x,
-                            y2: p2.y,
-                            opacity: opacity
+                            x1: Math.round(p1.x),
+                            y1: Math.round(p1.y),
+                            x2: Math.round(p2.x),
+                            y2: Math.round(p2.y),
+                            opacity: Math.round(opacity*100)/100
                         });
                     }
                 }
@@ -188,11 +194,11 @@ export default {
                     if (squareDist < squareRange) {
                         const opacity = this.maxOpacity * (squareRange - squareDist)/squareRange;
                         lines.push({
-                            x1: p.x,
-                            y1: p.y,
+                            x1: Math.round(p.x),
+                            y1: Math.round(p.y),
                             x2: this.mouseParticle.x,
                             y2: this.mouseParticle.y,
-                            opacity: opacity
+                            opacity: Math.round(100*opacity)/100
                         });
 
                         p.mouseDist = 1 - squareDist/squareRange;
