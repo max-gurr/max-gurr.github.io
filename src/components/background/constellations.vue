@@ -3,7 +3,7 @@
         <g v-for="(p, index) in particles" :key="'particle-'+index" >
             <defs>
                 <radialGradient :id="'gradientFill-'+index">
-                    <stop offset="25%" :stop-color="'rgba('+(155 + 100*p.mouseDist)+', '+(155 + 100*p.x/width)+', '+(155 + 100*p.y/height)+', '+(maxOpacity+0.3*p.mouseDist)+')'" />
+                    <stop offset="25%" :stop-color="'rgba('+(100 + 155*p.mouseDist)+', '+(100 + 155*p.x/width)+', '+(100 + 155*p.y/height)+', '+(maxOpacity+0.3*p.mouseDist)+')'" />
                     <stop offset="100%" stop-color="transparent" />
                 </radialGradient>
             </defs>

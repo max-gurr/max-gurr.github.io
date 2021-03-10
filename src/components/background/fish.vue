@@ -1,19 +1,25 @@
 <template>
-    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas fish-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+<div class="canvas fish-canvas" ref="canvasContainer">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
         <filter id="blurFilter">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
         </filter>
         
         <g v-for="(f, index) in fish" :key="'fish-'+index" :opacity="fishOpacity" filter="url(#blurFilter)">
-            <!-- Triangle shape path -->
             <path :d="
                 'M ' + (f.x) + ' ' + (f.y-fishSize)+
                 ' l -'+fishSize/2+' '+fishSize*1.25+
                 ' q '+fishSize/2+' -'+fishSize/2+' '+fishSize+' 0 Z'" 
-            :fill="fishColour"
+            :fill="'rgb('+(50 + 80*(f.xVel+f.yVel))+', '+(255*f.x/width)+', '+(255*(f.y/height))+')'"
             :transform="'rotate('+f.rotation+', '+f.x+', '+f.y+')'" />
+            <!-- <circle :cx="f.x" :cy="f.y" :r="neighbourRadius" fill="rgba(255, 255, 255, 0.2)" /> -->
         </g>
+
+        <!-- <g v-for="(r, index) in ripples" :key="'ripple-'+index">
+            <rect :x="r.x" :y="r.y" width="100" height="100" stroke="rgba(255, 255, 255, 1)" class="ripple"/>
+        </g> -->
     </svg>
+</div>
 </template>
 
 <script>
@@ -22,7 +28,7 @@ export default {
     props: {
         fishSize: {
             type: Number,
-            default: 15
+            default: 20
         },
         neighbourRadius: {
             type: Number,
@@ -31,18 +37,22 @@ export default {
     },
     data: () => ({
         fish: [],
+        ripples: [],
         width: window.innerWidth,
         height: window.innerHeight,
         drawCycle: null,
         fishOpacity: 0.3,
-        maxVel: 4,
-        maxForce: 0.2,
-        cohesionScale: 0.5,
-        alignmentScale: 0.1,
-        separationScale: 3,
+        maxVel: 3,
+        maxForce: 0.05,
+        cohesionScale: 1.3,
+        alignmentScale: 0.2,
+        separationScale: 5,
         fishColour: 'rgb(255, 100, 100)',
         frameRate: 35,
-        numFish: 20
+        numFish: 20,
+        rainChance: 0.25,
+        rippleGap: 0.2,
+        mousePos: null
     }),
     created() {
         window.addEventListener('resize', this.resizeHandler);
@@ -62,6 +72,13 @@ export default {
             await Promise.all(this.fish.map(async (f) => {
                 this.updateFish(f, this.fishSize);          
             }));
+
+            if (Math.random() < this.rainChance) {
+                const x = Math.random() * this.width;
+                const y = Math.random() * this.height;
+
+                this.makeRipple(x, y);
+            }
             // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.frameRate);
         },
         resizeHandler() {
@@ -73,8 +90,8 @@ export default {
 
             this.makeFish();
         },
-        async clickHandler(e) {
-           
+        async clickHandler(e) {        
+            this.makeRipple(e.clientX, e.clientY);
         },
         async mousemoveHandler(e) {
 
@@ -110,13 +127,6 @@ export default {
             // Add acc to vel
             f.xVel += f.xAcc;
             f.yVel += f.yAcc;
-
-            // Scale velocity to maxVel
-            const velMag = Math.sqrt(f.xVel * f.xVel + f.yVel * f.yVel);
-            if (velMag > 0) {
-                f.xVel *= this.maxVel/velMag;
-                f.yVel *= this.maxVel/velMag;
-            }
             
             // Add vel to pos
             f.x += f.xVel;
@@ -138,6 +148,13 @@ export default {
             // Calculate rotation
             f.rotation = (Math.atan2(f.yVel, f.xVel)/Math.PI) * 180 + 90;
 
+            // Scale velocity to maxVel
+            const velMag = Math.sqrt(f.xVel * f.xVel + f.yVel * f.yVel);
+            if (velMag > 0) {
+                f.xVel *= this.maxVel/velMag;
+                f.yVel *= this.maxVel/velMag;
+            }
+
             // Reset acc
             f.xAcc /= 2;
             f.yAcc /= 2;
@@ -147,6 +164,7 @@ export default {
             for (let i = 0; i < this.fish.length; i++) {
                 const f1 = this.fish[i];
                 let neighbourCount = 0;
+                let separationCount = 0;
                 let cohesionX = 0;
                 let cohesionY = 0;
                 let alignmentX = 0;
@@ -155,33 +173,38 @@ export default {
                 let separationY = 0;
 
                 // Go through each other fish
-                for (let j = i+1; j < this.fish.length; j++) {
-                    const f2 = this.fish[j];
+                for (let j = 0; j < this.fish.length; j++) {
+                    if (i !== j) {
+                        const f2 = this.fish[j];
 
-                    // Calculate dist between fish
-                    const xDist = f1.x - f2.x;
-                    const yDist = f1.y - f2.y;
-                    const mag = Math.sqrt(xDist * xDist + yDist * yDist);
+                        // Calculate dist between fish
+                        const xDist = f2.x - f1.x;
+                        const yDist = f2.y - f1.y;
+                        const mag = Math.sqrt(xDist * xDist + yDist * yDist);
 
-                    // If distance is less than neighbour radius
-                    // , f2 is a neighbour of f1
-                    if (mag < this.neighbourRadius) {
-                        // Apply flocking forces from neighbours
-                        alignmentX += f2.xVel;
-                        alignmentY += f2.yVel;
+                        // If distance is less than neighbour radius
+                        // , f2 is a neighbour of f1
+                        if (mag > 0 && mag < this.neighbourRadius) {
+                            // Apply flocking forces from neighbours
+                            alignmentX += f2.xVel;
+                            alignmentY += f2.yVel;
 
-                        // Cohesion //
-                        cohesionX += f2.x;
-                        cohesionY += f2.y;
+                            // Cohesion //
+                            cohesionX += f2.x;
+                            cohesionY += f2.y;
 
-                        // Separation
-                        const separationXDist = xDist/mag;
-                        const separationYDist = yDist/mag;
+                            // Separation
+                            if (mag < this.neighbourRadius/1.5) {
+                                const separationXDist = -xDist/mag;
+                                const separationYDist = -yDist/mag;
+                                separationX += separationXDist;
+                                separationY += separationYDist;
+                            
+                                separationCount += 1;
+                            }
 
-                        separationX += separationXDist;
-                        separationY += separationYDist;
-
-                        neighbourCount += 1;
+                            neighbourCount += 1;
+                        }
                     }
                 }
                 if (cohesionX !== 0 || cohesionY !== 0) {
@@ -197,8 +220,8 @@ export default {
                 }
                 
                 if (separationX !== 0 || separationY !== 0) {
-                    separationX /= neighbourCount;
-                    separationY /= neighbourCount;
+                    separationX /= separationCount;
+                    separationY /= separationCount;
                     this.applySeparation(f1, separationX, separationY);
                 }
             }
@@ -265,20 +288,59 @@ export default {
             // Add to acc
             f.xAcc += xForce;
             f.yAcc += yForce;
+        },
+        async makeRipple(x, y) {
+            const canvas = this.$refs['canvasContainer'];
+
+            const ripple = document.createElement("div");
+            ripple.className = "ripple";
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+
+            ripple.addEventListener( 'animationend', function() {
+                canvas.removeChild(ripple);
+            }.bind(this));
+
+            canvas.appendChild(ripple);
         }
     },
+    
     beforeDestroy() {
         clearInterval(this.drawCycle);
         window.removeEventListener('resize', this.resizeHandler);
-        window.removeEventListener('click', this.mouseMoveHandler);
+        window.removeEventListener('click', this.clickHandler);
     }
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 @import '../../assets/variables.scss';
 
 .fish-canvas {
-    background: $bg-dark-blue+10;
+    background: $bg-dark-blue;
+    background: radial-gradient(circle, #051541 0%, $bg-dark-blue 100%);
+
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        animation: fish-ripple-animate 0.8s ease;
+        transform: translate(-50%, -50%);
+        box-shadow: 0px 0px 10px rgba(255, 255, 255, 1);
+    
+
+    }
+
+    @keyframes fish-ripple-animate {
+        0% {
+            opacity: 0.4;
+            min-width: 0px;
+            min-height: 0px;
+        }
+        100% {
+            opacity: 0;
+            min-width: 100px;
+            min-height: 100px;
+        }
+    }
 }
 </style>

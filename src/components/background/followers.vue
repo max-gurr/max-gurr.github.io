@@ -222,23 +222,22 @@ export default {
     .click-ripple {
         position: absolute;
         border-radius: 50%;
-        animation: ripple-animate 0.4s;
+        animation: follower-ripple-animate 0.4s;
         transform: translate(-50%, -50%);
+        box-shadow: 0px 0px 30px white,
+                    inset 0px 0px 30px white;
     }
 
-    @keyframes ripple-animate {
-        0% {
-            $opacity: 0.3;
-            min-width: 0px;
-            min-height: 0px;
-            box-shadow: 0px 0px 15px rgba(255, 255, 255, $opacity),
-                    0px 0px 30px rgba(255, 255, 255, $opacity),
-                    0px 0px 100px rgba(255, 255, 255, $opacity);
+    @keyframes follower-ripple-animate {
+        1% {
+            opacity: 0.3;
+            width: 0px;
+            height: 0px;
         }
         100% {
-            min-width: 300px;
-            min-height: 300px;
-            box-shadow: none;
+            opacity: 0;
+            width: 300px;
+            height: 300px;
         }
     }
 }
