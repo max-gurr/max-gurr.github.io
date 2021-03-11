@@ -58,6 +58,10 @@ export default {
         neighbourRadius: {
             type: Number,
             default: 180
+        },
+        mouseEffectRadius: {
+            type: Number,
+            default: 150
         }
     },
     data: () => ({
@@ -77,11 +81,13 @@ export default {
         numFish: 20,
         rainChance: 0.25,
         rippleGap: 0.2,
-        mousePos: null
+        mousePos: null,
+        squareMouseEffectRadius: 0
     }),
     created() {
         window.addEventListener('resize', this.resizeHandler);
         window.addEventListener('click', this.clickHandler);
+        window.addEventListener('mousemove', this.mousemoveHandler);
     },
     mounted() {
         this.resizeHandler();
@@ -92,18 +98,24 @@ export default {
     },
     methods: {
         async draw() {
-            await this.partitionFish();
+            // Update fish
+            await this.applyFlockingBehaviour();
             await Promise.all(this.fish.map(async (f) => {
+                if (this.mousePos) {
+                    await this.repelFromMouse(f);
+                }
                 this.updateFish(f, this.fishSizeRadius);          
             }));
 
+            // Make ripples
             if (Math.random() < this.rainChance) {
                 const x = Math.random() * this.width;
                 const y = Math.random() * this.height;
 
                 this.makeRipple(x, y);
             }
-            // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.frameRate);
+
+            this.mousePos = null;
         },
         resizeHandler() {
             this.width = window.innerWidth;
@@ -112,10 +124,17 @@ export default {
             const divider = 20;
             this.numFish = Math.round(Math.min(this.width/divider, this.height/divider)) || 25;
 
+            this.squareMouseEffectRadius = this.mouseEffectRadius*this.mouseEffectRadius;
             this.makeFish();
         },
         async clickHandler(e) {        
             this.makeRipple(e.clientX, e.clientY);
+        },
+        async mousemoveHandler(e) {
+            this.mousePos = {
+                x: Math.round(e.clientX),
+                y: Math.round(e.clientY),
+            }
         },
         async makeFish() {
             this.fish = [];
@@ -180,7 +199,7 @@ export default {
             f.xAcc /= 2;
             f.yAcc /= 2;
         },
-        async partitionFish() {
+        async applyFlockingBehaviour() {
             // Go through each fish
             for (let i = 0; i < this.fish.length; i++) {
                 const f1 = this.fish[i];
@@ -323,13 +342,33 @@ export default {
             }.bind(this));
 
             canvas.appendChild(ripple);
-        }
+        },
+        async repelFromMouse(f) {
+            const xDist = f.x - this.mousePos.x;
+            const yDist = f.y - this.mousePos.y;
+
+            const posSquare = xDist * xDist + yDist * yDist;
+            if (posSquare < this.squareMouseEffectRadius) {
+                const xVelDelta = xDist - f.xVel;
+                const yVelDelta = yDist - f.yVel;
+
+                const velMag = Math.sqrt(xVelDelta * xVelDelta + yVelDelta * yVelDelta);
+                const maxMag = (this.mouseEffectRadius/velMag);
+                
+                const xForce = maxMag * (xVelDelta/velMag);
+                const yForce = maxMag * (yVelDelta/velMag);
+
+                f.xAcc += Math.min(xForce, this.maxForce);
+                f.yAcc += Math.min(yForce, this.maxForce);
+           }
+        },
     },
     
     beforeDestroy() {
         clearInterval(this.drawCycle);
         window.removeEventListener('resize', this.resizeHandler);
         window.removeEventListener('click', this.clickHandler);
+        window.removeEventListener('mousemove', this.mousemoveHandler);
     }
 }
 </script>

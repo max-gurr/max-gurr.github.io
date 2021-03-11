@@ -65,7 +65,7 @@ export default {
     }),
     created() {
         window.addEventListener('resize', this.resizeHandler);
-        window.addEventListener('mousemove', this.mouseMoveHandler);
+        window.addEventListener('mousemove', this.mousemoveHandler);
     },
     mounted() {
         // Initialise responsive variables
@@ -97,7 +97,7 @@ export default {
             this.calculateLineRange();
             this.makeParticles();
         },
-        async mouseMoveHandler(e) {
+        async mousemoveHandler(e) {
             if (!this.mouseParticle) {
                 this.mouseParticle = {
                     x: -500,
@@ -220,7 +220,7 @@ export default {
     beforeDestroy() {
         clearInterval(this.drawCycle);
         window.removeEventListener('resize', this.resizeHandler);
-        window.removeEventListener('mousemove', this.mouseMoveHandler);
+        window.removeEventListener('mousemove', this.mousemoveHandler);
     }
 }
 </script>

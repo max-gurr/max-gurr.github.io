@@ -76,7 +76,7 @@ export default {
     }),
     created() {
         window.addEventListener('resize', this.resizeHandler);
-        window.addEventListener('mousemove', this.mouseMoveHandler);
+        window.addEventListener('mousemove', this.mousemoveHandler);
         window.addEventListener('click', this.clickHandler);
     },
     mounted() {
@@ -110,7 +110,7 @@ export default {
 
             this.makeFollowers(this.numFollowers);
         },
-        async mouseMoveHandler(e) {
+        async mousemoveHandler(e) {
             this.mouseX = e.clientX;
             this.mouseY = e.clientY;
         },
@@ -251,7 +251,7 @@ export default {
         clearInterval(this.drawCycle);
         window.removeEventListener('resize', this.resizeHandler);
         window.removeEventListener('click', this.clickHandler);
-        window.removeEventListener('mousemove', this.mouseMoveHandler);
+        window.removeEventListener('mousemove', this.mousemoveHandler);
     }
 }
 </script>

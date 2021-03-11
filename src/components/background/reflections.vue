@@ -22,14 +22,16 @@
             </clipPath>
             
             <!-- Canvas -->
-            <g id="canvas" clip-path="url(#clip)">
+            <g id="canvas" ref="svg-canvas" clip-path="url(#clip)">
                 <circle :cx="width/5" :cy="height/5" :r="height/3" fill="url(#f2)" />
                 <circle :cx="width/1.25" :cy="height/4" :r="height/2.5" fill="url(#f3)" />
                 <circle :cx="width/2" :cy="height/3" :r="height/1.5" fill="url(#f1)" />
             </g>
         </defs>
 
+        <!-- Main display -->
         <use xlink:href="#canvas" />
+        <!-- Reflected display -->
         <use xlink:href="#canvas" :transform="'translate(0, '+(height+2)+') scale(1, -'+((1-cutoff)/cutoff)+')'"/>
     </svg>
 </template>

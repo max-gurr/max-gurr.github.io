@@ -44,6 +44,8 @@ export default {
 
 <style scoped lang="scss">
 .bg-select {
+    $base-size: 80px;
+    $item-size: 40px;
     $node-color: rgb(10, 10, 30);
     $node-highlight: #00ff9d;
     $node-color-active: #83ecb3;
@@ -58,11 +60,11 @@ export default {
         content: "";
         position: absolute;
         z-index: -99;
-        bottom: 35px;
-        left: 35px;
+        bottom: $base-size/2;
+        left: $base-size/2;
         transform: translate(-50%, 50%);
-        width: 70px;
-        height: 70px;
+        width: $base-size;
+        height: $base-size;
         background-color: $bg-color;
         border-radius: 50%;
         transition: all 0.5s ease;
@@ -83,30 +85,34 @@ export default {
         left: 0;
         z-index: 99;
         background-color: $node-color;
-        width: 70px;
-        height: 70px;
+        width: $base-size;
+        height: $base-size;
         border-radius: 50%;
         font-size: 1.5em;
         color: $node-highlight;
 
-        &:hover {
-            @media (min-width: 720px) {
-                background-color: $node-color-active;
-                
+        @media (min-width: 720px) {
+            &:hover {
+                background-color: $node-color-active;     
                 .icon {
                     stroke: $node-color;
                 }
-            };
+            }
+            &:active {
+                background-color: $node-color;
+                border: solid 2px $node-highlight;
+                .icon {
+                    stroke: $node-highlight;
+                }
+            }
         }
-
-        &:active {
-            @media (max-width: 719px) {
+        @media (max-width: 719px) {
+            &:active {
                 background-color: $node-color-active;
-                
                 .icon {
                     stroke: $node-color;
                 }
-            };
+            }
         }
     }
 
@@ -116,16 +122,16 @@ export default {
         background-color: $node-color;
         bottom: 10px;
         left: 15px;
-        width: 35px;
-        height: 35px;
+        width: $item-size;
+        height: $item-size;
         border-radius: 50%;
         font-size: 1.125em;
         transition: transform 0.5s ease;
         color: $node-highlight;
 
         @for $i from 1 to 99 {
-            $translationLength: 80px;
-            $rotationAngle: 30deg;
+            $translationLength: 85px;
+            $rotationAngle: 35deg;
 
             &--active:nth-of-type(#{$i}) { 
                 transform:  rotate(($i - 1.25) * $rotationAngle)
@@ -134,24 +140,33 @@ export default {
             }
         }
 
-        &:hover {
-            @media (min-width: 720px) {
+        @media (min-width: 720px) {
+            &:hover {
                 background-color: $node-color-active;
                 
                 .icon {
                     stroke: $node-color;
                 }
-            };
+            }
+
+            &:active {
+                background-color: $node-color;
+                border: solid 2px $node-highlight;
+                
+                .icon {
+                    stroke: $node-highlight;
+                }
+            }
         }
 
-        &:active {
-            @media (max-width: 719px) {
+        @media (max-width: 719px) {
+            &:active {
                 background-color: $node-color-active;
                 
                 .icon {
                     stroke: $node-color;
                 }
-            };
+            }
         }
     }
 
