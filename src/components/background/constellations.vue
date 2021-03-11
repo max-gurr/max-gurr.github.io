@@ -1,5 +1,6 @@
 <template>
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas constellations-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+        <!-- Page particles -->
         <g v-for="(p, index) in particles" :key="'particle-'+index" >
             <defs>
                 <radialGradient :id="'gradientFill-'+index">
@@ -11,14 +12,19 @@
         
             <!-- <line v-for="(l, lineIndex) in particles" :key="'line-'+lineIndex" v-if="(p.x - l.x)*(p.x - l.x)+(p.y - l.y)*(p.y - l.y) < squareMaxLineRange" :x1="p.x" :y1="p.y" :x2="l.x" :y2="l.y" stroke="white" /> -->
         </g>
-        <defs>
-            <radialGradient id="mouseParticleFill">
-                <stop offset="25%" :stop-color="'rgba(255, 255, 255, '+maxOpacity*2+')'" />
-                <stop offset="100%" stop-color="transparent" />
-            </radialGradient>
-        </defs>
-        <circle v-if="mouseParticle" :cx="mouseParticle.x" :cy="mouseParticle.y" :r="mouseParticle.radius" fill="url(#mouseParticleFill)" id="mouse-particle" />
-        
+
+        <!-- Mouse particle -->
+        <g>
+            <defs>
+                <radialGradient id="mouseParticleFill">
+                    <stop offset="25%" :stop-color="'rgba(255, 255, 255, '+maxOpacity*2+')'" />
+                    <stop offset="100%" stop-color="transparent" />
+                </radialGradient>
+            </defs>
+            <circle v-if="mouseParticle" :cx="mouseParticle.x" :cy="mouseParticle.y" :r="mouseParticle.radius" fill="url(#mouseParticleFill)" id="mouse-particle" />
+        </g>
+
+        <!-- Lines -->
         <g>
             <line v-for="(l, index) in lines" :key="'line-'+index" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" :stroke="'rgba(255, 255, 255, '+l.opacity+')'" />
         </g>
@@ -43,7 +49,7 @@ export default {
         },
         maxLineRange: {
             type: Number,
-            default: 100
+            default: 125
         }
     },
     data: () => ({

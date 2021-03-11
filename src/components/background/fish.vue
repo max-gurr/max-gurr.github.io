@@ -1,34 +1,64 @@
 <template>
-<div class="canvas fish-canvas" ref="canvasContainer">
-    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
-        <filter id="blurFilter">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
-        </filter>
-        
-        <g v-for="(f, index) in fish" :key="'fish-'+index" :opacity="fishOpacity" filter="url(#blurFilter)">
-            <path :d="
-                'M ' + (f.x) + ' ' + (f.y-fishSize)+
-                ' l -'+fishSize/2+' '+fishSize*1.25+
-                ' q '+fishSize/2+' -'+fishSize/2+' '+fishSize+' 0 Z'" 
-            :fill="'rgb('+(50 + 80*(f.xVel+f.yVel))+', '+(255*f.x/width)+', '+(255*(f.y/height))+')'"
-            :transform="'rotate('+f.rotation+', '+f.x+', '+f.y+')'" />
-            <!-- <circle :cx="f.x" :cy="f.y" :r="neighbourRadius" fill="rgba(255, 255, 255, 0.2)" /> -->
-        </g>
-    </svg>
-</div>
+    <div class="canvas" id="root">
+        <div class="canvas fish-canvas" ref="canvasContainer">
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+                <defs>
+                    <filter id="blurFilter">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
+                    </filter>
+                    <filter id="turbulence" x="0%" y="0%" width="100%" height="100%">
+                        <feTurbulence id="sea-filter" numOctaves="2" baseFrequency="0.015 0.015"></feTurbulence>
+                        <feDisplacementMap scale="20" in="SourceGraphic"></feDisplacementMap>
+                    </filter>
+                    <!-- <animate xlink:href="#sea-filter" attributeName="baseFrequency" dur="60s" keyTimes="0;0.5;1" values="0.02 0.06;0.04 0.08;0.02 0.06" repeatCount="indefinite"/> -->
+                </defs>
+
+                <g id="fish-container" filter="url(#blurFilter)">
+                    <g v-for="(f, index) in fish" :key="'fish-'+index" :opacity="fishOpacity" :transform="'rotate('+f.rotation+', '+f.x+', '+f.y+')'">
+                        <!-- Fish -->
+                        <path :d="
+                            'M ' +f.x+ ' ' +(f.y-fishRadius)+
+                            ' q '+fishRadius*1.5+' '+fishRadius+' -'+fishRadius+' '+fishRadius*3+
+                            'q '+fishRadius+' -'+fishRadius/2+' '+fishRadius*2+' 0'+
+                            ' q -'+fishRadius*2.5+' -'+fishRadius+' -'+fishRadius+' -'+fishRadius*3+' Z'"
+                        :fill="'rgb('+(50 + 80*(f.xVel+f.yVel))+', '+(255*f.x/width)+', '+(255*(f.y/height))+')'"
+                         />
+                         <path :d="
+                            'M '+(f.x-fishRadius)+' '+(f.y)+
+                            ' q '+fishRadius+' -'+fishRadius+' '+(fishRadius*2)+' 0 Z'
+                         " 
+                         :fill="'rgb('+(50 + 80*(f.xVel+f.yVel))+', '+(255*f.x/width)+', '+(255*(f.y/height))+')'"
+                         />
+                        
+                        <!-- Arrowhead -->
+                        <!-- <path :d="
+                            'M ' + (f.x) + ' ' + (f.y-fishRadius)+
+                            ' l -'+fishRadius/2+' '+fishRadius*1.25+
+                            ' q '+fishRadius/2+' -'+fishRadius/2+' '+fishRadius+' 0 Z'" 
+                        :fill="'rgb('+(50 + 80*(f.xVel+f.yVel))+', '+(255*f.x/width)+', '+(255*(f.y/height))+')'"
+                        :transform="'rotate('+f.rotation+', '+f.x+', '+f.y+')'" /> -->
+                        
+                        <!-- Outlines of neighbour/separation radius -->
+                        <!-- <circle :cx="f.x" :cy="f.y" :r="fishRadius*4" stroke="rgba(150, 0, 0, 0.6)" stroke-width="10" fill="none" />
+                        <circle :cx="f.x" :cy="f.y" :r="neighbourRadius" stroke="rgba(0, 150, 0, 0.6)" stroke-width="10" fill="none" /> -->
+                    </g>
+                </g>
+            </svg>
+        </div>
+    </div>
 </template>
 
 <script>
 export default {
     name: 'fish',
     props: {
-        fishSize: {
+        fishRadius: {
             type: Number,
-            default: 20
+            default: 11
         },
         neighbourRadius: {
             type: Number,
-            default: 200
+            default: 180
         }
     },
     data: () => ({
@@ -39,10 +69,10 @@ export default {
         drawCycle: null,
         fishOpacity: 0.3,
         maxVel: 3,
-        maxForce: 0.05,
-        cohesionScale: 1.5,
-        alignmentScale: 0.2,
-        separationScale: 5,
+        maxForce: 0.02,
+        cohesionScale: 2.25,
+        alignmentScale: 0.6,
+        separationScale: 12,
         fishColour: 'rgb(255, 100, 100)',
         frameRate: 35,
         numFish: 20,
@@ -53,7 +83,6 @@ export default {
     created() {
         window.addEventListener('resize', this.resizeHandler);
         window.addEventListener('click', this.clickHandler);
-        window.addEventListener('mousemove', this.mousemoveHandler);
     },
     mounted() {
         this.resizeHandler();
@@ -66,7 +95,7 @@ export default {
         async draw() {
             await this.partitionFish();
             await Promise.all(this.fish.map(async (f) => {
-                this.updateFish(f, this.fishSize);          
+                this.updateFish(f, this.fishRadius);          
             }));
 
             if (Math.random() < this.rainChance) {
@@ -88,9 +117,6 @@ export default {
         },
         async clickHandler(e) {        
             this.makeRipple(e.clientX, e.clientY);
-        },
-        async mousemoveHandler(e) {
-
         },
         async makeFish() {
             this.fish = [];
@@ -190,7 +216,7 @@ export default {
                             cohesionY += f2.y;
 
                             // Separation
-                            if (mag < this.neighbourRadius/1.5) {
+                            if (mag < this.fishRadius * 4) {
                                 const separationXDist = -xDist/mag;
                                 const separationYDist = -yDist/mag;
                                 separationX += separationXDist;
@@ -312,28 +338,32 @@ export default {
 <style lang="scss">
 @import '../../assets/variables.scss';
 
-.fish-canvas {
+#root {
     background: $bg-dark-blue;
     background: radial-gradient(circle, #051541 0%, $bg-dark-blue 100%);
 
-    .ripple {
-        position: absolute;
-        border-radius: 50%;
-        animation: fish-ripple-animate 0.8s ease;
-        transform: translate(-50%, -50%);
-        box-shadow: 0px 0px 10px rgba(255, 255, 255, 1);
-    }
+    .fish-canvas {
+        filter: url(#turbulence);
 
-    @keyframes fish-ripple-animate {
-        0% {
-            opacity: 0.4;
-            min-width: 0px;
-            min-height: 0px;
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            animation: fish-ripple-animate 0.8s ease;
+            transform: translate(-50%, -50%);
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 1);
         }
-        100% {
-            opacity: 0;
-            min-width: 100px;
-            min-height: 100px;
+
+        @keyframes fish-ripple-animate {
+            0% {
+                opacity: 0.4;
+                min-width: 0px;
+                min-height: 0px;
+            }
+            100% {
+                opacity: 0;
+                min-width: 100px;
+                min-height: 100px;
+            }
         }
     }
 }
