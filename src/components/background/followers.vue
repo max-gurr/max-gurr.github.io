@@ -1,16 +1,43 @@
 <template>
     <div class="canvas follower-canvas" ref="canvasContainer">
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
-            <g v-for="(follower, followerIndex) in followers" :key="'follower-'+followerIndex">
+            <g v-for="(f, followerIndex) in followers" :key="'follower-'+followerIndex">
                 <defs>
                     <radialGradient :id="'gradientFill-'+followerIndex">
-                        <!-- <stop offset="0%" stop-color="rgba(255, 255, 255, 0.10)" /> -->
-                        <stop offset="3%" :stop-color="'rgba('+(50 + 80*(follower.xAcc+follower.yAcc))+', '+(255*follower.x/width)+', '+(255*(follower.y/height))+', 0.20)'" />
+                        <!-- <stop offset="0%" stop-color="transparent" /> -->
+                        <!-- <stop offset="60%" :stop-color="f.fill" /> -->
+                        <stop offset="30%" :stop-color="'rgba('+(100 + 80*(f.xAcc+f.yAcc))+', '+ (50 + 155*f.x/width)+', '+(50 + 155*(f.y/height))+', 0.20)'" />
                         <stop offset="100%" stop-color="transparent" />
                     </radialGradient>
                 </defs>
             
-                <circle class="follower" :cx="follower.x" :cy="follower.y" :r="size" :fill="'url(#gradientFill-'+followerIndex+')'"/>
+                <circle class="follower" :cx="f.x" :cy="f.y" :r="f.size" :fill="'url(#gradientFill-'+followerIndex+')'"/>
+            </g>
+            <g>
+                <!-- Static background -->
+                <defs>
+                    <radialGradient id='f1'>
+                        <stop offset="0%" stop-color="transparent" />
+                        <stop offset="70%" stop-color="rgba(100, 100, 180, 0.125)" />
+                        <stop offset="100%" stop-color="transparent" />
+                    </radialGradient>
+                    <radialGradient id='f2'>
+                        <stop offset="0%" stop-color="transparent" />
+                        <stop offset="70%" stop-color="rgba(50, 200, 100, 0.125)" />
+                        <stop offset="100%" stop-color="transparent" />
+                    </radialGradient>
+                    <radialGradient id='f3'>
+                        <stop offset="0%" stop-color="transparent" />
+                        <stop offset="70%" stop-color="rgba(200, 100, 125, 0.125)" />
+                        <stop offset="100%" stop-color="transparent" />
+                    </radialGradient>
+                </defs>
+                <!-- Blue circle -->
+                <circle :cx="this.width/1.15" :cy="this.height/8" :r="Math.max(this.width, this.height)/2.8" fill="url(#f1)" />
+                <!-- Green circle -->
+                <circle :cx="this.width/10" :cy="this.height/3" :r="Math.max(this.width, this.height)/2.15" fill="url(#f2)" />
+                <!-- Red circle -->
+                <circle :cx="this.width/1.75" :cy="this.height" :r="Math.max(this.width, this.height)/3" fill="url(#f3)" />
             </g>
         </svg>
     </div>
@@ -26,11 +53,11 @@ export default {
         },
         numFollowers: {
             type: Number,
-            default: 20
+            default: 25
         },
         mouseRadius: {
             type: Number,
-            default: 150
+            default: 200
         }
     },
     data: () => ({
@@ -44,7 +71,8 @@ export default {
         mouseY: 0,
         squareMouseRadius: 0,
         size: 0,
-        frameRate: 50
+        frameRate: 40,
+        followerOpacity: 0.2
     }),
     created() {
         window.addEventListener('resize', this.resizeHandler);
@@ -52,9 +80,7 @@ export default {
         window.addEventListener('click', this.clickHandler);
     },
     mounted() {
-        this.followers = this.makeFollowers(this.numFollowers);
         this.squareMouseRadius = this.mouseRadius * this.mouseRadius;
-
         this.resizeHandler();
 
         this.drawCycle = setInterval(this.draw.bind(this), this.frameRate);
@@ -79,8 +105,10 @@ export default {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
 
-            const divider = 2;
-            this.size = Math.min(this.maxSize, Math.min(this.width/divider, this.height/divider));
+            const divider = 3;
+            this.size = Math.min(this.maxSize, Math.max(this.width/divider, this.height/divider));
+
+            this.makeFollowers(this.numFollowers);
         },
         async mouseMoveHandler(e) {
             this.mouseX = e.clientX;
@@ -104,23 +132,13 @@ export default {
                 this.repelFromMouse(f, e);
             }));
         },
-        makeFollowers (num) {
-            let followers = [];
+        async makeFollowers (num) {
+            this.followers = [];
 
             for (let i = 0; i < num; i++) {
-                const newFollower = {
-                    x: Math.random()*this.width,
-                    y: Math.random()*this.height,
-                    xVel: 0,
-                    yVel: 0,
-                    xAcc: 0,
-                    yAcc: 0
-                }
-                this.randomiseVelocity(newFollower);
-                followers.push(newFollower);
+                const newFollower = await this.generateRandomFollower();
+                this.followers.push(newFollower);
             }
-
-            return followers;
         },
         async updateFollower(f) {
             // Add acc to vel
@@ -132,16 +150,16 @@ export default {
             f.y += f.yVel;
 
             // Adjust x-pos
-            if (f.x < -this.size) {
-                f.x += this.width + this.size*2;
-            } else if (f.x > this.width + this.size) {
-                f.x -= this.width + this.size*2;
+            if (f.x < -f.size) {
+                f.x += this.width + f.size*2;
+            } else if (f.x > this.width + f.size) {
+                f.x -= this.width + f.size*2;
             }
             // Adjust y-pos
-            if (f.y < -this.size) {
-                f.y += this.height + this.size*2;
-            } else if (f.y > this.height + this.size) {
-                f.y -= this.height + this.size*2;
+            if (f.y < -f.size) {
+                f.y += this.height + f.size*2;
+            } else if (f.y > this.height + f.size) {
+                f.y -= this.height + f.size*2;
             }
 
             // Adjust vel
@@ -191,7 +209,16 @@ export default {
                 f.yAcc += Math.min(yForce, this.maxForce * 20);
             }
         },
-        randomiseVelocity(f) {
+        async generateRandomFollower() {
+            // Random size
+            const sizeRange = this.size - this.size/4;
+            const size = this.size - Math.random() * sizeRange;
+            
+            // Random position
+            const x = Math.round(Math.random()*this.width);
+            const y = Math.round(Math.random()*this.height);
+
+            // Random velocity
             let xVel = Math.sin(Math.random()*360);
             let yVel = Math.sin(Math.random()*360);
 
@@ -200,8 +227,24 @@ export default {
                 yVel = 0.5;
             }
 
-            f.xVel = xVel;
-            f.yVel = yVel;
+            // Random fill
+            const r = 0 + Math.round(Math.random() * 200);
+            const g = 100 + Math.round(Math.random() * 155);
+            const b = 100 + Math.round(Math.random() * 155);
+            const fill = 'rgba('+r+', '+g+', '+b+', '+this.followerOpacity+')';
+
+            const newFollower = {
+                x: x,
+                y: y,
+                xVel: xVel,
+                yVel: yVel,
+                xAcc: 0,
+                yAcc: 0,
+                fill: fill,
+                size: size
+            }
+
+            return newFollower;
         }
     },
     beforeDestroy() {

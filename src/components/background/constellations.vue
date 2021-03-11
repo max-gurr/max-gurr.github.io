@@ -17,10 +17,10 @@
                 <stop offset="100%" stop-color="transparent" />
             </radialGradient>
         </defs>
-        <circle v-if="mouseParticle" :cx="mouseParticle.x" :cy="mouseParticle.y" :r="mouseParticle.radius" fill="url(#mouseParticleFill)" id="mouse-particle"/>
+        <circle v-if="mouseParticle" :cx="mouseParticle.x" :cy="mouseParticle.y" :r="mouseParticle.radius" fill="url(#mouseParticleFill)" id="mouse-particle" />
         
-        <g stroke-width="0.7">
-            <line v-for="(l, index) in lines" :key="'line-'+index" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" stroke="white" :opacity="l.opacity"/>
+        <g>
+            <line v-for="(l, index) in lines" :key="'line-'+index" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" :stroke="'rgba(255, 255, 255, '+l.opacity+')'" />
         </g>
     </svg>
 </template>
@@ -31,15 +31,19 @@ export default {
     props: {
         minNumParticles: {
             type: Number,
-            default: 40
+            default: 50
         },
         maxNumParticles: {
             type: Number,
-            default: 150
+            default: 100
         },
         radius: {
             type: Number,
             default: 5
+        },
+        maxLineRange: {
+            type: Number,
+            default: 100
         }
     },
     data: () => ({
@@ -50,9 +54,8 @@ export default {
         height: window.innerHeight,
         drawCycle: null,
         lineRange: 0,
-        maxLineRange: 120,
         maxOpacity: 0.3,
-        animationRate: 50
+        animationRate: 40
     }),
     created() {
         window.addEventListener('resize', this.resizeHandler);
@@ -82,13 +85,13 @@ export default {
             // Reset animation timeout
             // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
         },
-        resizeHandler() {
-            this.width = window.innerWidth/1.5;
-            this.height = window.innerHeight/1.5;
+        async resizeHandler() {
+            this.width = window.innerWidth;
+            this.height = window.innerHeight;
             this.calculateLineRange();
             this.makeParticles();
         },
-        mouseMoveHandler(e) {
+        async mouseMoveHandler(e) {
             if (!this.mouseParticle) {
                 this.mouseParticle = {
                     x: -500,
@@ -98,8 +101,8 @@ export default {
                     nextY: 0
                 }
             }
-            this.mouseParticle.nextX = Math.round(e.clientX/1.5);
-            this.mouseParticle.nextY = Math.round(e.clientY/1.5);
+            this.mouseParticle.nextX = Math.round(e.clientX);
+            this.mouseParticle.nextY = Math.round(e.clientY);
         },
         calculateLineRange() {
             const divider = 4.5;
@@ -108,7 +111,7 @@ export default {
             this.lineRange = Math.max(this.maxLineRange/2, Math.min(this.maxLineRange, range));
         },
         async makeParticles() {
-            const divider = 10000;
+            const divider = 8000;
             const particles = [];
             const responsiveNum = (this.width * this.height)/divider;
             const numParticles = Math.max(this.minNumParticles, Math.min(this.maxNumParticles, responsiveNum));
@@ -123,8 +126,8 @@ export default {
                 }
 
                 const mag = Math.sqrt(xVel * xVel + yVel * yVel);
-                xVel *= 1/mag;
-                yVel *= 1/mag;
+                xVel *= 0.5/mag;
+                yVel *= 0.5/mag;
 
                 particles.push({
                     x: Math.random()*this.width,
@@ -141,20 +144,17 @@ export default {
             p.x += p.xVel;
             p.y += p.yVel;
 
-            if (p.x < 0) {
-                p.x += this.width;
-            } else if (p.x > this.width) {
-                p.x -= (this.width);
+            if (p.x < -this.lineRange) {
+                p.x += this.width + this.lineRange*2;
+            } else if (p.x > this.width + this.lineRange) {
+                p.x -= (this.width + this.lineRange*2);
             }
 
-            if (p.y < 0) {
-                p.y += this.height;
-            } else if (p.y > this.height) {
-                p.y -= (this.height );
+            if (p.y < -this.lineRange) {
+                p.y += this.height + this.lineRange*2;
+            } else if (p.y > this.height + this.lineRange) {
+                p.y -= (this.height + this.lineRange*2);
             }
-
-            p.x = Math.round(p.x);
-            p.y = Math.round(p.y);
         },
         async makeLines (range) {
             const lines = [];
