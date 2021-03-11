@@ -12,10 +12,10 @@
 </template>
 
 <script>
-import selectIcon from '@/assets/background/icons/select-icon.svg';
-import constellationsIcon from '@/assets/background/icons/constellations-icon.svg';
-import fishIcon from '@/assets/background/icons/fish-icon.svg';
-import followersIcon from '@/assets/background/icons/followers-icon.svg';
+import selectIcon from './icons/select-icon.svg';
+import constellationsIcon from './icons/constellations-icon.svg';
+import fishIcon from './icons/fish-icon.svg';
+import followersIcon from './icons/followers-icon.svg';
 
 export default {
     name: 'background-select',

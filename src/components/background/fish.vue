@@ -3,43 +3,42 @@
         <div class="canvas fish-canvas" ref="canvasContainer">
             <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
                 <defs>
-                    <filter id="blurFilter">
-                        <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
-                    </filter>
                     <filter id="turbulence" x="0%" y="0%" width="100%" height="100%">
-                        <feTurbulence id="sea-filter" numOctaves="2" baseFrequency="0.015 0.015"></feTurbulence>
+                        <feTurbulence id="sea-filter" numOctaves="2" baseFrequency="0.02 0.02"></feTurbulence>
                         <feDisplacementMap scale="20" in="SourceGraphic"></feDisplacementMap>
+                        <feGaussianBlur in="feDisplacementMap" stdDeviation="2" />
                     </filter>
                     <!-- <animate xlink:href="#sea-filter" attributeName="baseFrequency" dur="60s" keyTimes="0;0.5;1" values="0.02 0.06;0.04 0.08;0.02 0.06" repeatCount="indefinite"/> -->
                 </defs>
 
-                <g id="fish-container" filter="url(#blurFilter)">
+                <g id="fish-container">
                     <g v-for="(f, index) in fish" :key="'fish-'+index" :opacity="fishOpacity" :transform="'rotate('+f.rotation+', '+f.x+', '+f.y+')'">
                         <!-- Fish -->
+                        
                         <path :d="
-                            'M ' +f.x+ ' ' +(f.y-fishRadius)+
-                            ' q '+fishRadius*1.5+' '+fishRadius+' -'+fishRadius+' '+fishRadius*3+
-                            'q '+fishRadius+' -'+fishRadius/2+' '+fishRadius*2+' 0'+
-                            ' q -'+fishRadius*2.5+' -'+fishRadius+' -'+fishRadius+' -'+fishRadius*3+' Z'"
+                            'M ' +f.x+ ' ' +(f.y-fishSizeRadius)+
+                            ' q '+fishSizeRadius*1.5+' '+fishSizeRadius+' -'+fishSizeRadius+' '+fishSizeRadius*3+
+                            'q '+fishSizeRadius+' -'+fishSizeRadius/2+' '+fishSizeRadius*2+' 0'+
+                            ' q -'+fishSizeRadius*2.5+' -'+fishSizeRadius+' -'+fishSizeRadius+' -'+fishSizeRadius*3+' Z'"
                         :fill="'rgb('+(50 + 80*(f.xVel+f.yVel))+', '+(255*f.x/width)+', '+(255*(f.y/height))+')'"
                          />
                          <path :d="
-                            'M '+(f.x-fishRadius)+' '+(f.y)+
-                            ' q '+fishRadius+' -'+fishRadius+' '+(fishRadius*2)+' 0 Z'
+                            'M '+(f.x-fishSizeRadius)+' '+(f.y+3)+
+                            ' q '+fishSizeRadius+' -'+fishSizeRadius+' '+(fishSizeRadius*2)+' 0 Z'
                          " 
                          :fill="'rgb('+(50 + 80*(f.xVel+f.yVel))+', '+(255*f.x/width)+', '+(255*(f.y/height))+')'"
                          />
                         
                         <!-- Arrowhead -->
                         <!-- <path :d="
-                            'M ' + (f.x) + ' ' + (f.y-fishRadius)+
-                            ' l -'+fishRadius/2+' '+fishRadius*1.25+
-                            ' q '+fishRadius/2+' -'+fishRadius/2+' '+fishRadius+' 0 Z'" 
+                            'M ' + (f.x) + ' ' + (f.y-fishSizeRadius)+
+                            ' l -'+fishSizeRadius/2+' '+fishSizeRadius*1.25+
+                            ' q '+fishSizeRadius/2+' -'+fishSizeRadius/2+' '+fishSizeRadius+' 0 Z'" 
                         :fill="'rgb('+(50 + 80*(f.xVel+f.yVel))+', '+(255*f.x/width)+', '+(255*(f.y/height))+')'"
                         :transform="'rotate('+f.rotation+', '+f.x+', '+f.y+')'" /> -->
                         
                         <!-- Outlines of neighbour/separation radius -->
-                        <!-- <circle :cx="f.x" :cy="f.y" :r="fishRadius*4" stroke="rgba(150, 0, 0, 0.6)" stroke-width="10" fill="none" />
+                        <!-- <circle :cx="f.x" :cy="f.y" :r="fishSizeRadius*4" stroke="rgba(150, 0, 0, 0.6)" stroke-width="10" fill="none" />
                         <circle :cx="f.x" :cy="f.y" :r="neighbourRadius" stroke="rgba(0, 150, 0, 0.6)" stroke-width="10" fill="none" /> -->
                     </g>
                 </g>
@@ -52,7 +51,7 @@
 export default {
     name: 'fish',
     props: {
-        fishRadius: {
+        fishSizeRadius: {
             type: Number,
             default: 11
         },
@@ -69,8 +68,8 @@ export default {
         drawCycle: null,
         fishOpacity: 0.3,
         maxVel: 3,
-        maxForce: 0.02,
-        cohesionScale: 2.25,
+        maxForce: 0.03,
+        cohesionScale: 2,
         alignmentScale: 0.6,
         separationScale: 12,
         fishColour: 'rgb(255, 100, 100)',
@@ -95,7 +94,7 @@ export default {
         async draw() {
             await this.partitionFish();
             await Promise.all(this.fish.map(async (f) => {
-                this.updateFish(f, this.fishRadius);          
+                this.updateFish(f, this.fishSizeRadius);          
             }));
 
             if (Math.random() < this.rainChance) {
@@ -216,7 +215,7 @@ export default {
                             cohesionY += f2.y;
 
                             // Separation
-                            if (mag < this.fishRadius * 4) {
+                            if (mag < this.fishSizeRadius * 4) {
                                 const separationXDist = -xDist/mag;
                                 const separationYDist = -yDist/mag;
                                 separationX += separationXDist;

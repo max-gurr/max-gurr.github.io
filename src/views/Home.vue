@@ -16,6 +16,7 @@ import pixelRain from '@/components/background/pixel-rain.vue';
 import ripples from '@/components/background/ripples.vue';
 import followers from '@/components/background/followers.vue';
 import fish from '@/components/background/fish.vue';
+import reflections from '@/components/background/reflections.vue';
 
 export default {
   name: 'Home',
@@ -25,7 +26,8 @@ export default {
     pixelRain,
     ripples,
     followers,
-    fish
+    fish,
+    reflections
   },
   data: () => ({
     selectedBackground: null,
@@ -39,8 +41,8 @@ export default {
         icon: 'constellationsIcon'
       }, 
       {
-        value: 'pixel-rain',
-        icon: 'constellationsIcon'
+        value: 'reflections',
+        icon: 'followersIcon'
       },
       {
         value: 'fish',
