@@ -17,10 +17,18 @@
                 <stop offset="70%" :stop-color="'rgba(180, 100, 100, '+maxOpacity+')'" />
                 <stop offset="100%" stop-color="transparent" />
             </radialGradient>
+
             <clipPath id="clip">
                 <rect x="0" y="0" :width="width" :height="height*cutoff" />
             </clipPath>
+            <clipPath id="reflected-clip">
+                <rect x="0" :y="height*cutoff" :width="width" :height="height*(1-cutoff)" />
+            </clipPath>
             
+            <filter id="blur" x="0%" y="0%" width="100%" height="100%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="30" />
+            </filter>
+
             <!-- Canvas -->
             <g id="canvas" ref="svg-canvas" clip-path="url(#clip)">
                 <circle :cx="width/5" :cy="height/5" :r="height/3" fill="url(#f2)" />
@@ -28,11 +36,13 @@
                 <circle :cx="width/2" :cy="height/3" :r="height/1.5" fill="url(#f1)" />
             </g>
         </defs>
-
+        
         <!-- Main display -->
         <use xlink:href="#canvas" />
         <!-- Reflected display -->
-        <use xlink:href="#canvas" :transform="'translate(0, '+(height+2)+') scale(1, -'+((1-cutoff)/cutoff)+')'"/>
+        <g clip-path="url(#reflected-clip)">
+            <use xlink:href="#canvas" :transform="'translate(0, '+(height+2)+') scale(1, -'+((1-cutoff)/cutoff)+')'" filter="url(#blur)" />
+        </g>
     </svg>
 </template>
 

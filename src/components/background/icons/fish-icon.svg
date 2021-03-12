@@ -10,15 +10,15 @@
     <path d="
         M 10 0
         Q 20 10 7 20
-        M 10 0
-        Q 0 10 13 20
+        Q 10 18 13 20
+        Q 0 10 10 0
         M 5.5 8
         l -2 2
         M 14.5 8
         l 2 2"
-    transform="rotate(45deg, 10, 10)"
     stroke-width="2"
-    stroke-linecap="round" />
+    stroke-linecap="round"
+    transform="rotate(45deg, 10, 10)"/>
     <!-- <path :d="
     'M '+(f.x-fishRadius)+' '+(f.y)+
     ' q '+fishRadius+' -'+fishRadius+' '+(fishRadius*2)+' 0 Z'
