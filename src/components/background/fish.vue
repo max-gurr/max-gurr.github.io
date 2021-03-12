@@ -6,42 +6,24 @@
                     <filter id="turbulence" x="0%" y="0%" width="100%" height="100%">
                         <feTurbulence id="sea-filter" baseFrequency="0.02 0.02"></feTurbulence>
                         <feDisplacementMap scale="20" in="SourceGraphic"></feDisplacementMap>
-                        <feGaussianBlur in="feDisplacementMap" stdDeviation="2" />
+                        <feGaussianBlur in="feDisplacementMap" stdDeviation="1.8" />
                     </filter>
                     <!-- <animate xlink:href="#sea-filter" attributeName="baseFrequency" dur="60s" keyTimes="0;0.5;1" values="0.02 0.06;0.04 0.08;0.02 0.06" repeatCount="indefinite"/> -->
                 </defs>
 
                 <g id="fish-container">
-                    <g v-for="(f, index) in fish" :key="'fish-'+index" :opacity="fishOpacity" :transform="'rotate('+f.rotation+', '+(f.x+fishSizeRadius)+', '+(f.y+fishSizeRadius)+')'">
-                        <fishSvg :x="f.x-fishSizeRadius"
-                        :y="f.y-fishSizeRadius"
-                        :width="fishSizeRadius*2" 
-                        :height="fishSizeRadius*2"
-                        :fill="f.colour"
-                        :stroke="f.colour"
-                        />
+                    <g v-for="(f, index) in fish" :key="'fish-'+index" :opacity="fishOpacity" :transform="'rotate('+f.rotation+', '+(f.x+fishSizeRadius)+', '+(f.y+fishSizeRadius)+')'" :fill="f.colour" stroke="none">
                         <!-- Fish path -->
-                        <!-- <path :d="
-                            'M ' +f.x+ ' ' +(f.y-fishSizeRadius)+
-                            ' q '+fishSizeRadius*1.5+' '+fishSizeRadius+' -'+fishSizeRadius+' '+fishSizeRadius*3+
-                            'q '+fishSizeRadius+' -'+fishSizeRadius/2+' '+fishSizeRadius*2+' 0'+
-                            ' q -'+fishSizeRadius*2.5+' -'+fishSizeRadius+' -'+fishSizeRadius+' -'+fishSizeRadius*3+' Z'"
-                        :fill="'rgb('+(50 + 80*(f.xVel+f.yVel))+', '+(255*f.x/width)+', '+(255*(f.y/height))+')'"
-                         />
-                         <path :d="
-                            'M '+(f.x-fishSizeRadius)+' '+(f.y+3)+
-                            ' q '+fishSizeRadius+' -'+fishSizeRadius+' '+(fishSizeRadius*2)+' 0 Z'
-                         " 
-                         :fill="'rgb('+(50 + 80*(f.xVel+f.yVel))+', '+(255*f.x/width)+', '+(255*(f.y/height))+')'"
-                         /> -->
-                        
-                        <!-- Arrowhead -->
-                        <!-- <path :d="
-                            'M ' + (f.x) + ' ' + (f.y-fishSizeRadius)+
-                            ' l -'+fishSizeRadius/2+' '+fishSizeRadius*1.25+
-                            ' q '+fishSizeRadius/2+' -'+fishSizeRadius/2+' '+fishSizeRadius+' 0 Z'" 
-                        :fill="'rgb('+(50 + 80*(f.xVel+f.yVel))+', '+(255*f.x/width)+', '+(255*(f.y/height))+')'"
-                        :transform="'rotate('+f.rotation+', '+f.x+', '+f.y+')'" /> -->
+                        <path :d="
+                            'M '+(f.x)+' '+(f.y-fishSizeRadius)+
+                            'q '+(fishSizeRadius)+' '+(fishSizeRadius)+' -'+(fishSizeRadius/2)+' '+(fishSizeRadius*2)+
+                            'q '+(fishSizeRadius/2)+' -'+(fishSizeRadius/3)+' '+(fishSizeRadius)+' 0'+
+                            'q -'+(fishSizeRadius*1.5)+' -'+(fishSizeRadius)+' -'+(fishSizeRadius/2)+' -'+(fishSizeRadius*2)"
+                        />
+                        <path :d="
+                            'M '+(f.x-fishSizeRadius/1.8)+' '+(f.y)+
+                            'q '+(fishSizeRadius/1.8)+' -'+(fishSizeRadius)+' '+(2*fishSizeRadius/1.8)+' 0 Z'"
+                        />
                         
                         <!-- Outlines of neighbour/separation radius -->
                         <!-- <circle :cx="f.x" :cy="f.y" :r="fishSizeRadius*4" stroke="rgba(150, 0, 0, 0.6)" stroke-width="10" fill="none" />
@@ -68,7 +50,7 @@ export default {
         },
         neighbourRadius: {
             type: Number,
-            default: 180
+            default: 150
         },
         mouseEffectRadius: {
             type: Number,
@@ -87,10 +69,10 @@ export default {
         drawCycle: null,
         fishOpacity: 0.3,
         maxVel: 3,
-        maxForce: 0.03,
-        cohesionScale: 2,
+        maxForce: 0.02,
+        cohesionScale: 3,
         alignmentScale: 0.6,
-        separationScale: 12,
+        separationScale: 10,
         fishColour: 'rgb(255, 100, 100)',
         frameRate: 35,
         numFish: 0,
@@ -204,7 +186,7 @@ export default {
             }
 
             // Calculate rotation
-            f.rotation = (Math.atan2(f.yVel, f.xVel)/Math.PI) * 180 + 45;
+            f.rotation = (Math.atan2(f.yVel, f.xVel)/Math.PI) * 180 + 90;
 
             // Scale velocity to maxVel
             const velMag = Math.sqrt(f.xVel * f.xVel + f.yVel * f.yVel);
@@ -216,7 +198,6 @@ export default {
             // Reset acc
             f.xAcc /= 2;
             f.yAcc /= 2;
-
 
             // Calculate colour
             f.colour = 'rgb('+(50 + 80*(f.xVel+f.yVel))+', '+(255*f.x/this.width)+', '+(255*(f.y/this.height))+')';

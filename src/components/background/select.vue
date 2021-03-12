@@ -16,6 +16,7 @@ import selectIcon from './icons/select-icon.svg';
 import constellationsIcon from './icons/constellations-icon.svg';
 import fishIcon from './icons/fish-icon.svg';
 import followersIcon from './icons/followers-icon.svg';
+import reflectionsIcon from './icons/reflections-icon.svg';
 
 export default {
     name: 'background-select',
@@ -23,7 +24,8 @@ export default {
         selectIcon,
         constellationsIcon,
         fishIcon,
-        followersIcon
+        followersIcon,
+        reflectionsIcon
     },
     props: {
         backgrounds: {

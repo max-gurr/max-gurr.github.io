@@ -42,7 +42,7 @@ export default {
       }, 
       {
         value: 'reflections',
-        icon: 'followersIcon'
+        icon: 'reflectionsIcon'
       },
       {
         value: 'fish',
