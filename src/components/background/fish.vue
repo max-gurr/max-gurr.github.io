@@ -5,7 +5,7 @@
                 <defs>
                     <filter id="turbulence" x="0%" y="0%" width="100%" height="100%">
                         <feTurbulence id="sea-filter" baseFrequency="0.02 0.02"></feTurbulence>
-                        <feDisplacementMap scale="20" in="SourceGraphic"></feDisplacementMap>
+                        <feDisplacementMap scale="12" in="SourceGraphic"></feDisplacementMap>
                         <feGaussianBlur in="feDisplacementMap" stdDeviation="1.8" />
                     </filter>
                     <!-- <animate xlink:href="#sea-filter" attributeName="baseFrequency" dur="60s" keyTimes="0;0.5;1" values="0.02 0.06;0.04 0.08;0.02 0.06" repeatCount="indefinite"/> -->
@@ -46,7 +46,7 @@ export default {
     props: {
         fishSizeRadius: {
             type: Number,
-            default: 12
+            default: 13
         },
         neighbourRadius: {
             type: Number,
@@ -58,7 +58,7 @@ export default {
         },
         maxFish: {
             type: Number,
-            default: 25
+            default: 40
         }
     },
     data: () => ({
@@ -118,7 +118,7 @@ export default {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
 
-            const divider = 20;
+            const divider = 18;
             this.numFish = Math.round(Math.min(this.maxFish, Math.min(this.width/divider, this.height/divider)));
 
             this.squareMouseEffectRadius = this.mouseEffectRadius*this.mouseEffectRadius;
