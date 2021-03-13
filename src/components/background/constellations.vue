@@ -3,13 +3,15 @@
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas constellations-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
         <!-- Moon -->
         <defs>
-            <radialGradient id='background-colourfill-1'>
+            <radialGradient id='moon-fill'>
                 <stop offset="0%" stop-color="transparent" />
-                <stop offset="60%" :stop-color="'rgba(100, 100, 180, 0.2)'" />
+                <stop offset="25%" stop-color="rgba(170, 180, 150, 0.15)" />
+                <stop offset="45%" stop-color="transparent" />
+                <stop offset="80%" :stop-color="'rgba(150, 180, 170, 0.2)'" />
                 <stop offset="100%" stop-color="transparent" />
             </radialGradient>
         </defs>
-        <circle :cx="width/2" :cy="(height/1.5)" :r="Math.max(width/2, height/2)" fill="url(#background-colourfill-1)" stroke="none" />
+        <circle :cx="width/2" :cy="(height/1.5)" :r="Math.max(width/2, height/2)" fill="url(#moon-fill)" stroke="none" />
         
         <!-- Page particles -->
         <g v-for="(p, index) in particles" :key="'particle-'+index" >
@@ -19,9 +21,7 @@
                     <stop offset="100%" stop-color="transparent" />
                 </radialGradient>
             </defs>
-            <circle :cx="p.x" :cy="p.y" :r="radius" :fill="'url(#gradientFill-'+index+')'" class="particle" />
-        
-            <!-- <line v-for="(l, lineIndex) in particles" :key="'line-'+lineIndex" v-if="(p.x - l.x)*(p.x - l.x)+(p.y - l.y)*(p.y - l.y) < squareMaxLineRange" :x1="p.x" :y1="p.y" :x2="l.x" :y2="l.y" stroke="white" /> -->
+            <circle :cx="p.x" :cy="p.y" :r="radius" :fill="'url(#gradientFill-'+index+')'" class="particle" />        
         </g>
 
         <!-- Mouse particle -->
@@ -40,14 +40,36 @@
             <line v-for="(l, index) in lines" :key="'line-'+index" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" :stroke="'rgba(255, 255, 255, '+l.opacity+')'" />
         </g>
     </svg>
+
     <!-- Mountains -->
     <svg viewBox="0 0 100 100" class="canvas" x="0" :width="width" :height="height/2" preserveAspectRatio="xMinYMax meet">
         <path d="
             M 0 100
             l 0 -20
-            l 25 -25
-            l 5 2
             l 10 -10
+            l 5 -3
+            l 3 -5
+            l 4 -3
+            l 3 -4
+            l 5 2
+            l 2 -2
+            l 3 -1
+            l 2 -4
+            l 4 -3
+            l 4 2
+            l 3 3
+            l 4 1
+            l 2 5
+            l 5 5
+            l 3 5
+            l 5 3
+            l 4 2
+            l 2 4
+            l 6 3
+            l 4 5
+            l 2 4
+            l 3 5
+            l 5 2
             L 100 100 Z
         " 
         fill="rgb(2, 2, 5)" 
@@ -58,7 +80,34 @@
         <path d="
             M 100 100
             l 0 -30
-            l -30 -30
+            l -4 -4
+            l -5 -3
+            l -3 -5
+            l -2 1
+            l -2 -4
+            l -3 -3
+            l -5 -3
+            l -3 -3
+            l -2 -2
+            l -2 1
+            l -2 2
+            l -2 4
+            l -3 4
+            l -3 1
+            l -3 3
+            l -2 4
+            l -4 2
+            l -3 4
+            l -4 1
+            l -4 3
+            l -5 3
+            l -5 6
+            l -4 3
+            l -5 3
+            l -3 5
+            l -4 2
+            l -5 3
+            l -2 4
             L 0 100 Z
         " 
         fill="rgb(2, 2, 5)" 
@@ -68,8 +117,23 @@
     <svg viewBox="0 0 100 100" class="canvas" x="0" :width="width" :height="height/2" preserveAspectRatio="xMidYMax meet">
         <path d="
             M 25 100
-            l 20 -25
-            L 75 100 Z
+            l 4 -2
+            l 2 -4
+            l 5 -3
+            l 2 -3
+            l 3 -2
+            l 3 -5
+            l 2 2
+            l 1 -1
+            l 2 -4
+            l 3 -2
+            l 3 3
+            l 4 2
+            l 2 4
+            l 5 5
+            l 3 5
+            l 4 3
+            L 80 100 Z
         " 
         fill="rgb(2, 2, 5)" 
         stroke="none" 
@@ -197,16 +261,16 @@ export default {
             p.x += p.xVel;
             p.y += p.yVel;
 
-            if (p.x < -this.lineRange) {
-                p.x += this.width + this.lineRange*2;
-            } else if (p.x > this.width + this.lineRange) {
-                p.x -= (this.width + this.lineRange*2);
+            if (p.x < -range/2) {
+                p.x += (this.width + range);
+            } else if (p.x > this.width + range/2) {
+                p.x -= (this.width + range);
             }
 
-            if (p.y < -this.lineRange) {
-                p.y += this.height + this.lineRange*2;
-            } else if (p.y > this.height + this.lineRange) {
-                p.y -= (this.height + this.lineRange*2);
+            if (p.y < -range/2) {
+                p.y += (this.height + range);
+            } else if (p.y > this.height + range/2) {
+                p.y -= (this.height + range);
             }
         },
         async makeLines (range) {

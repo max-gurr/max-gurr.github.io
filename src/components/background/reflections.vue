@@ -74,7 +74,8 @@
 </template>
 
 <script>
-import Treeline from './treeline2.svg';
+import Treeline from '../../assets/background/treeline2.svg';
+
 export default {
     name: 'reflections',
     components: {
@@ -149,7 +150,7 @@ export default {
             const yVel = -velMag * (Math.random()/2 + 0.5);
 
             const radius = Math.round(this.particleSize * (Math.random() + 0.5));
-            const finalYPos = Math.round(Math.random() * this.height * this.cutoff * 0.2);
+            const finalYPos = Math.round((Math.random()*2-1) * (this.height * this.cutoff * 0.5));
             const fill = xPos%2 === 0 ? true : false;
 
             this.particles.push({
