@@ -162,7 +162,7 @@ export default {
             }
         },
         async updateFish(f) {
-            const range = this.fishSizeRadius;
+            const range = this.fishSizeRadius*2;
             
             // Add acc to vel
             f.xVel += f.xAcc;
@@ -356,13 +356,13 @@ export default {
                 const yVelDelta = yDist - f.yVel;
 
                 const velMag = Math.sqrt(xVelDelta * xVelDelta + yVelDelta * yVelDelta);
-                const maxMag = (this.mouseEffectRadius/velMag);
+                const maxMag = 1 - (velMag/this.mouseEffectRadius);
                 
                 const xForce = maxMag * (xVelDelta/velMag);
                 const yForce = maxMag * (yVelDelta/velMag);
 
-                f.xAcc += Math.min(xForce, this.maxForce);
-                f.yAcc += Math.min(yForce, this.maxForce);
+                f.xAcc += xForce;
+                f.yAcc += yForce;
            }
         },
     },
