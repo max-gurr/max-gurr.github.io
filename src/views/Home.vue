@@ -39,14 +39,14 @@ export default {
       {
         value: 'constellations',
         icon: 'constellationsIcon'
-      }, 
-      {
-        value: 'reflections',
-        icon: 'reflectionsIcon'
       },
       {
         value: 'fish',
         icon: 'fishIcon'
+      }, 
+      {
+        value: 'reflections',
+        icon: 'reflectionsIcon'
       }
     ]
   }),
