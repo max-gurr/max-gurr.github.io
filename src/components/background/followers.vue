@@ -98,15 +98,13 @@ export default {
             // Reset mouse attractor point
             this.mouseX = 0;
             this.mouseY = 0;
-
-            // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.frameRate);
         },
         resizeHandler() {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
 
             const divider = 3;
-            this.size = Math.min(this.maxSize, Math.max(this.width/divider, this.height/divider));
+            this.size = Math.min(this.maxSize, Math.min(this.width/divider, this.height/divider));
 
             this.makeFollowers(this.numFollowers);
         },
@@ -149,17 +147,22 @@ export default {
             f.x += f.xVel;
             f.y += f.yVel;
 
+            const blurAdjustment = 4;
             // Adjust x-pos
-            if (f.x < -f.size) {
-                f.x += this.width + f.size*2;
-            } else if (f.x > this.width + f.size) {
-                f.x -= this.width + f.size*2;
+            if (f.x < f.size/blurAdjustment) {
+                f.xVel *= -1;
+                f.x += 1;
+            } else if (f.x > this.width - f.size/blurAdjustment) {
+                f.xVel *= -1;
+                f.x -= 1;
             }
             // Adjust y-pos
-            if (f.y < -f.size) {
-                f.y += this.height + f.size*2;
-            } else if (f.y > this.height + f.size) {
-                f.y -= this.height + f.size*2;
+            if (f.y < f.size/blurAdjustment) {
+                f.yVel *= -1;
+                f.y += 1;
+            } else if (f.y > this.height - f.size/blurAdjustment) {
+                f.yVel *= -1;
+                f.y -= 1;
             }
 
             // Adjust vel
