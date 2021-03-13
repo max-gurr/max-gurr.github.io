@@ -1,5 +1,16 @@
 <template>
+<div>
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas constellations-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+        <!-- Moon -->
+        <defs>
+            <radialGradient id='background-colourfill-1'>
+                <stop offset="0%" stop-color="transparent" />
+                <stop offset="60%" :stop-color="'rgba(100, 100, 180, 0.2)'" />
+                <stop offset="100%" stop-color="transparent" />
+            </radialGradient>
+        </defs>
+        <circle :cx="width/2" :cy="(height/1.5)" :r="Math.max(width/2, height/2)" fill="url(#background-colourfill-1)" stroke="none" />
+        
         <!-- Page particles -->
         <g v-for="(p, index) in particles" :key="'particle-'+index" >
             <defs>
@@ -29,6 +40,42 @@
             <line v-for="(l, index) in lines" :key="'line-'+index" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" :stroke="'rgba(255, 255, 255, '+l.opacity+')'" />
         </g>
     </svg>
+    <!-- Mountains -->
+    <svg viewBox="0 0 100 100" class="canvas" x="0" :width="width" :height="height/2" preserveAspectRatio="xMinYMax meet">
+        <path d="
+            M 0 100
+            l 0 -20
+            l 25 -25
+            l 5 2
+            l 10 -10
+            L 100 100 Z
+        " 
+        fill="rgb(2, 2, 5)" 
+        stroke="none" 
+        stroke-linejoin="round" />
+    </svg>
+    <svg viewBox="0 0 100 100" class="canvas" x="0" :width="width" :height="height/2" preserveAspectRatio="xMaxYMax meet">
+        <path d="
+            M 100 100
+            l 0 -30
+            l -30 -30
+            L 0 100 Z
+        " 
+        fill="rgb(2, 2, 5)" 
+        stroke="none" 
+        stroke-linejoin="round" />
+    </svg>
+    <svg viewBox="0 0 100 100" class="canvas" x="0" :width="width" :height="height/2" preserveAspectRatio="xMidYMax meet">
+        <path d="
+            M 25 100
+            l 20 -25
+            L 75 100 Z
+        " 
+        fill="rgb(2, 2, 5)" 
+        stroke="none" 
+        stroke-linejoin="round" />
+    </svg>
+</div>
 </template>
 
 <script>
@@ -117,7 +164,7 @@ export default {
             this.lineRange = Math.max(this.maxLineRange/2, Math.min(this.maxLineRange, range));
         },
         async makeParticles() {
-            const divider = 8000;
+            const divider = 7000;
             const particles = [];
             const responsiveNum = (this.width * this.height)/divider;
             const numParticles = Math.max(this.minNumParticles, Math.min(this.maxNumParticles, responsiveNum));
@@ -231,5 +278,9 @@ export default {
 .constellations-canvas {
     background: $bg-dark-blue;
     background: radial-gradient(circle, rgba(18,12,35,1) 0%, $bg-dark-blue 100%);
+
+    #mountains {
+        
+    }
 }
 </style>
