@@ -1,4 +1,5 @@
 <template>
+<div ref="root" id="reflections-root">
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas reflections-canvas" :viewBox="'0 0 '+this.width+' '+this.height" :width="width" :height="height">
         <defs>
             <clipPath id="clip">
@@ -71,6 +72,7 @@
             <use xlink:href="#canvas" :transform="'translate(-20, '+(height+2)+') scale(1, -'+((1-cutoff)/cutoff)+')'" filter="url(#reflection-blur)" />
         </g>
     </svg>
+</div>
 </template>
 
 <script>
@@ -195,11 +197,12 @@ export default {
 
 <style lang="scss">
 @import '../../assets/variables.scss';
-
-.reflections-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: $bg-dark-blue;
+#reflections-root {
+    .reflections-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: $bg-dark-blue;
+    }
 }
 </style>

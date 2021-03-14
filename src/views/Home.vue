@@ -31,22 +31,22 @@ export default {
   },
   data: () => ({
     selectedBackground: null,
-    backgroundComponents: [
+    backgroundComponents: [ 
+      {
+        value: 'reflections',
+        icon: 'reflectionsIcon'
+      },
       {
         value: 'followers',
         icon: 'followersIcon'
       },
       {
-        value: 'constellations',
-        icon: 'constellationsIcon'
-      },
-      {
         value: 'fish',
         icon: 'fishIcon'
-      }, 
+      },
       {
-        value: 'reflections',
-        icon: 'reflectionsIcon'
+        value: 'constellations',
+        icon: 'constellationsIcon'
       }
     ]
   }),
@@ -69,31 +69,32 @@ export default {
 
   .container {
     position: relative;
-    width: calc(100% - 150px);
-    height: calc(100% - 150px);
+    width: calc(100% - 15vw);
+    height: calc(100% - 15vw);
     transition: all 0.5s ease;
     transition-delay: 0s;
-    // border-top-right-radius: 25%;
-    // border-bottom-left-radius: 25%;
+    border-top-right-radius: 1vw;
+    border-bottom-left-radius: 1vw;
+    border-bottom-right-radius: 0.5vw;
+    border-top-left-radius: 0.5vw;
 
     @media (max-width: 720px) {
-      width: calc(100% - 85px);
-      height: calc(100% - 85px);
+      width: calc(100% - 100px);
+      height: calc(100% - 100px);
     }
 
     // &:hover, &:active {
-    //   background-color: rgba(79, 161, 141, 0.2);
-    //   transition: all 0.5s ease;
+    //   background-color: rgba(39, 39, 39, 0.5);
+    //   transition: all 0.25s ease;
     //   transition-delay: 0.4s;
     // }
 
     $weight: 5px;
-    &::before {
+    &::before, &::after {
       content: "";
       background-color: white;
       position: absolute;
-      top: 0;
-      left: 0;
+      
       height: 15%;
       width: 15%;
       clip-path: polygon(-50% -50%, 150% -50%, 100% 0, 100% $weight, $weight $weight, $weight 100%, 0 100%, -50% 150%);
@@ -101,26 +102,21 @@ export default {
       transition-delay: 0.1s;
       box-shadow: 0px 0px 10px 2px rgba(255, 255, 255, 0.5);
     }
-
+    &::before {
+      top: 0;
+      left: 0;
+    }
     &::after {
-      content: "";
-      background-color: white;
-      position: absolute;
       bottom: 0;
       right: 0;
-      height: 15%;
-      width: 15%;
-      clip-path: polygon(-50% -50%, 150% -50%, 100% 0, 100% $weight, $weight $weight, $weight 100%, 0 100%, -50% 150%);
       transform: rotate(180deg);
-      transition: all 0.75s ease;
-      transition-delay: 0.1s;
-      box-shadow: 0px 0px 10px 2px rgba(255, 255, 255, 0.5);
     }
 
     // &:hover::before, &:hover::after, &:active::before, &:active::after, &:focus::before, &:focus::after {
     //   height: 100%;
     //   width: 100%;
     //   transition-delay: 0s;
+    //   margin: -2vw;
     // }
 
     h1 {

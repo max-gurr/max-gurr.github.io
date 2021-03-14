@@ -46,7 +46,7 @@ export default {
     props: {
         fishSizeRadius: {
             type: Number,
-            default: 13
+            default: 12
         },
         neighbourRadius: {
             type: Number,
@@ -54,7 +54,7 @@ export default {
         },
         mouseEffectRadius: {
             type: Number,
-            default: 150
+            default: 200
         },
         maxFish: {
             type: Number,
@@ -68,8 +68,8 @@ export default {
         height: window.innerHeight,
         drawCycle: null,
         fishOpacity: 0.3,
-        maxVel: 3,
-        maxForce: 0.02,
+        maxVel: 2.35,
+        maxForce: 0.01,
         cohesionScale: 3,
         alignmentScale: 0.6,
         separationScale: 10,
