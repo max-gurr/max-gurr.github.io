@@ -7,7 +7,7 @@
                         <!-- <stop offset="0%" stop-color="transparent" /> -->
                         <!-- <stop offset="60%" :stop-color="f.fill" /> -->
                         <stop offset="30%" :stop-color="'rgba('+(100 + 80*(f.xAcc+f.yAcc))+', '+ (50 + 155*f.x/width)+', '+(50 + 155*(f.y/height))+', 0.20)'" />
-                        <stop offset="100%" stop-color="transparent" />
+                        <stop offset="70%" stop-color="transparent" />
                     </radialGradient>
                 </defs>
             
