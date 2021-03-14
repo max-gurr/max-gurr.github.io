@@ -12,7 +12,7 @@
             <filter id="reflection-blur" x="0%" y="0%" width="100%" height="100%">
                 <feTurbulence id="sea-filter" baseFrequency="0.01 0.03"></feTurbulence>
                 <feDisplacementMap scale="50" in="SourceGraphic"></feDisplacementMap>
-                <feGaussianBlur in="feDisplacementMap" stdDeviation="3" />
+                <feGaussianBlur in="feDisplacementMap" stdDeviation="5" />
             </filter>
 
             <radialGradient id="aura-fill-1">
@@ -60,7 +60,7 @@
 
                 <!-- <Treeline x="0" y="0" class="trees" fill="black"/> -->
                 <g :transform="'translate(0 -'+height*(1-cutoff)+') rotate(-3 '+width/2+' '+height/2+')'">
-                    <Treeline :x="-width/5" :y="width/6" :width="width*1.5" preserveAspectRatio="xMidYMax meet"/>
+                    <Treeline :x="-width/5" :y="width/7" :width="width*1.5" preserveAspectRatio="xMidYMax meet"/>
                 </g>
             </g>
         </defs>
@@ -86,7 +86,7 @@ export default {
     props: {
         cutoff: {
             type: Number,
-            default: 0.65
+            default: 0.7
         },
         minParticleSize: {
             type: Number,

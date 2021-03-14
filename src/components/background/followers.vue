@@ -4,8 +4,6 @@
             <g v-for="(f, followerIndex) in followers" :key="'follower-'+followerIndex">
                 <defs>
                     <radialGradient :id="'gradientFill-'+followerIndex">
-                        <!-- <stop offset="0%" stop-color="transparent" /> -->
-                        <!-- <stop offset="60%" :stop-color="f.fill" /> -->
                         <stop offset="30%" :stop-color="'rgba('+(100 + 80*(f.xAcc+f.yAcc))+', '+ (50 + 155*f.x/width)+', '+(50 + 155*(f.y/height))+', 0.20)'" />
                         <stop offset="70%" stop-color="transparent" />
                     </radialGradient>
@@ -33,11 +31,11 @@
                     </radialGradient>
                 </defs>
                 <!-- Blue circle -->
-                <circle :cx="this.width/1.15" :cy="this.height/8" :r="Math.max(this.width, this.height)/2.8" fill="url(#f1)" />
+                <circle :cx="this.width/1.15" :cy="this.height/4" :r="Math.max(this.width/2.8, this.height/2)" fill="url(#f1)" />
                 <!-- Green circle -->
-                <circle :cx="this.width/10" :cy="this.height/3" :r="Math.max(this.width, this.height)/2.15" fill="url(#f2)" />
+                <circle :cx="this.width/10" :cy="this.height/6" :r="Math.max(this.width/3, this.height/2.4)" fill="url(#f2)" />
                 <!-- Red circle -->
-                <circle :cx="this.width/1.75" :cy="this.height" :r="Math.max(this.width, this.height)/3" fill="url(#f3)" />
+                <circle :cx="this.width/2.2" :cy="this.height" :r="Math.max(this.width/3, this.height/2.2)" fill="url(#f3)" />
             </g>
         </svg>
     </div>

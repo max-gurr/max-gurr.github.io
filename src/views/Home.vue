@@ -1,7 +1,8 @@
 <template>
   <div class="home page">
     <div class="container flex-center">
-      <h1>Welcome</h1>
+      <h1>Max Gurr</h1>
+      <h2>full stack web dev</h2>
     </div>
     <component v-bind:is="selectedBackground" />
     <backgroundSelect :backgrounds="backgroundComponents" @click="setBackground"></backgroundSelect>
@@ -65,23 +66,18 @@ export default {
 .home {
   align-items: center;
   justify-content: center;
-  flex-direction: column;
 
   .container {
+    flex-direction: column;
     position: relative;
-    width: calc(100% - 15vw);
-    height: calc(100% - 15vw);
     transition: all 0.5s ease;
     transition-delay: 0s;
     border-top-right-radius: 1vw;
     border-bottom-left-radius: 1vw;
     border-bottom-right-radius: 0.5vw;
     border-top-left-radius: 0.5vw;
-
-    @media (max-width: 720px) {
-      width: calc(100% - 100px);
-      height: calc(100% - 100px);
-    }
+    padding: 15vh 15vw;
+    max-width: 100vw;
 
     // &:hover, &:active {
     //   background-color: rgba(39, 39, 39, 0.5);
@@ -92,11 +88,10 @@ export default {
     $weight: 5px;
     &::before, &::after {
       content: "";
-      background-color: white;
+      background-color: rgba(255, 255, 255, 0.35);
       position: absolute;
-      
-      height: 15%;
-      width: 15%;
+      height: 20%;
+      width: 20%;
       clip-path: polygon(-50% -50%, 150% -50%, 100% 0, 100% $weight, $weight $weight, $weight 100%, 0 100%, -50% 150%);
       transition: all 0.75s ease;
       transition-delay: 0.1s;
@@ -120,8 +115,14 @@ export default {
     // }
 
     h1 {
-      font-size: calc(min(5em, 10vw));
+      font-size: calc(min(5em, 12vw));
       color: #29bd7f;
+      font-variant: small-caps;
+    }
+    h2 {
+      font-size: calc(min(2em, 5vw));
+      color: #29bd7f;
+      font-variant: small-caps;
     }
   }
 }
