@@ -85,7 +85,7 @@ export default {
             height: 40px;
         }
         &:active span {
-            background-color: #787a7c;
+            background-color: $grey-70;
         }
 
         &::before {

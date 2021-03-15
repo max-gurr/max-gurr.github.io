@@ -197,6 +197,7 @@ export default {
 
 <style lang="scss">
 @import '../../assets/variables.scss';
+
 #reflections-root {
     .reflections-canvas {
         position: absolute;

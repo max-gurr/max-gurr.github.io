@@ -336,15 +336,11 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 @import '../../assets/variables.scss';
 
 .constellations-canvas {
     background: $bg-dark-blue;
     background: radial-gradient(circle, rgba(18,12,35,1) 0%, $bg-dark-blue 100%);
-
-    #mountains {
-        
-    }
 }
 </style>

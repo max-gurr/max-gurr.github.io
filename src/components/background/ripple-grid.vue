@@ -131,7 +131,7 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 @import '../../assets/variables.scss';
 
 .ripple-grid-canvas {
