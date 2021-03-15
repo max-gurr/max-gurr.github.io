@@ -25,7 +25,9 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+@import '../../assets/variables.scss';
+
 .nav {
     position: fixed;
     z-index: 100;
@@ -52,15 +54,12 @@ export default {
     &--link {
         width: 50%;
         height: 100%;
-
         a {
             font-weight: bold;
             text-decoration: none;
             color: #2c3e50;
             width: 100%;
             height: 100%;
-
-
             &.router-link-exact-active {
                 color: #42b983;
             }
@@ -78,8 +77,9 @@ export default {
         top: 100%;
         left: 0;
         width: 100%;
-        height: 30px;
+        height: 40px;
         transition: height 0.25s ease;
+        overflow: hidden;
 
         &:hover {
             height: 40px;
@@ -87,26 +87,21 @@ export default {
         &:active span {
             background-color: $grey-70;
         }
-
         &::before {
             content: "";
             position: absolute;
-            bottom: 0px;
-            left: 50%;
-            width: 100%;
-            height: 200%;
-            transform: translateX(-50%);
-            border-radius: 50%;
+            top: 0px;
+            width: 80px;
+            height: 80px;
+            transform: translate(-50%, -50%) scaleY(0.6) rotate(45deg);
             background-color: rgba(20, 20, 25, 0.9);
-            box-shadow: 0px 0px 10px rgba(0, 255, 157, 0.8);
-            clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+            box-shadow: 0px 0px 10px rgba(0, 255, 157, 1);
         }
-
         span {
             min-width: 3px;
             min-height: 15px;
             position: absolute;
-            top: 25%;
+            top: 15%;
             left: 50%;
             background-color: #2c3e50;
             border-radius: 99px;
