@@ -183,7 +183,6 @@ export default {
         this.resizeHandler();
 
         // Start animation
-        // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
         this.drawCycle = setInterval(this.draw.bind(this), this.animationRate);
     },
     methods: {
@@ -234,6 +233,8 @@ export default {
             const numParticles = Math.max(this.minNumParticles, Math.min(this.maxNumParticles, responsiveNum));
             
             for (let i = 0; i < numParticles; i++) {
+                const xPos = Math.random()*this.width;
+                const yPos = Math.random()*this.height;
                 var xVel = Math.sin(Math.random()*360);
                 var yVel = Math.sin(Math.random()*360);
 
@@ -242,13 +243,14 @@ export default {
                     yVel = -0.6;
                 }
 
+                const scale = 0.5;
                 const mag = Math.sqrt(xVel * xVel + yVel * yVel);
-                xVel *= 0.5/mag;
-                yVel *= 0.5/mag;
+                xVel *= scale/mag;
+                yVel *= scale/mag;
 
                 particles.push({
-                    x: Math.random()*this.width,
-                    y: Math.random()*this.height,
+                    x: xPos,
+                    y: yPos,
                     xVel: xVel,
                     yVel: yVel,
                     mouseDist: 0

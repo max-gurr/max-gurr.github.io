@@ -19,22 +19,20 @@
 import backgroundSelect from '@/components/background/select.vue';
 // Backgrounds:
 import constellations from '@/components/background/constellations.vue';
-import pixelRain from '@/components/background/pixel-rain.vue';
-import ripples from '@/components/background/ripples.vue';
 import followers from '@/components/background/followers.vue';
 import fish from '@/components/background/fish.vue';
 import reflections from '@/components/background/reflections.vue';
+import bamboo from '@/components/background/bamboo.vue';
 
 export default {
   name: 'Home',
   components: {
     backgroundSelect,
     constellations,
-    pixelRain,
-    ripples,
     followers,
     fish,
-    reflections
+    reflections,
+    bamboo
   },
   data: () => ({
     selectedBackground: null,
@@ -44,7 +42,7 @@ export default {
         icon: 'reflectionsIcon'
       },
       {
-        value: 'followers',
+        value: 'bamboo',
         icon: 'followersIcon'
       },
       {

@@ -11,8 +11,21 @@
                     <!-- <animate xlink:href="#sea-filter" attributeName="baseFrequency" dur="60s" keyTimes="0;0.5;1" values="0.02 0.06;0.04 0.08;0.02 0.06" repeatCount="indefinite"/> -->
                 </defs>
 
-                <g id="fish-container">
-                    <g v-for="(f, index) in fish" :key="'fish-'+index" :opacity="fishOpacity" :transform="'rotate('+f.rotation+', '+(f.x+fishSizeRadius)+', '+(f.y+fishSizeRadius)+')'" :fill="f.colour" stroke="none">
+                <g>
+                    <path v-for="(pad, padIndex) in lilypads" 
+                        :key="'lilypad-'+padIndex"
+                        stroke="none"
+                        fill="green"
+                    />
+                </g>
+
+                <g id="fish-container" filter="url(#turbulence)">
+                    <g v-for="(f, index) in fish" 
+                        :key="'fish-'+index" 
+                        :opacity="fishOpacity" 
+                        :transform="'rotate('+f.rotation+', '+(f.x+fishSizeRadius)+', '+(f.y+fishSizeRadius)+')'" 
+                        :fill="f.colour" 
+                        stroke="none">
                         <!-- Fish path -->
                         <path :d="
                             'M '+(f.x)+' '+(f.y-fishSizeRadius)+
@@ -24,10 +37,6 @@
                             'M '+(f.x-fishSizeRadius/1.8)+' '+(f.y)+
                             'q '+(fishSizeRadius/1.8)+' -'+(fishSizeRadius)+' '+(2*fishSizeRadius/1.8)+' 0 Z'"
                         />
-                        
-                        <!-- Outlines of neighbour/separation radius -->
-                        <!-- <circle :cx="f.x" :cy="f.y" :r="fishSizeRadius*4" stroke="rgba(150, 0, 0, 0.6)" stroke-width="10" fill="none" />
-                        <circle :cx="f.x" :cy="f.y" :r="neighbourRadius" stroke="rgba(0, 150, 0, 0.6)" stroke-width="10" fill="none" /> -->
                     </g>
                 </g>
             </svg>
@@ -74,12 +83,14 @@ export default {
         alignmentScale: 0.6,
         separationScale: 10,
         fishColour: 'rgb(255, 100, 100)',
-        frameRate: 35,
+        frameRate: 40,
         numFish: 0,
-        rainChance: 0.25,
+        rainChance: 0.2,
         rippleGap: 0.2,
         mousePos: null,
-        squareMouseEffectRadius: 0
+        squareMouseEffectRadius: 0,
+        numLilypads: 50,
+        lilypadSize: 100
     }),
     created() {
         window.addEventListener('resize', this.resizeHandler);
@@ -90,7 +101,6 @@ export default {
         this.resizeHandler();
 
         // Start animation
-        // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.frameRate);
         this.drawCycle = setInterval(this.draw.bind(this), this.frameRate);
     },
     methods: {
@@ -384,19 +394,18 @@ export default {
     background: radial-gradient(circle, #051541 0%, $bg-dark-blue 100%);
 
     .fish-canvas {
-        filter: url(#turbulence);
-
         .ripple {
             position: absolute;
             border-radius: 50%;
             animation: fish-ripple-animate 0.8s ease;
             transform: translate(-50%, -50%);
-            box-shadow: 0px 0px 10px rgba(255, 255, 255, 1);
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 1),
+                        inset 0px 0px 10px rgba(255, 255, 255, 1);
         }
 
         @keyframes fish-ripple-animate {
             0% {
-                opacity: 0.4;
+                opacity: 0.2;
                 min-width: 0px;
                 min-height: 0px;
             }
