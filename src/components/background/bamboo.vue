@@ -1,27 +1,46 @@
 <template>
 <div>
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas constellations-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+        <defs>
+            <pattern id="bamboo-stalk" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+                <path d="M 60 15 Q 100 0 140 15 Q 120 100 140 195 Q 100 200 60 195 Q 80 100 60 15" fill="rgba(3, 5, 15, 1)"/>
+            </pattern>
+
+            <pattern id="bamboo-group-1" x="0" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(5, 8, 10, 1)">
+                <Bamboo />
+            </pattern>
+            <pattern id="bamboo-group-2" x="30%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(6, 9, 12, 0.9)">
+                <Bamboo />
+            </pattern>
+            <pattern id="bamboo-group-3" x="60%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(12, 12, 15, 0.8)">
+                <Bamboo />
+            </pattern>
+        </defs>
         <!-- Back particles -->
         <g v-for="(p3, index3) in particlesLayer3" :key="'layer3-particle-'+index3" >
             <defs>
                 <radialGradient :id="'layer3-gradientFill-'+index3">
-                    <stop offset="25%" :stop-color="'rgba(255, 200, 100, '+(maxOpacity/3)+')'" />
+                    <stop offset="25%" :stop-color="'rgba(255, 150, 100, '+(0.6)+')'" />
                     <stop offset="100%" stop-color="transparent" />
                 </radialGradient>
             </defs>
             <circle :cx="p3.x" :cy="p3.y" :r="particleSize*0.5" :fill="'url(#layer3-gradientFill-'+index3+')'" class="particle" />        
         </g>
 
+        <rect x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-3)" />
+
         <!-- Middle particles -->
         <g v-for="(p2, index2) in particlesLayer2" :key="'layer2-particle-'+index2" >
             <defs>
                 <radialGradient :id="'layer2-gradientFill-'+index2">
-                    <stop offset="25%" :stop-color="'rgba(255, 200, 100, '+(maxOpacity/2)+')'" />
+                    <stop offset="25%" :stop-color="'rgba(240, 100, 180, '+(maxOpacity/2)+')'" />
                     <stop offset="100%" stop-color="transparent" />
                 </radialGradient>
             </defs>
             <circle :cx="p2.x" :cy="p2.y" :r="particleSize*0.75" :fill="'url(#layer2-gradientFill-'+index2+')'" class="particle" />        
         </g>
+
+        <rect x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-2)" />
 
         <!-- Top particles -->
         <g v-for="(p1, index1) in particlesLayer1" :key="'layer1-particle-'+index1" >
@@ -33,15 +52,20 @@
             </defs>
             <circle :cx="p1.x" :cy="p1.y" :r="particleSize" :fill="'url(#layer1-gradientFill-'+index1+')'" class="particle" />        
         </g>
-
         
+        <!-- Top bamboo -->
+        <rect x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-1)" />
     </svg>
 </div>
 </template>
 
 <script>
+import Bamboo from '../../assets/background/bamboo.svg';
 export default {
     name: 'bamboo',
+    components: {
+        Bamboo
+    },
     props: {
     },
     data: () => ({
@@ -52,9 +76,9 @@ export default {
         height: window.innerHeight,
         drawCycle: null,
         maxOpacity: 0.3,
-        maxVel: 1,
+        maxVel: 2,
         particleSize: 0,
-        numParticles: 10,
+        numParticles: 20,
         animationRate: 40,
     }),
     created() {
@@ -84,7 +108,7 @@ export default {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
 
-            const divider = 10;
+            const divider = 15;
             this.particleSize = Math.min(this.width/divider, this.height/divider);
             this.makeParticles();
         },

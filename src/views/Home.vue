@@ -42,12 +42,16 @@ export default {
         icon: 'reflectionsIcon'
       },
       {
-        value: 'bamboo',
-        icon: 'followersIcon'
-      },
-      {
         value: 'fish',
         icon: 'fishIcon'
+      },
+      {
+        value: 'bamboo',
+        icon: 'bambooIcon'
+      },
+      {
+        value: 'followers',
+        icon: 'followersIcon'
       },
       {
         value: 'constellations',

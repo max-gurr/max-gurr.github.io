@@ -10,9 +10,7 @@
             </clipPath>
             
             <filter id="reflection-blur" x="0%" y="0%" width="100%" height="100%">
-                <feTurbulence id="sea-filter" baseFrequency="0.01 0.03"></feTurbulence>
-                <feDisplacementMap scale="50" in="SourceGraphic"></feDisplacementMap>
-                <feGaussianBlur in="feDisplacementMap" stdDeviation="5" />
+                <feGaussianBlur in="SourceGraphic" stdDeviation="6" />
             </filter>
 
             <radialGradient id="aura-fill-1">
@@ -69,7 +67,7 @@
         <use xlink:href="#canvas" />
         <!-- Reflected display -->
         <g clip-path="url(#reflection-clip)">
-            <use xlink:href="#canvas" :transform="'translate(-20, '+(height+2)+') scale(1, -'+((1-cutoff)/cutoff)+')'" filter="url(#reflection-blur)" />
+            <use xlink:href="#canvas" :transform="'translate(0, '+(height)+') scale(1, -'+((1-cutoff)/cutoff)+')'" filter="url(#reflection-blur)" />
         </g>
     </svg>
 </div>

@@ -17,6 +17,7 @@ import constellationsIcon from './icons/constellations-icon.svg';
 import fishIcon from './icons/fish-icon.svg';
 import followersIcon from './icons/followers-icon.svg';
 import reflectionsIcon from './icons/reflections-icon.svg';
+import bambooIcon from './icons/bamboo-icon.svg';
 
 export default {
     name: 'background-select',
@@ -25,7 +26,8 @@ export default {
         constellationsIcon,
         fishIcon,
         followersIcon,
-        reflectionsIcon
+        reflectionsIcon,
+        bambooIcon
     },
     props: {
         backgrounds: {
@@ -133,12 +135,12 @@ export default {
 
         @for $i from 1 to 99 {
             $translationLength: 85px;
-            $rotationAngle: 35deg;
+            $rotationAngle: 28deg;
 
             &--active:nth-of-type(#{$i}) { 
-                transform:  rotate(($i - 1.25) * $rotationAngle)
+                transform:  rotate(($i - 1.5) * $rotationAngle)
                             translateY(-$translationLength)
-                            rotate(($i - 1.25) * -$rotationAngle);
+                            rotate(($i - 1.5) * -$rotationAngle);
             }
         }
 
