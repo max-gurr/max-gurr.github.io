@@ -23,6 +23,7 @@ import followers from '@/components/background/followers.vue';
 import fish from '@/components/background/fish.vue';
 import reflections from '@/components/background/reflections.vue';
 import bamboo from '@/components/background/bamboo.vue';
+import zoomers from '@/components/background/zoomers.vue';
 
 export default {
   name: 'Home',
@@ -32,13 +33,14 @@ export default {
     followers,
     fish,
     reflections,
-    bamboo
+    bamboo,
+    zoomers
   },
   data: () => ({
     selectedBackground: null,
     backgroundComponents: [ 
       {
-        value: 'reflections',
+        value: 'zoomers',
         icon: 'reflectionsIcon'
       },
       {
