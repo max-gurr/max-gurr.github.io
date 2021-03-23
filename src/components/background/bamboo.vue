@@ -1,18 +1,17 @@
 <template>
 <div>
-    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas constellations-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas bamboo-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
         <defs>
-            <pattern id="bamboo-stalk" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
-                <path d="M 60 15 Q 100 0 140 15 Q 120 100 140 195 Q 100 200 60 195 Q 80 100 60 15" fill="rgba(3, 5, 15, 1)"/>
-            </pattern>
-
-            <pattern id="bamboo-group-1" x="0" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(5, 8, 10, 1)">
+            <!-- Top bamboo pattern -->
+            <pattern id="bamboo-group-1" x="0" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(3, 8, 9, 1)">
                 <Bamboo />
             </pattern>
-            <pattern id="bamboo-group-2" x="30%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(6, 9, 12, 0.9)">
+            <!-- Middle bamboo pattern -->
+            <pattern id="bamboo-group-2" x="30%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(9, 9, 7, 0.9)">
                 <Bamboo />
             </pattern>
-            <pattern id="bamboo-group-3" x="60%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(12, 12, 15, 0.8)">
+            <!-- Back bamboo pattern -->
+            <pattern id="bamboo-group-3" x="60%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(10, 15, 15, 0.8)">
                 <Bamboo />
             </pattern>
         </defs>
@@ -26,7 +25,8 @@
             </defs>
             <circle :cx="p3.x" :cy="p3.y" :r="particleSize*0.5" :fill="'url(#layer3-gradientFill-'+index3+')'" class="particle" />        
         </g>
-
+        
+        <!-- Back bamboo -->
         <rect x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-3)" />
 
         <!-- Middle particles -->
@@ -40,6 +40,7 @@
             <circle :cx="p2.x" :cy="p2.y" :r="particleSize*0.75" :fill="'url(#layer2-gradientFill-'+index2+')'" class="particle" />        
         </g>
 
+        <!-- Middle bamboo -->
         <rect x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-2)" />
 
         <!-- Top particles -->
@@ -179,6 +180,6 @@ export default {
 @import '../../assets/variables.scss';
 
 .bamboo-canvas {
-    background: $bg-dark-blue;
+    background: $bg-dark-green;
 }
 </style>
