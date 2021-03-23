@@ -47,7 +47,7 @@
     "not dead"
   ],
   "gitHooks": {
-    "pre-push": "lint-staged"
+    "pre-push": "npm run lint"
   },
   "lint-staged": {
     "*.{js,jsx,vue}": [
