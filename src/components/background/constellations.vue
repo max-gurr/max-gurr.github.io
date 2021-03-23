@@ -1,5 +1,6 @@
 <template>
 <div>
+    <!-- Particles -->
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas constellations-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
         <!-- Moon -->
         <defs>
@@ -40,7 +41,7 @@
             <line v-for="(l, index) in lines" :key="'line-'+index" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" :stroke="'rgba(255, 255, 255, '+l.opacity+')'" />
         </g>
     </svg>
-
+    <div class="canvas star-canvas" ref="star-canvas"></div>
     <!-- Mountains -->
     <svg viewBox="0 0 100 100" class="canvas" x="0" :width="width" :height="height/2" preserveAspectRatio="xMinYMax meet">
         <path d="
@@ -170,6 +171,7 @@ export default {
         width: window.innerWidth,
         height: window.innerHeight,
         drawCycle: null,
+        shootingStarChance: 0.02,
         lineRange: 0,
         maxOpacity: 0.3,
         animationRate: 40
@@ -198,8 +200,9 @@ export default {
 
             this.lines = await this.makeLines(this.lineRange);
 
-            // Reset animation timeout
-            // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.animationRate);
+            if (Math.random() < this.shootingStarChance) {
+                this.makeShootingStar();
+            }
         },
         async resizeHandler() {
             this.width = window.innerWidth;
@@ -328,6 +331,26 @@ export default {
             })
 
             return lines;
+        },
+        makeShootingStar() {
+            const canvas = this.$refs['star-canvas'];
+            const x = Math.random() * this.width;
+            const y = Math.random() * this.height/2;
+
+            const angleRange = 160;
+            const rotation = Math.round(Math.random() * angleRange - angleRange/2);
+
+            const shootingStar = document.createElement("div");
+            shootingStar.className = "shooting-star";
+            shootingStar.style.left = x + 'px';
+            shootingStar.style.top = y + 'px';
+            shootingStar.style.transform = 'rotate('+rotation+'deg)';
+
+            shootingStar.addEventListener( 'animationend', function() {
+                canvas.removeChild(shootingStar);
+            }.bind(this));
+
+            canvas.appendChild(shootingStar);
         }
     },
     beforeDestroy() {
@@ -344,5 +367,33 @@ export default {
 .constellations-canvas {
     background: $bg-dark-blue;
     background: radial-gradient(circle, rgba(18,12,35,1) 0%, $bg-dark-blue 100%);
+}
+
+.star-canvas {
+    .shooting-star {
+        position: absolute;
+        width: 5px;
+        height: 20vh;
+        border-radius: 99px;
+        overflow: hidden;
+
+        &::after {
+            background-color: rgba(255, 255, 255, 0.2);
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            animation: shooting-star 0.5s ease;
+        }
+    }
+
+    @keyframes shooting-star {
+        0% {
+            transform: translateY(-100%);
+        }
+        100% {
+            transform: translateY(100%);
+        }
+    }
 }
 </style>

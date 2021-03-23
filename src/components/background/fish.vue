@@ -11,19 +11,11 @@
                     <!-- <animate xlink:href="#sea-filter" attributeName="baseFrequency" dur="60s" keyTimes="0;0.5;1" values="0.02 0.06;0.04 0.08;0.02 0.06" repeatCount="indefinite"/> -->
                 </defs>
 
-                <g>
-                    <path v-for="(pad, padIndex) in lilypads" 
-                        :key="'lilypad-'+padIndex"
-                        stroke="none"
-                        fill="green"
-                    />
-                </g>
-
                 <g id="fish-container" filter="url(#turbulence)">
                     <g v-for="(f, index) in fish" 
                         :key="'fish-'+index" 
                         :opacity="fishOpacity" 
-                        :transform="'rotate('+f.rotation+', '+(f.x+fishSizeRadius)+', '+(f.y+fishSizeRadius)+')'" 
+                        :transform="'rotate('+f.rotation+', '+(f.x+fishSizeRadius)+', '+(f.y)+')'" 
                         :fill="f.colour" 
                         stroke="none">
                         <!-- Fish path -->
@@ -55,7 +47,7 @@ export default {
     props: {
         fishSizeRadius: {
             type: Number,
-            default: 12
+            default: 13
         },
         neighbourRadius: {
             type: Number,
@@ -88,9 +80,7 @@ export default {
         rainChance: 0.2,
         rippleGap: 0.2,
         mousePos: null,
-        squareMouseEffectRadius: 0,
-        numLilypads: 50,
-        lilypadSize: 100
+        squareMouseEffectRadius: 0
     }),
     created() {
         window.addEventListener('resize', this.resizeHandler);
