@@ -99,8 +99,6 @@ export default {
         width: window.innerWidth,
         height: window.innerHeight,
         drawCycle: null,
-        maxOpacity: 0.5,
-        animationRate: 40,
         maxOpacity: 0.3,
         maxVel: 2.5,
         animationRate: 40,

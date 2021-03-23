@@ -174,7 +174,7 @@ export default {
             f.xAcc /= 2;
             f.yAcc /= 2;
         },
-        async pointTowardsMouse(f, e) {
+        async pointTowardsMouse(f) {
             const xDist = this.mouseX - f.x;
             const yDist = this.mouseY - f.y;
 

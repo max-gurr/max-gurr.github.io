@@ -37,13 +37,8 @@
 </template>
 
 <script>
-import fishSvg from './icons/fish-icon.svg';
-
 export default {
     name: 'fish',
-    components: {
-        fishSvg,
-    },
     props: {
         fishSizeRadius: {
             type: Number,
