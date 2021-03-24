@@ -243,7 +243,7 @@ export default {
                     flower: flower
                 };
 
-                const goodPad = false;
+                let goodPad = false;
                 while (!goodPad) {
                     goodPad = true;
                     
