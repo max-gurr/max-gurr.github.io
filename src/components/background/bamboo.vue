@@ -114,7 +114,6 @@ export default {
             this.makeParticles();
         },
         makeParticles() {
-            const divider = 1;
             this.particlesLayer1 = this.makeParticleLayer(1, this.numParticles);
             this.particlesLayer2 = this.makeParticleLayer(2, this.numParticles);
             this.particlesLayer3 = this.makeParticleLayer(3, this.numParticles);

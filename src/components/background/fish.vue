@@ -1,38 +1,83 @@
 <template>
     <div class="canvas" id="root">
-        <div class="canvas fish-canvas" ref="canvasContainer">
-            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
-                <defs>
-                    <filter id="turbulence" x="0%" y="0%" width="100%" height="100%">
-                        <feTurbulence id="sea-filter" baseFrequency="0.02 0.02"></feTurbulence>
-                        <feDisplacementMap scale="12" in="SourceGraphic"></feDisplacementMap>
-                        <feGaussianBlur in="feDisplacementMap" stdDeviation="1.8" />
-                    </filter>
-                    <!-- <animate xlink:href="#sea-filter" attributeName="baseFrequency" dur="60s" keyTimes="0;0.5;1" values="0.02 0.06;0.04 0.08;0.02 0.06" repeatCount="indefinite"/> -->
-                </defs>
+        <div class="canvas fish-canvas" ref="ripple-container"></div>
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+            <defs>
+                <filter id="turbulence" x="0%" y="0%" width="100%" height="100%">
+                    <feTurbulence id="sea-filter" baseFrequency="0.02 0.02"></feTurbulence>
+                    <feDisplacementMap scale="12" in="SourceGraphic"></feDisplacementMap>
+                    <feGaussianBlur in="feDisplacementMap" stdDeviation="1.8" />
+                </filter>
+                <!-- <animate xlink:href="#sea-filter" attributeName="baseFrequency" dur="60s" keyTimes="0;0.5;1" values="0.02 0.06;0.04 0.08;0.02 0.06" repeatCount="indefinite"/> -->
+            </defs>
 
-                <g id="fish-container" filter="url(#turbulence)">
-                    <g v-for="(f, index) in fish" 
-                        :key="'fish-'+index" 
-                        :opacity="fishOpacity" 
-                        :transform="'rotate('+f.rotation+', '+(f.x+fishSizeRadius)+', '+(f.y)+')'" 
-                        :fill="f.colour" 
-                        stroke="none">
-                        <!-- Fish path -->
-                        <path :d="
-                            'M '+(f.x)+' '+(f.y-fishSizeRadius)+
-                            'q '+(fishSizeRadius)+' '+(fishSizeRadius)+' -'+(fishSizeRadius/2)+' '+(fishSizeRadius*2)+
-                            'q '+(fishSizeRadius/2)+' -'+(fishSizeRadius/3)+' '+(fishSizeRadius)+' 0'+
-                            'q -'+(fishSizeRadius*1.5)+' -'+(fishSizeRadius)+' -'+(fishSizeRadius/2)+' -'+(fishSizeRadius*2)"
-                        />
-                        <path :d="
-                            'M '+(f.x-fishSizeRadius/1.8)+' '+(f.y)+
-                            'q '+(fishSizeRadius/1.8)+' -'+(fishSizeRadius)+' '+(2*fishSizeRadius/1.8)+' 0 Z'"
-                        />
-                    </g>
+            <g id="fish-container" filter="url(#turbulence)">
+                <g v-for="(f, index) in fish" 
+                    :key="'fish-'+index" 
+                    :opacity="fishOpacity" 
+                    :transform="'rotate('+f.rotation+', '+(f.x+fishSizeRadius)+', '+(f.y)+')'" 
+                    :fill="f.colour" 
+                    stroke="none">
+                    <!-- Fish path -->
+                    <path :d="
+                        'M '+(f.x)+' '+(f.y-fishSizeRadius)+
+                        'q '+(fishSizeRadius)+' '+(fishSizeRadius)+' -'+(fishSizeRadius/2)+' '+(fishSizeRadius*2)+
+                        'q '+(fishSizeRadius/2)+' -'+(fishSizeRadius/3)+' '+(fishSizeRadius)+' 0'+
+                        'q -'+(fishSizeRadius*1.5)+' -'+(fishSizeRadius)+' -'+(fishSizeRadius/2)+' -'+(fishSizeRadius*2)"
+                    />
+                    <path :d="
+                        'M '+(f.x-fishSizeRadius/1.8)+' '+(f.y)+
+                        'q '+(fishSizeRadius/1.8)+' -'+(fishSizeRadius)+' '+(2*fishSizeRadius/1.8)+' 0 Z'"
+                    />
                 </g>
-            </svg>
-        </div>
+            </g>
+        </svg>
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+            <defs>
+                <svg id="lily-pad" viewBox="0 0 100 100" >
+                    <path d="
+                        M 0 40 
+                        a 50 50 0 1 1 0 20 
+                        L 50 50 z" />
+                </svg>
+                <svg id="lily-flower" viewBox="0 0 100 100" >
+                    <circle cx="50" cy="50" r="5" fill="rgb(100, 100, 40)" />
+                    <g v-for="p1 in 12" :key="'outerpetal-'+p1">
+                        <ellipse cx="50" cy="30" rx="6" ry="15" fill="rgb(100, 100, 100)" :transform="'rotate('+(p1*30)+' 50 50)'"/>
+                    </g>
+                    <g v-for="p2 in 12" :key="'middlepetal-'+p2">
+                        <ellipse cx="50" cy="35" rx="4" ry="10" fill="rgb(100, 90, 90)" :transform="'rotate('+(p2*30 + 15)+' 50 50)'"/>
+                    </g>
+                    <g v-for="p3 in 8" :key="'flower-'+p3">
+                        <ellipse cx="50" cy="40" rx="3" ry="8" fill="rgb(80, 20, 60)" :transform="'rotate('+(p3*45 + 15)+' 50 50)'"/>
+                    </g>
+                </svg>
+            </defs>
+
+            <!-- Lily pads -->
+            <g 
+                v-for="(pad, padIndex) in lilypads"
+                :key="'lilpad-'+padIndex"
+                :transform="'rotate('+pad.rotation+' '+(pad.x + pad.size/2)+' '+(pad.y + pad.size/2)+')'"
+            >
+                <use
+                    xlink:href="#lily-pad" 
+                    :fill="pad.fill"
+                    :x="pad.x" 
+                    :y="pad.y" 
+                    :width="pad.size" 
+                    :height="pad.size"
+                />
+                <use
+                    v-if="pad.flower"
+                    xlink:href="#lily-flower" 
+                    :x="pad.x" 
+                    :y="pad.y" 
+                    :width="pad.size" 
+                    :height="pad.size"
+                />
+            </g>
+        </svg>
     </div>
 </template>
 
@@ -55,6 +100,14 @@ export default {
         maxFish: {
             type: Number,
             default: 40
+        },
+        numLilypads: {
+            type: Number,
+            default: 12
+        },
+        lilypadChance: {
+            type: Number,
+            default: 0.15
         }
     },
     data: () => ({
@@ -75,7 +128,9 @@ export default {
         rainChance: 0.2,
         rippleGap: 0.2,
         mousePos: null,
-        squareMouseEffectRadius: 0
+        squareMouseEffectRadius: 0,
+        lilypads: [],
+        lilypadSize: 0
     }),
     created() {
         window.addEventListener('resize', this.resizeHandler);
@@ -113,11 +168,16 @@ export default {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
 
-            const divider = 18;
-            this.numFish = Math.round(Math.min(this.maxFish, Math.min(this.width/divider, this.height/divider)));
+            const fishDivider = 18;
+            this.numFish = Math.round(Math.min(this.maxFish, Math.min(this.width/fishDivider, this.height/fishDivider)));
 
             this.squareMouseEffectRadius = this.mouseEffectRadius*this.mouseEffectRadius;
             this.makeFish();
+
+            const lilypadDivider = 8;
+            this.lilypadSize = Math.min(this.width/lilypadDivider, this.height/lilypadDivider);
+            this.lilypads = [];
+            this.makeLilypads(this.numLilypads);
         },
         async clickHandler(e) {        
             this.makeRipple(e.clientX, e.clientY);
@@ -155,6 +215,69 @@ export default {
                     colour: 'white'
                 });
             }
+        },
+        async makeLilypads(num) {
+            for (let i = 0; i < num; i++) {
+                const xRange = this.width - this.lilypadSize*2;
+                const yRange = this.height - this.lilypadSize*2;
+                const xPos = Math.round(Math.random() * xRange + this.lilypadSize);
+                const yPos = Math.round(Math.random() * yRange + this.lilypadSize);
+
+                const sizeRange = this.lilypadSize/4;
+                const size = Math.round((Math.random()*2 - 1)*sizeRange + this.lilypadSize);
+                
+                const rotation = Math.round(Math.random() * 365);
+
+                const green = Math.round(Math.random() * 10 + 10);
+                const blue = Math.round(Math.random() * 10 + 12);
+                const fill = 'rgb(0, '+green+', '+blue+')';
+
+                const flower = Math.random() < this.lilypadChance;
+
+                const newLilypad = {
+                    x: xPos,
+                    y: yPos,
+                    size: size,
+                    rotation: rotation,
+                    fill: fill,
+                    flower: flower
+                };
+
+                const goodPad = false;
+                while (!goodPad) {
+                    goodPad = true;
+                    
+                    // Check if lilypad is touching any others
+                    for (let p = 0; p < this.lilypads.length; p++) {
+                        const otherPad = this.lilypads[p];
+                        if (this.lilypadsTouching(newLilypad, otherPad)) {
+                            goodPad = false;
+                        }
+                    }
+
+                    if (!goodPad) {
+                        newLilypad.x = Math.round(Math.random() * xRange + this.lilypadSize);
+                        newLilypad.y = Math.round(Math.random() * yRange + this.lilypadSize);
+                    }
+                }
+
+                this.lilypads.push(newLilypad);
+            }
+        },
+        lilypadsTouching(l1, l2) {
+            const xPos1 = l1.x + l1.size/2;
+            const xPos2 = l2.x + l2.size/2;
+            const yPos1 = l1.y + l1.size/2;
+            const yPos2 = l2.y + l2.size/2;
+
+            const xDist = xPos2 - xPos1;
+            const yDist = yPos2 - yPos1;
+            const squareDist = xDist*xDist + yDist*yDist;
+            
+            const range = l1.size/2 + l2.size/2;
+            const squareRange = range * range;
+
+            return (squareDist < squareRange);
         },
         async updateFish(f) {
             const range = this.fishSizeRadius*2;
@@ -328,7 +451,7 @@ export default {
             f.yAcc += yForce;
         },
         async makeRipple(x, y) {
-            const canvas = this.$refs['canvasContainer'];
+            const canvas = this.$refs['ripple-container'];
 
             const ripple = document.createElement("div");
             ripple.className = "ripple";
