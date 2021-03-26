@@ -3,7 +3,7 @@
     <!-- Particles -->
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas constellations-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
         <!-- Moon -->
-        <defs>
+        <g>
             <radialGradient id='moon-fill'>
                 <stop offset="0%" stop-color="transparent" />
                 <stop offset="25%" stop-color="rgba(170, 180, 150, 0.15)" />
@@ -11,14 +11,21 @@
                 <stop offset="80%" :stop-color="'rgba(150, 180, 170, 0.2)'" />
                 <stop offset="100%" stop-color="transparent" />
             </radialGradient>
-        </defs>
-        <circle :cx="width/2" :cy="(height/1.5)" :r="Math.max(width/2, height/2)" fill="url(#moon-fill)" stroke="none" />
+        
+            <circle 
+                :cx="width/2" 
+                :cy="(height/1.5)" 
+                :r="Math.max(width/2, height/2)" 
+                fill="url(#moon-fill)" 
+                stroke="none" 
+            />
+        </g>
         
         <!-- Page particles -->
         <g v-for="(p, index) in particles" :key="'particle-'+index" >
             <defs>
                 <radialGradient :id="'gradientFill-'+index">
-                    <stop offset="25%" :stop-color="'rgba('+(100 + 155*p.mouseDist)+', '+(100 + 155*p.x/width)+', '+(100 + 155*p.y/height)+', '+(maxOpacity+0.3*p.mouseDist)+')'" />
+                    <stop offset="25%" :stop-color="'rgb('+(100 + 155*p.mouseDist)+', '+(100 + 155*Math.round(p.x)/width)+', '+(100 + 155*Math.round(p.y)/height)+')'" />
                     <stop offset="100%" stop-color="transparent" />
                 </radialGradient>
             </defs>
@@ -27,8 +34,9 @@
                 cy="0" 
                 :r="radius" 
                 :fill="'url(#gradientFill-'+index+')'" 
-                :transform="'translate('+p.x+', '+p.y+')'"
-                class="particle" 
+                :transform="'translate('+Math.round(p.x)+', '+Math.round(p.y)+')'"
+                class="particle"
+                :opacity="(maxOpacity+0.3*p.mouseDist)"
             />        
         </g>
 
@@ -40,7 +48,13 @@
                     <stop offset="100%" stop-color="transparent" />
                 </radialGradient>
             </defs>
-            <circle v-if="mouseParticle" :cx="mouseParticle.x" :cy="mouseParticle.y" :r="mouseParticle.radius" fill="url(#mouseParticleFill)" id="mouse-particle" />
+            <circle 
+                v-if="mouseParticle" 
+                :cx="mouseParticle.x" 
+                :cy="mouseParticle.y" 
+                :r="mouseParticle.radius" 
+                fill="url(#mouseParticleFill)" id="mouse-particle" 
+            />
         </g>
 
         <!-- Lines -->
@@ -52,7 +66,8 @@
                 :y1="l.y1" 
                 :x2="l.x2" 
                 :y2="l.y2" 
-                :stroke="'rgba(255, 255, 255, '+l.opacity+')'" 
+                stroke="white"
+                :opacity="l.opacity" 
             />
         </g>
     </svg>
@@ -333,8 +348,8 @@ export default {
                         lines.push({
                             x1: Math.round(p.x),
                             y1: Math.round(p.y),
-                            x2: this.mouseParticle.x,
-                            y2: this.mouseParticle.y,
+                            x2: Math.round(this.mouseParticle.x),
+                            y2: Math.round(this.mouseParticle.y),
                             opacity: Math.round(100*opacity)/100
                         });
 
