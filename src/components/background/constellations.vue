@@ -22,7 +22,14 @@
                     <stop offset="100%" stop-color="transparent" />
                 </radialGradient>
             </defs>
-            <circle :cx="p.x" :cy="p.y" :r="radius" :fill="'url(#gradientFill-'+index+')'" class="particle" />        
+            <circle 
+                cx="0" 
+                cy="0" 
+                :r="radius" 
+                :fill="'url(#gradientFill-'+index+')'" 
+                :transform="'translate('+p.x+', '+p.y+')'"
+                class="particle" 
+            />        
         </g>
 
         <!-- Mouse particle -->
@@ -161,7 +168,7 @@ export default {
         },
         maxNumParticles: {
             type: Number,
-            default: 115
+            default: 100
         },
         radius: {
             type: Number,

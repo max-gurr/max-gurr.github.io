@@ -8,25 +8,24 @@
                     <feDisplacementMap scale="12" in="SourceGraphic"></feDisplacementMap>
                     <feGaussianBlur in="feDisplacementMap" stdDeviation="1.8" />
                 </filter>
-                <!-- <animate xlink:href="#sea-filter" attributeName="baseFrequency" dur="60s" keyTimes="0;0.5;1" values="0.02 0.06;0.04 0.08;0.02 0.06" repeatCount="indefinite"/> -->
             </defs>
 
             <g id="fish-container" filter="url(#turbulence)">
                 <g v-for="(f, index) in fish" 
                     :key="'fish-'+index" 
                     :opacity="fishOpacity" 
-                    :transform="'rotate('+f.rotation+', '+(f.x+fishSizeRadius)+', '+(f.y)+')'" 
+                    :transform="'translate('+f.x+', '+f.y+') rotate('+f.rotation+', 0, 0)'" 
                     :fill="f.colour" 
                     stroke="none">
                     <!-- Fish path -->
                     <path :d="
-                        'M '+(f.x)+' '+(f.y-fishSizeRadius)+
+                        'M 0 0'+
                         'q '+(fishSizeRadius)+' '+(fishSizeRadius)+' -'+(fishSizeRadius/2)+' '+(fishSizeRadius*2)+
                         'q '+(fishSizeRadius/2)+' -'+(fishSizeRadius/3)+' '+(fishSizeRadius)+' 0'+
                         'q -'+(fishSizeRadius*1.5)+' -'+(fishSizeRadius)+' -'+(fishSizeRadius/2)+' -'+(fishSizeRadius*2)"
                     />
                     <path :d="
-                        'M '+(f.x-fishSizeRadius/1.8)+' '+(f.y)+
+                        'M -'+fishSizeRadius/1.8+' '+(fishSizeRadius)+
                         'q '+(fishSizeRadius/1.8)+' -'+(fishSizeRadius)+' '+(2*fishSizeRadius/1.8)+' 0 Z'"
                     />
                 </g>
@@ -41,6 +40,7 @@
                         L 50 50 z" />
                 </svg>
                 <svg id="lily-flower" viewBox="0 0 100 100" >
+                    <!-- Fills for lily flower petals -->
                     <circle cx="50" cy="50" r="5" fill="rgb(100, 100, 40)" />
                     <g v-for="p1 in 12" :key="'outerpetal-'+p1">
                         <ellipse cx="50" cy="30" rx="6" ry="15" fill="rgb(100, 100, 100)" :transform="'rotate('+(p1*30)+' 50 50)'"/>
@@ -99,7 +99,7 @@ export default {
         },
         maxFish: {
             type: Number,
-            default: 40
+            default: 50
         },
         numLilypads: {
             type: Number,
@@ -117,7 +117,7 @@ export default {
         height: window.innerHeight,
         drawCycle: null,
         fishOpacity: 0.3,
-        maxVel: 2.35,
+        maxVel: 2.5,
         maxForce: 0.01,
         cohesionScale: 3,
         alignmentScale: 0.6,
@@ -168,7 +168,7 @@ export default {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
 
-            const fishDivider = 18;
+            const fishDivider = 15;
             this.numFish = Math.round(Math.min(this.maxFish, Math.min(this.width/fishDivider, this.height/fishDivider)));
 
             this.squareMouseEffectRadius = this.mouseEffectRadius*this.mouseEffectRadius;

@@ -84,7 +84,7 @@ export default {
     props: {
         cutoff: {
             type: Number,
-            default: 0.8
+            default: 0.75
         },
         minParticleSize: {
             type: Number,
