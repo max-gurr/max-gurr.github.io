@@ -58,7 +58,7 @@
         </g>
 
         <!-- Lines -->
-        <g>
+        <!-- <g>
             <line 
                 v-for="(l, index) in lines" 
                 :key="'line-'+index" 
@@ -69,7 +69,14 @@
                 stroke="white"
                 :opacity="l.opacity" 
             />
-        </g>
+        </g> -->
+        <path 
+            v-for="(linePath, opacity) in lines" 
+            :key="'lines-'+opacity" 
+            :d="linePath" 
+            stroke="white"
+            :opacity="opacity" 
+        />
     </svg>
     <div class="canvas star-canvas" ref="star-canvas"></div>
     <!-- Mountains -->
@@ -183,7 +190,7 @@ export default {
         },
         maxNumParticles: {
             type: Number,
-            default: 100
+            default: 180
         },
         radius: {
             type: Number,
@@ -191,20 +198,23 @@ export default {
         },
         maxLineRange: {
             type: Number,
-            default: 125
+            default: 150
         }
     },
     data: () => ({
         particles: [],
         mouseParticle: null,
-        lines: [],
+        lines: {},
         width: window.innerWidth,
         height: window.innerHeight,
         drawCycle: null,
         shootingStarChance: 0.02,
         lineRange: 0,
         maxOpacity: 0.3,
-        animationRate: 40
+        animationRate: 40,
+        numParticlesDivider: 10000,
+        lineOpacityDivider: 0.03,
+        lineRangeDivider: 4.5
     }),
     created() {
         window.addEventListener('resize', this.resizeHandler);
@@ -254,15 +264,12 @@ export default {
             this.mouseParticle.nextY = Math.round(e.clientY);
         },
         calculateLineRange() {
-            const divider = 4.5;
-
-            let range = Math.min(this.width/divider, this.height/divider);
+            let range = Math.min(this.width/this.lineRangeDivider, this.height/this.lineRangeDivider);
             this.lineRange = Math.max(this.maxLineRange/2, Math.min(this.maxLineRange, range));
         },
         async makeParticles() {
-            const divider = 7000;
             const particles = [];
-            const responsiveNum = (this.width * this.height)/divider;
+            const responsiveNum = (this.width * this.height)/this.numParticlesDivider;
             const numParticles = Math.max(this.minNumParticles, Math.min(this.maxNumParticles, responsiveNum));
             
             for (let i = 0; i < numParticles; i++) {
@@ -309,7 +316,42 @@ export default {
             }
         },
         async makeLines (range) {
-            const lines = [];
+            const lineData = this.getEmptyLines();
+
+            await this.computeLines(lineData, range);
+            if (this.mouseParticle) {
+                await this.makeLinesToMouse(lineData, range);
+            }
+
+            const linePaths = await this.makeLinePaths(lineData)
+
+            console.log(linePaths);
+
+            return linePaths;
+        },
+        getEmptyLines() {
+            const lines = {};
+            for (let i = this.lineOpacityDivider; i <= this.maxOpacity + this.lineOpacityDivider; i += this.lineOpacityDivider) {
+                let index = Math.round(i * 1000)/1000;
+                lines[index] = [];
+            }
+
+            return lines;
+        },
+        addNewLine(lines, p1, p2, opacity) {
+            const roundedOpacity = Math.round((opacity - (opacity % this.lineOpacityDivider))*1000)/1000;
+            
+            // Don't want lines with opacity 0
+            if (roundedOpacity > 0) {
+                lines[roundedOpacity].push({
+                    x1: Math.round(p1.x),
+                    y1: Math.round(p1.y),
+                    x2: Math.round(p2.x),
+                    y2: Math.round(p2.y),
+                });
+            }
+        },
+        async computeLines(lines, range) {
             const squareRange = range * range;
             const particles = [...this.particles];
 
@@ -324,43 +366,46 @@ export default {
                     const squareDist = xDist * xDist + yDist * yDist;
 
                     if (squareDist < squareRange) {
-                        const opacity = this.maxOpacity * (squareRange - squareDist)/squareRange;
-                        lines.push({
-                            x1: Math.round(p1.x),
-                            y1: Math.round(p1.y),
-                            x2: Math.round(p2.x),
-                            y2: Math.round(p2.y),
-                            opacity: Math.round(opacity*100)/100
-                        });
+                        // Set opacity based on distance
+                        let opacity = this.maxOpacity * (squareRange - squareDist)/squareRange;
+                        // Round based on opacity divider
+                        
+                        this.addNewLine(lines, p1, p2, opacity);
                     }
                 }
             }
-
+        },
+        async makeLinesToMouse(lines, range) {
+            const squareRange = range * range;
             // Mouse lines
             this.particles.forEach((p) => {
-                if (this.mouseParticle) {
-                    const xDist = this.mouseParticle.x - p.x;
-                    const yDist = this.mouseParticle.y - p.y;
-                    const squareDist = xDist * xDist + yDist * yDist;
+                const xDist = this.mouseParticle.x - p.x;
+                const yDist = this.mouseParticle.y - p.y;
+                const squareDist = xDist * xDist + yDist * yDist;
 
-                    if (squareDist < squareRange) {
-                        const opacity = this.maxOpacity * (squareRange - squareDist)/squareRange;
-                        lines.push({
-                            x1: Math.round(p.x),
-                            y1: Math.round(p.y),
-                            x2: Math.round(this.mouseParticle.x),
-                            y2: Math.round(this.mouseParticle.y),
-                            opacity: Math.round(100*opacity)/100
-                        });
+                if (squareDist < squareRange) {
+                    const opacity = this.maxOpacity * (squareRange - squareDist)/squareRange;
+                    this.addNewLine(lines, p, this.mouseParticle, opacity);
 
-                        p.mouseDist = 1 - squareDist/squareRange;
-                    } else {
-                        p.mouseDist = 0;
-                    }
+                    p.mouseDist = 1 - squareDist/squareRange;
+                } else {
+                    p.mouseDist = 0;
                 }
             })
+        },
+        async makeLinePaths(lineData) {
+            const linePaths = {};
+            for (const opacity in lineData) {
+                const lines = lineData[opacity];
+                let newLinePath = "";
+                lines.forEach((l) => {
+                    newLinePath += `M ${l.x1} ${l.y1} L ${l.x2} ${l.y2} `
+                });
 
-            return lines;
+                linePaths[opacity] = newLinePath;
+            }
+
+            return linePaths;
         },
         makeShootingStar() {
             const canvas = this.$refs['star-canvas'];
