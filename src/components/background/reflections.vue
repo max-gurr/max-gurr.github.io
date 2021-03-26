@@ -30,15 +30,14 @@
             <g id="canvas" ref="main-display" clip-path="url(#clip)">
                 <!-- Aura -->
                 <ellipse fill="url(#aura-fill-1)" stroke="none"
-                :cx="width/2" :cy="height*(cutoff/1.2)"
-                :rx="width/2" :ry="(height*cutoff)" />
+                    :cx="width/2" :cy="height*(cutoff/1.2)"
+                    :rx="width/2" :ry="(height*cutoff)" />
                 <ellipse fill="url(#aura-fill-2)" stroke="none"
-                cx="0" :cy="height*(cutoff/1.2)"
-                :rx="width/2" :ry="(height*cutoff)" />
+                    cx="0" :cy="height*(cutoff/1.2)"
+                    :rx="width/2" :ry="(height*cutoff)" />
                 <ellipse fill="url(#aura-fill-3)" stroke="none"
-                :cx="width" :cy="height*(cutoff/1.2)"
-                :rx="width/2" :ry="(height*cutoff)" />
-
+                    :cx="width" :cy="height*(cutoff/1.2)"
+                    :rx="width/2" :ry="(height*cutoff)" />
 
                 
                 <!-- Particles -->
@@ -52,7 +51,8 @@
                         :cy="p.y" 
                         :r="p.radius" 
                         stroke="none" 
-                        :fill="'url(#particleFill-'+particleIndex+')'" 
+                        :fill="'url(#particleFill-'+particleIndex+')'"
+                        shape-rendering="optimizeSpeed"
                     />
                 </g>
 
@@ -84,7 +84,7 @@ export default {
     props: {
         cutoff: {
             type: Number,
-            default: 0.7
+            default: 0.8
         },
         minParticleSize: {
             type: Number,
@@ -92,7 +92,7 @@ export default {
         },
         maxParticleSize: {
             type: Number,
-            default: 60
+            default: 70
         }
     },
     data: () => ({
@@ -103,7 +103,7 @@ export default {
         maxVel: 2.5,
         animationRate: 40,
         particles: [],
-        particleSpawnFrequency: 15,
+        particleSpawnFrequency: 12,
         frameCount: 0,
         particleSize: 0
     }),

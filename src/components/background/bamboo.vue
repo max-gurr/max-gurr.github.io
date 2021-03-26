@@ -3,7 +3,7 @@
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas bamboo-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
         <defs>
             <!-- Top bamboo pattern -->
-            <pattern id="bamboo-group-1" x="0" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(3, 8, 9, 1)">
+            <pattern id="bamboo-group-1" x="0" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(3, 8, 1, 1)">
                 <Bamboo />
             </pattern>
             <!-- Middle bamboo pattern -->
@@ -11,7 +11,7 @@
                 <Bamboo />
             </pattern>
             <!-- Back bamboo pattern -->
-            <pattern id="bamboo-group-3" x="60%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(10, 15, 15, 0.8)">
+            <pattern id="bamboo-group-3" x="60%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(10, 15, 12, 0.85)">
                 <Bamboo />
             </pattern>
         </defs>
@@ -27,7 +27,7 @@
         </g>
         
         <!-- Back bamboo -->
-        <rect x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-3)" />
+        <rect ref="back-bamboo" x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-3)" />
 
         <!-- Middle particles -->
         <g v-for="(p2, index2) in particlesLayer2" :key="'layer2-particle-'+index2" >
@@ -41,13 +41,13 @@
         </g>
 
         <!-- Middle bamboo -->
-        <rect x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-2)" />
+        <rect ref="middle-bamboo" x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-2)" />
 
         <!-- Top particles -->
         <g v-for="(p1, index1) in particlesLayer1" :key="'layer1-particle-'+index1" >
             <defs>
                 <radialGradient :id="'layer1-gradientFill-'+index1">
-                    <stop offset="25%" :stop-color="'rgba(255, 200, 100, '+(maxOpacity)+')'" />
+                    <stop offset="25%" :stop-color="'rgba('+(100 + 100*(p1.x/width))+', 100, '+(50*(p1.x/height))+', '+(maxOpacity)+')'" />
                     <stop offset="100%" stop-color="transparent" />
                 </radialGradient>
             </defs>
@@ -55,7 +55,7 @@
         </g>
         
         <!-- Top bamboo -->
-        <rect x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-1)" />
+        <rect ref="top-bamboo" x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-1)" />
     </svg>
 </div>
 </template>
@@ -112,6 +112,22 @@ export default {
             const divider = 15;
             this.particleSize = Math.min(this.width/divider, this.height/divider);
             this.makeParticles();
+        },
+        async mousemoveHandler(e) {
+            const topTranslateX = (1 - e.clientX/this.width) * 2;
+            const middleTranslateX = (e.clientX/this.width) * 4;
+            const backTranslateX = (1 - e.clientX/this.width) * 6
+
+            // const topTranslateY = (1 - e.clientY/this.height) * 2;
+            // const middleTranslateY = (e.clientY/this.height) * 4;
+            // const backTranslateY = (1 - e.clientY/this.height) * 6;
+            const topTranslateY = 0;
+            const middleTranslateY = 0;
+            const backTranslateY = 0;
+
+            this.$refs['top-bamboo'].style.transform = `translate(${topTranslateX}%, ${topTranslateY}%)`;
+            this.$refs['middle-bamboo'].style.transform = `translate(${middleTranslateX}%, ${middleTranslateY}%)`;
+            this.$refs['back-bamboo'].style.transform = `translate(${backTranslateX}%, ${backTranslateY}%)`;
         },
         makeParticles() {
             this.particlesLayer1 = this.makeParticleLayer(1, this.numParticles);

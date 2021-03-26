@@ -125,7 +125,7 @@ export default {
         fishColour: 'rgb(255, 100, 100)',
         frameRate: 40,
         numFish: 0,
-        rainChance: 0.2,
+        rainChance: 0.15,
         rippleGap: 0.2,
         mousePos: null,
         squareMouseEffectRadius: 0,
@@ -228,7 +228,7 @@ export default {
                 
                 const rotation = Math.round(Math.random() * 365);
 
-                const green = Math.round(Math.random() * 10 + 10);
+                const green = Math.round(Math.random() * 10 + 15);
                 const blue = Math.round(Math.random() * 10 + 12);
                 const fill = 'rgb(0, '+green+', '+blue+')';
 
@@ -499,7 +499,7 @@ export default {
 
 #root {
     background: $bg-dark-blue;
-    background: radial-gradient(circle, #051541 0%, $bg-dark-blue 100%);
+    background: radial-gradient(circle, #01212b 0%, $bg-dark-blue 100%);
 
     .fish-canvas {
         .ripple {

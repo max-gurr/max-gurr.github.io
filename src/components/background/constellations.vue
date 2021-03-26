@@ -38,7 +38,15 @@
 
         <!-- Lines -->
         <g>
-            <line v-for="(l, index) in lines" :key="'line-'+index" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2" :stroke="'rgba(255, 255, 255, '+l.opacity+')'" />
+            <line 
+                v-for="(l, index) in lines" 
+                :key="'line-'+index" 
+                :x1="l.x1" 
+                :y1="l.y1" 
+                :x2="l.x2" 
+                :y2="l.y2" 
+                :stroke="'rgba(255, 255, 255, '+l.opacity+')'" 
+            />
         </g>
     </svg>
     <div class="canvas star-canvas" ref="star-canvas"></div>
@@ -153,7 +161,7 @@ export default {
         },
         maxNumParticles: {
             type: Number,
-            default: 100
+            default: 115
         },
         radius: {
             type: Number,

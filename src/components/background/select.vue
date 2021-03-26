@@ -47,12 +47,14 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '../../assets/variables.scss';
+
 .bg-select {
     $base-size: 80px;
     $item-size: 40px;
-    $node-color: rgb(10, 10, 30);
-    $node-highlight: #00ff9d;
-    $node-color-active: #83ecb3;
+    $node-color: $bg-dark-blue;
+    $node-highlight: $theme-green;
+    $node-color-active: $theme-green + 50;
     $bg-color: $node-color;
     
     position: absolute;

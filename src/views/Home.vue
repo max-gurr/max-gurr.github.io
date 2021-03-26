@@ -38,12 +38,12 @@ export default {
     selectedBackground: null,
     backgroundComponents: [ 
       {
-        value: 'reflections',
-        icon: 'reflectionsIcon'
-      },
-      {
         value: 'fish',
         icon: 'fishIcon'
+      },
+      {
+        value: 'reflections',
+        icon: 'reflectionsIcon'
       },
       {
         value: 'bamboo',
@@ -112,12 +112,12 @@ export default {
 
     h1 {
       font-size: calc(min(5em, 12vw));
-      color: #29bd7f;
+      color: $theme-green;
       font-variant: small-caps;
     }
     h2 {
       font-size: calc(min(2em, 5vw));
-      color: #29bd7f;
+      color: $theme-green;
       font-variant: small-caps;
     }
   }
