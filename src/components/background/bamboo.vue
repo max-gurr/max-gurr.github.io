@@ -3,15 +3,11 @@
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas bamboo-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
         <defs>
             <!-- Top bamboo pattern -->
-            <pattern id="bamboo-group-1" x="0" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(3, 8, 1, 1)">
-                <Bamboo />
-            </pattern>
-            <!-- Middle bamboo pattern -->
-            <pattern id="bamboo-group-2" x="30%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(9, 9, 7, 0.9)">
+            <pattern id="bamboo-group-1" x="0" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(3, 15, 5, 1)">
                 <Bamboo />
             </pattern>
             <!-- Back bamboo pattern -->
-            <pattern id="bamboo-group-3" x="60%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(10, 15, 12, 0.85)">
+            <pattern id="bamboo-group-2" x="30%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(9, 20, 8, 0.9)">
                 <Bamboo />
             </pattern>
         </defs>

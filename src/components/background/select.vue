@@ -54,7 +54,7 @@ export default {
     $item-size: 40px;
     $node-color: $bg-dark-blue;
     $node-highlight: $theme-green;
-    $node-color-active: $theme-green + 50;
+    $node-color-active: lighten($theme-green, 15%);
     $bg-color: $node-color;
     
     position: absolute;

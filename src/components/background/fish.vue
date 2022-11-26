@@ -62,7 +62,7 @@
             >
                 <use
                     xlink:href="#lily-pad" 
-                    :fill="pad.fill"
+                    fill="rgb(0, 50, 40)"
                     :x="pad.x" 
                     :y="pad.y" 
                     :width="pad.size" 
@@ -103,7 +103,7 @@ export default {
         },
         numLilypads: {
             type: Number,
-            default: 12
+            default: 10
         },
         lilypadChance: {
             type: Number,
@@ -116,7 +116,7 @@ export default {
         width: window.innerWidth,
         height: window.innerHeight,
         drawCycle: null,
-        fishOpacity: 0.3,
+        fishOpacity: 0.4,
         maxVel: 2.5,
         maxForce: 0.01,
         cohesionScale: 3,
@@ -228,8 +228,8 @@ export default {
                 
                 const rotation = Math.round(Math.random() * 365);
 
-                const green = Math.round(Math.random() * 10 + 15);
-                const blue = Math.round(Math.random() * 10 + 12);
+                const green = Math.round(Math.random() * 10 + 50);
+                const blue = Math.round(Math.random() * 10 + 50);
                 const fill = 'rgb(0, '+green+', '+blue+')';
 
                 const flower = Math.random() < this.lilypadChance;
@@ -347,6 +347,7 @@ export default {
                         // , f2 is a neighbour of f1
                         if (mag > 0 && mag < this.neighbourRadius) {
                             // Apply flocking forces from neighbours
+                            // Alignment
                             alignmentX += f2.xVel;
                             alignmentY += f2.yVel;
 
@@ -499,7 +500,7 @@ export default {
 
 #root {
     background: $bg-dark-blue;
-    background: radial-gradient(circle, #01212b 0%, $bg-dark-blue 100%);
+    background: radial-gradient(circle, #022c38 0%, $bg-dark-blue 100%);
 
     .fish-canvas {
         .ripple {
