@@ -3,11 +3,11 @@
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas bamboo-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
         <defs>
             <!-- Top bamboo pattern -->
-            <pattern id="bamboo-group-1" x="0" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(3, 15, 5, 1)">
+            <pattern id="bamboo-group-1" x="0" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(5, 8, 15, 0.8)">
                 <Bamboo />
             </pattern>
             <!-- Back bamboo pattern -->
-            <pattern id="bamboo-group-2" x="30%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(9, 20, 8, 0.9)">
+            <pattern id="bamboo-group-2" x="30%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(5, 15, 16, 1)">
                 <Bamboo />
             </pattern>
         </defs>
@@ -51,7 +51,7 @@
         </g>
         
         <!-- Top bamboo -->
-        <rect ref="top-bamboo" x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-1)" />
+        <rect ref="top-bamboo" x="0" y="0%" width="100%" height="100%" fill="url(#bamboo-group-1)" />
     </svg>
 </div>
 </template>
@@ -59,7 +59,7 @@
 <script>
 import Bamboo from '../../assets/background/bamboo.svg';
 export default {
-    name: 'bamboo',
+    name: 'bamboo-background',
     components: {
         Bamboo
     },
@@ -75,7 +75,7 @@ export default {
         maxOpacity: 0.3,
         maxVel: 2,
         particleSize: 0,
-        numParticles: 20,
+        numParticles: 15,
         animationRate: 40,
     }),
     created() {
@@ -111,17 +111,16 @@ export default {
         },
         async mousemoveHandler(e) {
             const topTranslateX = (1 - e.clientX/this.width) * 2;
-            const middleTranslateX = (e.clientX/this.width) * 4;
-            const backTranslateX = (1 - e.clientX/this.width) * 6
+            const middleTranslateX = (e.clientX/this.width) * 3;
+            const backTranslateX = (1 - e.clientX/this.width)
 
             // const topTranslateY = (1 - e.clientY/this.height) * 2;
             // const middleTranslateY = (e.clientY/this.height) * 4;
             // const backTranslateY = (1 - e.clientY/this.height) * 6;
-            const topTranslateY = 0;
             const middleTranslateY = 0;
             const backTranslateY = 0;
 
-            this.$refs['top-bamboo'].style.transform = `translate(${topTranslateX}%, ${topTranslateY}%)`;
+            this.$refs['top-bamboo'].style.transform = `translateX(${topTranslateX}%)`;
             this.$refs['middle-bamboo'].style.transform = `translate(${middleTranslateX}%, ${middleTranslateY}%)`;
             this.$refs['back-bamboo'].style.transform = `translate(${backTranslateX}%, ${backTranslateY}%)`;
         },
@@ -177,7 +176,7 @@ export default {
             }
         },
     },
-    beforeDestroy() {
+    beforeUnmount() {
         clearInterval(this.drawCycle);
         window.removeEventListener('resize', this.resizeHandler);
         window.removeEventListener('mousemove', this.mousemoveHandler);
@@ -186,7 +185,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../assets/variables.scss';
+@use '../../assets/variables.scss' as *;
 
 .bamboo-canvas {
     background: $bg-dark-green;

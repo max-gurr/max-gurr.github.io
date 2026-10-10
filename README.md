@@ -1,24 +1,16 @@
-# website
+# Max Gurr's portfolio
 
-## Project setup
-```
+A Vue 3 single-page portfolio built with Vite.
+
+## Requirements
+
+Use Node.js 20.19+ or 22.12+.
+
+## Setup
+
+```sh
 npm install
+npm run dev
 ```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Build the production site with `npm run build`, preview it locally with `npm run preview`, and lint the source with `npm run lint`.

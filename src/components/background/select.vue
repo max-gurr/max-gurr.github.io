@@ -1,6 +1,11 @@
 <template>
-  <div class="bg-select" :class="{ 'bg-select--active' : active}">
-        <span class="bg-select__base flex-center" v-on:click="active = !active" :class="{ 'bg-select__base--active' : active}">
+  <div
+    class="bg-select"
+    :class="{ 'bg-select--active' : active}"
+    @mouseenter="active = true"
+    @mouseleave="active = false"
+  >
+        <span class="bg-select__base flex-center" v-on:click="toggleActive" :class="{ 'bg-select__base--active' : active}">
             <selectIcon class="icon"/>
         </span>
         <div v-for="(bg, index) in backgrounds" :key="index" class="bg-select__item flex-center" :class="{ 'bg-select__item--active' : active}" v-on:click="bgClick(bg.value)">
@@ -21,6 +26,7 @@ import bambooIcon from './icons/bamboo-icon.svg';
 
 export default {
     name: 'background-select',
+    emits: ['click'],
     components: {
         selectIcon,
         constellationsIcon,
@@ -39,6 +45,11 @@ export default {
        active: false
     }),
     methods: {
+        toggleActive() {
+            if (window.matchMedia('(hover: none)').matches) {
+                this.active = !this.active;
+            }
+        },
         bgClick(value) {
             this.$emit('click', value);
         }
@@ -47,15 +58,19 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import '../../assets/variables.scss';
+@use 'sass:color';
+@use 'sass:math';
+@use '../../assets/variables.scss' as *;
 
 .bg-select {
     $base-size: 80px;
     $item-size: 40px;
     $node-color: $bg-dark-blue;
-    $node-highlight: $theme-green;
-    $node-color-active: lighten($theme-green, 15%);
-    $bg-color: $node-color;
+    $node-background: rgba($node-color, 0.4);
+    $node-highlight: $soft-blue;
+    $node-color-active: color.adjust($node-highlight, $lightness: 10%);
+    $icon-color: rgba($light-grey, 0.75);
+    $bg-color: rgba($node-color, 0.58);
     
     position: absolute;
     z-index: 97;
@@ -66,23 +81,21 @@ export default {
         content: "";
         position: absolute;
         z-index: -99;
-        bottom: $base-size/2;
-        left: $base-size/2;
+        bottom: math.div($base-size, 2);
+        left: math.div($base-size, 2);
         transform: translate(-50%, 50%);
         width: $base-size;
         height: $base-size;
         background-color: $bg-color;
         border-radius: 50%;
+        backdrop-filter: blur(14px);
         transition: all 0.5s ease;
-        border: solid 2px $node-highlight;
-        box-shadow: 0px 0px 2px $node-highlight,
-                    0px 0px 8px $node-highlight,
-                    0px 0px 20px $node-highlight;
+        border: 1px solid rgba(239, 239, 239, 0.12);
     }
 
     &--active::before {
-        width: 230px;
-        height: 230px;
+        width: 220px;
+        height: 220px;
     }
 
     &__base {
@@ -90,10 +103,12 @@ export default {
         bottom: 0;
         left: 0;
         z-index: 99;
-        background-color: $node-color;
+        background-color: $node-background;
+        backdrop-filter: blur(10px);
         width: $base-size;
         height: $base-size;
         border-radius: 50%;
+        border: 1px solid rgba(239, 239, 239, 0.12);
         font-size: 1.5em;
         color: $node-highlight;
 
@@ -105,7 +120,7 @@ export default {
                 }
             }
             &:active {
-                background-color: $node-color;
+                background-color: $node-background;
                 border: solid 2px $node-highlight;
                 .icon {
                     stroke: $node-highlight;
@@ -125,8 +140,9 @@ export default {
     &__item {
         position: absolute;
         z-index: 0;
-        background-color: $node-color;
-        bottom: 10px;
+        background-color: $node-background;
+        backdrop-filter: blur(14px);
+        bottom: 15px;
         left: 15px;
         width: $item-size;
         height: $item-size;
@@ -136,7 +152,7 @@ export default {
         color: $node-highlight;
 
         @for $i from 1 to 99 {
-            $translationLength: 85px;
+            $translationLength: 82px;
             $rotationAngle: 28deg;
 
             &--active:nth-of-type(#{$i}) { 
@@ -156,7 +172,7 @@ export default {
             }
 
             &:active {
-                background-color: $node-color;
+                background-color: $node-background;
                 border: solid 2px $node-highlight;
                 
                 .icon {
@@ -177,9 +193,9 @@ export default {
     }
 
     .icon {
-        width: 60%;
-        height: 60%;
-        stroke: $node-highlight;
+        width: 50%;
+        height: 50%;
+        stroke: $icon-color;
     }
 }
 </style>

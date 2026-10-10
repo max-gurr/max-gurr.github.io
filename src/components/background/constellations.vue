@@ -428,7 +428,7 @@ export default {
             canvas.appendChild(shootingStar);
         }
     },
-    beforeDestroy() {
+    beforeUnmount() {
         clearInterval(this.drawCycle);
         window.removeEventListener('resize', this.resizeHandler);
         window.removeEventListener('mousemove', this.mousemoveHandler);
@@ -437,7 +437,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../assets/variables.scss';
+@use '../../assets/variables.scss' as *;
 
 .constellations-canvas {
     background: $bg-dark-blue;

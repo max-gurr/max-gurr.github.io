@@ -1,79 +1,109 @@
 <template>
-    <div class="canvas" id="root">
-        <div class="canvas fish-canvas" ref="ripple-container"></div>
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+    <div id="fish-background">
+        <svg class="filter-definitions" aria-hidden="true">
             <defs>
-                <filter id="turbulence" x="0%" y="0%" width="100%" height="100%">
-                    <feTurbulence id="sea-filter" baseFrequency="0.02 0.02"></feTurbulence>
-                    <feDisplacementMap scale="12" in="SourceGraphic"></feDisplacementMap>
-                    <feGaussianBlur in="feDisplacementMap" stdDeviation="1.8" />
+                <filter id="fish-refraction" x="-5%" y="-5%" width="110%" height="110%">
+                    <feTurbulence
+                        type="turbulence"
+                        baseFrequency="0.02 0.02"
+                        numOctaves="1"
+                        result="water"
+                    />
+                    <feDisplacementMap
+                        in="SourceGraphic"
+                        in2="water"
+                        scale="3"
+                        result="refracted-fish"
+                    />
+                    <feGaussianBlur in="refracted-fish" stdDeviation="1.8" />
                 </filter>
             </defs>
-
-            <g id="fish-container" filter="url(#turbulence)">
-                <g v-for="(f, index) in fish" 
-                    :key="'fish-'+index" 
-                    :opacity="fishOpacity" 
-                    :transform="'translate('+f.x+', '+f.y+') rotate('+f.rotation+', 0, 0)'" 
-                    :fill="f.colour" 
-                    stroke="none">
-                    <!-- Fish path -->
-                    <path :d="
-                        'M 0 0'+
-                        'q '+(fishSizeRadius)+' '+(fishSizeRadius)+' -'+(fishSizeRadius/2)+' '+(fishSizeRadius*2)+
-                        'q '+(fishSizeRadius/2)+' -'+(fishSizeRadius/3)+' '+(fishSizeRadius)+' 0'+
-                        'q -'+(fishSizeRadius*1.5)+' -'+(fishSizeRadius)+' -'+(fishSizeRadius/2)+' -'+(fishSizeRadius*2)"
-                    />
-                    <path :d="
-                        'M -'+fishSizeRadius/1.8+' '+(fishSizeRadius)+
-                        'q '+(fishSizeRadius/1.8)+' -'+(fishSizeRadius)+' '+(2*fishSizeRadius/1.8)+' 0 Z'"
-                    />
-                </g>
-            </g>
         </svg>
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+        <canvas ref="fishCanvas" class="canvas koi-fish-canvas"></canvas>
+        <div ref="rippleContainer" class="canvas ripple-layer"></div>
+        <svg
+            class="canvas lily-layer"
+            xmlns="http://www.w3.org/2000/svg"
+            :viewBox="`0 0 ${width} ${height}`"
+        >
             <defs>
-                <svg id="lily-pad" viewBox="0 0 100 100" >
-                    <path d="
-                        M 0 40 
-                        a 50 50 0 1 1 0 20 
-                        L 50 50 z" />
+                <radialGradient id="lily-pad-fill">
+                    <stop offset="10%" stop-color="#17613f" />
+                    <stop offset="100%" stop-color="#0a422f" />
+                </radialGradient>
+                <radialGradient id="lily-pad-shadow">
+                    <stop offset="0%" stop-color="rgb(0, 100, 40)" />
+                    <stop offset="35%" stop-color="rgb(0, 115, 46)" />
+                </radialGradient>
+                <svg id="lily-pad" viewBox="0 0 100 100">
+                    <defs>
+                        <clipPath id="lily-pad-shape">
+                            <path d="M 0 40 a 50 50 0 1 1 0 20 L 50 50 z" />
+                        </clipPath>
+                    </defs>
+                    <g clip-path="url(#lily-pad-shape)">
+                        <circle cx="50" cy="50" r="49" fill="url(#lily-pad-fill)" />
+                        <path
+                            d="M 75 12
+                               C 50 50 50 50 92 42
+                               C 50 50 50 50 86 78
+                               C 50 50 50 50 52 94
+                               C 50 50 50 50 12 80
+                               C 50 50 50 50 10 50
+                               C 50 50 50 50 22 18
+                               C 50 50 50 50 75 12"
+                            fill="url(#lily-pad-shadow)"
+                            opacity="0.5"
+                        />
+                    </g>
                 </svg>
-                <svg id="lily-flower" viewBox="0 0 100 100" >
-                    <!-- Fills for lily flower petals -->
+                <svg id="lily-flower" viewBox="0 0 100 100">
                     <circle cx="50" cy="50" r="5" fill="rgb(100, 100, 40)" />
-                    <g v-for="p1 in 12" :key="'outerpetal-'+p1">
-                        <ellipse cx="50" cy="30" rx="6" ry="15" fill="rgb(100, 100, 100)" :transform="'rotate('+(p1*30)+' 50 50)'"/>
+                    <g v-for="petal in 12" :key="`outer-petal-${petal}`">
+                        <ellipse
+                            cx="50"
+                            cy="30"
+                            rx="6"
+                            ry="15"
+                            fill="rgb(100, 100, 100)"
+                            :transform="`rotate(${petal * 30} 50 50)`"
+                        />
                     </g>
-                    <g v-for="p2 in 12" :key="'middlepetal-'+p2">
-                        <ellipse cx="50" cy="35" rx="4" ry="10" fill="rgb(100, 90, 90)" :transform="'rotate('+(p2*30 + 15)+' 50 50)'"/>
+                    <g v-for="petal in 12" :key="`middle-petal-${petal}`">
+                        <ellipse
+                            cx="50"
+                            cy="35"
+                            rx="4"
+                            ry="10"
+                            fill="rgb(100, 90, 90)"
+                            :transform="`rotate(${petal * 30 + 15} 50 50)`"
+                        />
                     </g>
-                    <g v-for="p3 in 8" :key="'flower-'+p3">
-                        <ellipse cx="50" cy="40" rx="3" ry="8" fill="rgb(80, 20, 60)" :transform="'rotate('+(p3*45 + 15)+' 50 50)'"/>
+                    <g v-for="petal in 8" :key="`inner-petal-${petal}`">
+                        <ellipse
+                            cx="50"
+                            cy="40"
+                            rx="3"
+                            ry="8"
+                            fill="rgb(80, 20, 60)"
+                            :transform="`rotate(${petal * 45 + 15} 50 50)`"
+                        />
                     </g>
                 </svg>
             </defs>
 
-            <!-- Lily pads -->
-            <g 
-                v-for="(pad, padIndex) in lilypads"
-                :key="'lilpad-'+padIndex"
-                :transform="'rotate('+pad.rotation+' '+(pad.x + pad.size/2)+' '+(pad.y + pad.size/2)+')'"
+            <g
+                v-for="(pad, index) in lilypads"
+                :key="`lily-pad-${index}`"
+                :transform="`rotate(${pad.rotation} ${pad.x + pad.size / 2} ${pad.y + pad.size / 2})`"
             >
-                <use
-                    xlink:href="#lily-pad" 
-                    fill="rgb(0, 50, 40)"
-                    :x="pad.x" 
-                    :y="pad.y" 
-                    :width="pad.size" 
-                    :height="pad.size"
-                />
+                <use href="#lily-pad" :x="pad.x" :y="pad.y" :width="pad.size" :height="pad.size" />
                 <use
                     v-if="pad.flower"
-                    xlink:href="#lily-flower" 
-                    :x="pad.x" 
-                    :y="pad.y" 
-                    :width="pad.size" 
+                    href="#lily-flower"
+                    :x="pad.x"
+                    :y="pad.y"
+                    :width="pad.size"
                     :height="pad.size"
                 />
             </g>
@@ -82,448 +112,203 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
+import { createKoiSchool } from './koiFish.js'
+
+const DRAW_SCALE = 1.25
+
 export default {
-    name: 'fish',
+    name: 'fish-background',
     props: {
-        fishSizeRadius: {
-            type: Number,
-            default: 13
-        },
-        neighbourRadius: {
-            type: Number,
-            default: 150
-        },
-        mouseEffectRadius: {
-            type: Number,
-            default: 200
-        },
-        maxFish: {
-            type: Number,
-            default: 50
-        },
         numLilypads: {
             type: Number,
-            default: 10
+            default: 5,
         },
         lilypadChance: {
             type: Number,
-            default: 0.15
-        }
+            default: 0.25,
+        },
     },
     data: () => ({
-        fish: [],
-        ripples: [],
         width: window.innerWidth,
         height: window.innerHeight,
-        drawCycle: null,
-        fishOpacity: 0.4,
-        maxVel: 2.5,
-        maxForce: 0.01,
-        cohesionScale: 3,
-        alignmentScale: 0.6,
-        separationScale: 10,
-        fishColour: 'rgb(255, 100, 100)',
-        frameRate: 40,
-        numFish: 0,
-        rainChance: 0.15,
-        rippleGap: 0.2,
-        mousePos: null,
-        squareMouseEffectRadius: 0,
+        pixelRatio: 1,
+        context: null,
+        fish: markRaw([]),
+        animationFrame: null,
         lilypads: [],
-        lilypadSize: 0
     }),
-    created() {
-        window.addEventListener('resize', this.resizeHandler);
-        window.addEventListener('click', this.clickHandler);
-        window.addEventListener('mousemove', this.mousemoveHandler);
-    },
     mounted() {
-        this.resizeHandler();
-
-        // Start animation
-        this.drawCycle = setInterval(this.draw.bind(this), this.frameRate);
+        window.addEventListener('resize', this.resizeHandler)
+        window.addEventListener('pointerdown', this.makeRipple)
+        this.resizeHandler()
+        this.animationFrame = window.requestAnimationFrame(this.animate)
     },
     methods: {
-        async draw() {
-            // Update fish
-            await this.applyFlockingBehaviour();
-            await Promise.all(this.fish.map(async (f) => {
-                if (this.mousePos) {
-                    await this.repelFromMouse(f);
-                }
-                this.updateFish(f);          
-            }));
-
-            // Make ripples
-            if (Math.random() < this.rainChance) {
-                const x = Math.random() * this.width;
-                const y = Math.random() * this.height;
-
-                this.makeRipple(x, y);
-            }
-
-            this.mousePos = null;
-        },
         resizeHandler() {
-            this.width = window.innerWidth;
-            this.height = window.innerHeight;
+            this.width = window.innerWidth
+            this.height = window.innerHeight
+            this.pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
 
-            const fishDivider = 15;
-            this.numFish = Math.round(Math.min(this.maxFish, Math.min(this.width/fishDivider, this.height/fishDivider)));
+            const canvas = this.$refs.fishCanvas
+            canvas.width = Math.round(this.width * this.pixelRatio)
+            canvas.height = Math.round(this.height * this.pixelRatio)
+            this.context = canvas.getContext('2d')
 
-            this.squareMouseEffectRadius = this.mouseEffectRadius*this.mouseEffectRadius;
-            this.makeFish();
-
-            const lilypadDivider = 8;
-            this.lilypadSize = Math.min(this.width/lilypadDivider, this.height/lilypadDivider);
-            this.lilypads = [];
-            this.makeLilypads(this.numLilypads);
+            const worldWidth = this.width / DRAW_SCALE
+            const worldHeight = this.height / DRAW_SCALE
+            const fishCount = Math.max(6, Math.min(12, Math.round(this.width / 85)))
+            this.fish = markRaw(createKoiSchool(this.context, worldWidth, worldHeight, fishCount))
+            this.makeLilypads()
         },
-        async clickHandler(e) {        
-            this.makeRipple(e.clientX, e.clientY);
-        },
-        async mousemoveHandler(e) {
-            this.mousePos = {
-                x: Math.round(e.clientX),
-                y: Math.round(e.clientY),
-            }
-        },
-        async makeFish() {
-            this.fish = [];
-            
-            for (let i = 0; i < this.numFish; i++) {
-                var xVel = Math.sin(Math.random()*360);
-                var yVel = Math.sin(Math.random()*360);
+        animate() {
+            const { context } = this
+            context.setTransform(1, 0, 0, 1, 0, 0)
+            context.clearRect(0, 0, this.$refs.fishCanvas.width, this.$refs.fishCanvas.height)
+            context.setTransform(
+                this.pixelRatio * DRAW_SCALE,
+                0,
+                0,
+                this.pixelRatio * DRAW_SCALE,
+                0,
+                0,
+            )
 
-                const mag = Math.sqrt(xVel * xVel + yVel * yVel);
-                if (mag === 0) {
-                    xVel = 0.5;
-                    yVel = 0.5;
+            for (let first = 0; first < this.fish.length; first += 1) {
+                const fish = this.fish[first]
+                for (let second = first + 1; second < this.fish.length; second += 1) {
+                    fish.flockTo(this.fish[second])
+                    this.fish[second].flockTo(fish)
                 }
-                const scale = this.maxVel/mag;
-                xVel = scale * xVel;
-                yVel = scale * yVel;
-
-                this.fish.push({
-                    x: Math.random()*this.width,
-                    y: Math.random()*this.height,
-                    xVel: xVel,
-                    yVel: yVel,
-                    xAcc: 0,
-                    yAcc: 0,
-                    rotation: 0,
-                    colour: 'white'
-                });
             }
+
+            const worldWidth = this.width / DRAW_SCALE
+            const worldHeight = this.height / DRAW_SCALE
+            this.fish.forEach((fish) => {
+                fish.applyFlocking()
+                fish.resetFlocking()
+                fish.update(worldWidth, worldHeight)
+                context.save()
+                context.translate(fish.x, fish.y)
+                context.scale(1.5, 1.5)
+                context.translate(-fish.x, -fish.y)
+                fish.draw()
+                context.restore()
+            })
+
+            if (Math.random() < 0.0015) {
+                this.makeRipple({
+                    clientX: Math.random() * this.width,
+                    clientY: Math.random() * this.height,
+                })
+            }
+            this.animationFrame = window.requestAnimationFrame(this.animate)
         },
-        async makeLilypads(num) {
-            for (let i = 0; i < num; i++) {
-                const xRange = this.width - this.lilypadSize*2;
-                const yRange = this.height - this.lilypadSize*2;
-                const xPos = Math.round(Math.random() * xRange + this.lilypadSize);
-                const yPos = Math.round(Math.random() * yRange + this.lilypadSize);
+        makeRipple(event) {
+            const ripple = document.createElement('div')
+            ripple.className = 'fish-ripple'
+            ripple.style.left = `${event.clientX}px`
+            ripple.style.top = `${event.clientY}px`
 
-                const sizeRange = this.lilypadSize/4;
-                const size = Math.round((Math.random()*2 - 1)*sizeRange + this.lilypadSize);
-                
-                const rotation = Math.round(Math.random() * 365);
+            const container = this.$refs.rippleContainer
+            container.appendChild(ripple)
+            ripple.addEventListener('animationend', () => ripple.remove(), { once: true })
+        },
+        makeLilypads() {
+            const size = Math.min(this.width / 8, this.height / 8)
+            const pads = []
+            const maxAttempts = this.numLilypads * 20
 
-                const green = Math.round(Math.random() * 10 + 50);
-                const blue = Math.round(Math.random() * 10 + 50);
-                const fill = 'rgb(0, '+green+', '+blue+')';
-
-                const flower = Math.random() < this.lilypadChance;
-
-                const newLilypad = {
-                    x: xPos,
-                    y: yPos,
-                    size: size,
-                    rotation: rotation,
-                    fill: fill,
-                    flower: flower
-                };
-
-                let goodPad = false;
-                while (!goodPad) {
-                    goodPad = true;
-                    
-                    // Check if lilypad is touching any others
-                    for (let p = 0; p < this.lilypads.length; p++) {
-                        const otherPad = this.lilypads[p];
-                        if (this.lilypadsTouching(newLilypad, otherPad)) {
-                            goodPad = false;
-                        }
+            for (let index = 0; index < this.numLilypads && index < maxAttempts; index += 1) {
+                const padSize = size * (0.75 + Math.random() * 0.5)
+                let pad
+                let attempts = 0
+                do {
+                    pad = {
+                        x: size + Math.random() * Math.max(0, this.width - size * 2),
+                        y: size + Math.random() * Math.max(0, this.height - size * 2),
+                        size: padSize,
+                        rotation: Math.round(Math.random() * 365),
+                        flower: Math.random() < this.lilypadChance || index == 0,
                     }
-
-                    if (!goodPad) {
-                        newLilypad.x = Math.round(Math.random() * xRange + this.lilypadSize);
-                        newLilypad.y = Math.round(Math.random() * yRange + this.lilypadSize);
-                    }
-                }
-
-                this.lilypads.push(newLilypad);
-            }
-        },
-        lilypadsTouching(l1, l2) {
-            const xPos1 = l1.x + l1.size/2;
-            const xPos2 = l2.x + l2.size/2;
-            const yPos1 = l1.y + l1.size/2;
-            const yPos2 = l2.y + l2.size/2;
-
-            const xDist = xPos2 - xPos1;
-            const yDist = yPos2 - yPos1;
-            const squareDist = xDist*xDist + yDist*yDist;
-            
-            const range = l1.size/2 + l2.size/2;
-            const squareRange = range * range;
-
-            return (squareDist < squareRange);
-        },
-        async updateFish(f) {
-            const range = this.fishSizeRadius*2;
-            
-            // Add acc to vel
-            f.xVel += f.xAcc;
-            f.yVel += f.yAcc;
-            
-            // Add vel to pos
-            f.x += f.xVel;
-            f.y += f.yVel;
-
-            // Check if at left/right border
-            if (f.x < -range) {
-                f.x += this.width + range*2;
-            } else if (f.x > this.width + range) {
-                f.x -= (this.width + range*2);
-            }
-            // Check if at top/bottom border
-            if (f.y < -range) {
-                f.y += this.height + range*2;
-            } else if (f.y > this.height + range) {
-                f.y -= (this.height + range*2);
+                    attempts += 1
+                } while (
+                    attempts < 20
+                    && pads.some((other) => {
+                        const dx = pad.x + pad.size / 2 - other.x - other.size / 2
+                        const dy = pad.y + pad.size / 2 - other.y - other.size / 2
+                        const radius = (pad.size + other.size) / 2
+                        return dx * dx + dy * dy < radius * radius
+                    })
+                )
+                pads.push(pad)
             }
 
-            // Calculate rotation
-            f.rotation = (Math.atan2(f.yVel, f.xVel)/Math.PI) * 180 + 90;
-
-            // Scale velocity to maxVel
-            const velMag = Math.sqrt(f.xVel * f.xVel + f.yVel * f.yVel);
-            if (velMag > 0) {
-                f.xVel *= this.maxVel/velMag;
-                f.yVel *= this.maxVel/velMag;
-            }
-
-            // Reset acc
-            f.xAcc /= 2;
-            f.yAcc /= 2;
-
-            // Calculate colour
-            f.colour = 'rgb('+(50 + 80*(f.xVel+f.yVel))+', '+(255*f.x/this.width)+', '+(255*(f.y/this.height))+')';
-        },
-        async applyFlockingBehaviour() {
-            // Go through each fish
-            for (let i = 0; i < this.fish.length; i++) {
-                const f1 = this.fish[i];
-                let neighbourCount = 0;
-                let separationCount = 0;
-                let cohesionX = 0;
-                let cohesionY = 0;
-                let alignmentX = 0;
-                let alignmentY = 0;
-                let separationX = 0;
-                let separationY = 0;
-
-                // Go through each other fish
-                for (let j = 0; j < this.fish.length; j++) {
-                    if (i !== j) {
-                        const f2 = this.fish[j];
-
-                        // Calculate dist between fish
-                        const xDist = f2.x - f1.x;
-                        const yDist = f2.y - f1.y;
-                        const mag = Math.sqrt(xDist * xDist + yDist * yDist);
-
-                        // If distance is less than neighbour radius
-                        // , f2 is a neighbour of f1
-                        if (mag > 0 && mag < this.neighbourRadius) {
-                            // Apply flocking forces from neighbours
-                            // Alignment
-                            alignmentX += f2.xVel;
-                            alignmentY += f2.yVel;
-
-                            // Cohesion //
-                            cohesionX += f2.x;
-                            cohesionY += f2.y;
-
-                            // Separation
-                            if (mag < this.fishSizeRadius * 4) {
-                                const separationXDist = -xDist/mag;
-                                const separationYDist = -yDist/mag;
-                                separationX += separationXDist;
-                                separationY += separationYDist;
-                            
-                                separationCount += 1;
-                            }
-
-                            neighbourCount += 1;
-                        }
-                    }
-                }
-                if (cohesionX !== 0 || cohesionY !== 0) {
-                    cohesionX /= neighbourCount;
-                    cohesionY /= neighbourCount;
-                    this.applyCohesion(f1, cohesionX, cohesionY);
-                }
-
-                if (alignmentX !== 0 || alignmentY !== 0) {
-                    alignmentX /= neighbourCount;
-                    alignmentY /= neighbourCount;
-                    this.applyAlignment(f1, alignmentX, alignmentY);
-                }
-                
-                if (separationX !== 0 || separationY !== 0) {
-                    separationX /= separationCount;
-                    separationY /= separationCount;
-                    this.applySeparation(f1, separationX, separationY);
-                }
-            }
-        },
-        async applyCohesion(f, cohesionX, cohesionY) {
-            // Desired velocity
-            const cohesionXDist = cohesionX - f.x;
-            const cohesionYDist = cohesionY - f.y;
-            // Force to get to desired velocity
-            let cohesionXForce = cohesionXDist - f.xVel;
-            let cohesionYForce = cohesionYDist - f.yVel;
-
-            // Scale to max force
-            const cohesionMag = Math.sqrt(cohesionXForce * cohesionXForce + cohesionYForce * cohesionYForce);
-            if (cohesionMag > this.maxForce) {
-                cohesionXForce = this.maxForce * cohesionXForce/cohesionMag;
-                cohesionYForce = this.maxForce * cohesionYForce/cohesionMag;
-            }
-
-            // Scale by behaviour multiplier
-            cohesionXForce *= this.cohesionScale;
-            cohesionYForce *= this.cohesionScale;
-
-            // Add to acceleration
-            f.xAcc += cohesionXForce;
-            f.yAcc += cohesionYForce;
-        },
-        async applySeparation(f, separationX, separationY) {
-            // Force = different in velocity
-            let xForce = separationX - f.xVel;
-            let yForce = separationY - f.yVel;
-
-            // Scale to max force
-            const separationMag = Math.sqrt(xForce * xForce + yForce * yForce);
-            if (separationMag > this.maxForce) {
-                xForce = this.maxForce * xForce/separationMag;
-                yForce = this.maxForce * yForce/separationMag;
-            }
-
-            // Adjust by behaviour multipler
-            xForce *= this.separationScale;
-            yForce *= this.separationScale;
-
-            // Add to acc
-            f.xAcc += xForce;
-            f.yAcc += yForce;
-        },
-        async applyAlignment(f, alignmentX, alignmentY) {
-            // Force = different in velocity
-            let xForce = alignmentX - f.xVel;
-            let yForce = alignmentY - f.yVel;
-
-            // Scale to max force
-            const alignmentMag = Math.sqrt(xForce * xForce + yForce * yForce);
-            if (alignmentMag > this.maxForce) {
-                xForce = this.maxForce * xForce/alignmentMag;
-                yForce = this.maxForce * yForce/alignmentMag;
-            }
-
-            // Adjust by behaviour multipler
-            xForce *= this.alignmentScale;
-            yForce *= this.alignmentScale;
-
-            // Add to acc
-            f.xAcc += xForce;
-            f.yAcc += yForce;
-        },
-        async makeRipple(x, y) {
-            const canvas = this.$refs['ripple-container'];
-
-            const ripple = document.createElement("div");
-            ripple.className = "ripple";
-            ripple.style.left = x + 'px';
-            ripple.style.top = y + 'px';
-
-            ripple.addEventListener( 'animationend', function() {
-                canvas.removeChild(ripple);
-            }.bind(this));
-
-            canvas.appendChild(ripple);
-        },
-        async repelFromMouse(f) {
-            const xDist = f.x - this.mousePos.x;
-            const yDist = f.y - this.mousePos.y;
-
-            const posSquare = xDist * xDist + yDist * yDist;
-            if (posSquare < this.squareMouseEffectRadius) {
-                const xVelDelta = xDist - f.xVel;
-                const yVelDelta = yDist - f.yVel;
-
-                const velMag = Math.sqrt(xVelDelta * xVelDelta + yVelDelta * yVelDelta);
-                const maxMag = 1 - (velMag/this.mouseEffectRadius);
-                
-                const xForce = maxMag * (xVelDelta/velMag);
-                const yForce = maxMag * (yVelDelta/velMag);
-
-                f.xAcc += xForce;
-                f.yAcc += yForce;
-           }
+            this.lilypads = pads
         },
     },
-    
-    beforeDestroy() {
-        clearInterval(this.drawCycle);
-        window.removeEventListener('resize', this.resizeHandler);
-        window.removeEventListener('click', this.clickHandler);
-        window.removeEventListener('mousemove', this.mousemoveHandler);
-    }
+    beforeUnmount() {
+        window.cancelAnimationFrame(this.animationFrame)
+        window.removeEventListener('resize', this.resizeHandler)
+        window.removeEventListener('pointerdown', this.makeRipple)
+    },
 }
 </script>
 
 <style lang="scss">
-@import '../../assets/variables.scss';
+@use '../../assets/variables.scss' as *;
 
-#root {
-    background: $bg-dark-blue;
+#fish-background {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
     background: radial-gradient(circle, #022c38 0%, $bg-dark-blue 100%);
 
-    .fish-canvas {
-        .ripple {
+    .filter-definitions {
+        position: absolute;
+        width: 0;
+        height: 0;
+    }
+
+    .koi-fish-canvas {
+        z-index: 1;
+        filter: url(#fish-refraction) blur(2px) brightness(0.6);
+        opacity: 0.4;
+        pointer-events: none;
+    }
+
+    .ripple-layer {
+        z-index: 2;
+        pointer-events: none;
+
+        .fish-ripple {
             position: absolute;
             border-radius: 50%;
             animation: fish-ripple-animate 0.8s ease;
             transform: translate(-50%, -50%);
-            box-shadow: 0px 0px 10px rgba(255, 255, 255, 1),
-                        inset 0px 0px 10px rgba(255, 255, 255, 1);
+            box-shadow:
+                0 0 10px rgba(255, 255, 255, 0.8),
+                inset 0 0 10px rgba(255, 255, 255, 0.8);
         }
+    }
 
-        @keyframes fish-ripple-animate {
-            0% {
-                opacity: 0.2;
-                min-width: 0px;
-                min-height: 0px;
-            }
-            100% {
-                opacity: 0;
-                min-width: 100px;
-                min-height: 100px;
-            }
-        }
+    .lily-layer {
+        z-index: 3;
+        pointer-events: none;
+    }
+}
+
+@keyframes fish-ripple-animate {
+    0% {
+        opacity: 0.2;
+        min-width: 0;
+        min-height: 0;
+    }
+    100% {
+        opacity: 0;
+        min-width: 100px;
+        min-height: 100px;
     }
 }
 </style>

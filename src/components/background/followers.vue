@@ -43,7 +43,7 @@
 
 <script>
 export default {
-    name: 'followers',
+    name: 'followers-background',
     props: {
         maxSize: {
             type: Number,
@@ -248,7 +248,7 @@ export default {
             return newFollower;
         }
     },
-    beforeDestroy() {
+    beforeUnmount() {
         clearInterval(this.drawCycle);
         window.removeEventListener('resize', this.resizeHandler);
         window.removeEventListener('click', this.clickHandler);
@@ -258,7 +258,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../assets/variables.scss';
+@use '../../assets/variables.scss' as *;
 
 .follower-canvas {
     background-color: $bg-dark-blue;
