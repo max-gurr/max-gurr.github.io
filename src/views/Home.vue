@@ -54,6 +54,10 @@ export default {
         icon: 'fishIcon'
       },
       {
+        value: 'constellations',
+        icon: 'constellationsIcon'
+      },
+      {
         value: 'reflections',
         icon: 'reflectionsIcon'
       },
@@ -64,10 +68,6 @@ export default {
       {
         value: 'followers',
         icon: 'followersIcon'
-      },
-      {
-        value: 'constellations',
-        icon: 'constellationsIcon'
       }
     ]
   }),

@@ -3,11 +3,11 @@
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas bamboo-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
         <defs>
             <!-- Top bamboo pattern -->
-            <pattern id="bamboo-group-1" x="0" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(5, 8, 15, 0.8)">
+            <pattern id="bamboo-group-1" x="-20" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(14, 10, 20, 0.8)">
                 <Bamboo />
             </pattern>
             <!-- Back bamboo pattern -->
-            <pattern id="bamboo-group-2" x="30%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(5, 15, 16, 1)">
+            <pattern id="bamboo-group-2" x="50%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(8, 8, 14, 1)">
                 <Bamboo />
             </pattern>
         </defs>
@@ -22,9 +22,6 @@
             <circle :cx="p3.x" :cy="p3.y" :r="particleSize*0.5" :fill="'url(#layer3-gradientFill-'+index3+')'" class="particle" />        
         </g>
         
-        <!-- Back bamboo -->
-        <rect ref="back-bamboo" x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-3)" />
-
         <!-- Middle particles -->
         <g v-for="(p2, index2) in particlesLayer2" :key="'layer2-particle-'+index2" >
             <defs>
