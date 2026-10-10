@@ -248,8 +248,8 @@ export default {
 
     .koi-fish-canvas {
         z-index: 1;
-        filter: brightness(0.6);
-        opacity: 0.4;
+        filter: blur(2px);
+        opacity: 0.25;
         pointer-events: none;
     }
 
