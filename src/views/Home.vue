@@ -9,7 +9,7 @@
           <nav class="home-actions" aria-label="Portfolio pages">
             <button class="home-action" type="button" @click="showContent('about')">About me</button>
             <button class="home-action home-action--primary" type="button" @click="showContent('research')">Research</button>
-            <router-link class="home-action" to="/projects">Projects</router-link>
+            <!-- <router-link class="home-action" to="/projects">Projects</router-link> -->
           </nav>
           <a class="home-email" href="mailto:maxd.gurr@gmail.com"><em>Currently looking for Post-Doc opportunities!</em></a>
         </div>
