@@ -1,24 +1,5 @@
 <template>
     <div id="fish-background">
-        <svg class="filter-definitions" aria-hidden="true">
-            <defs>
-                <filter id="fish-refraction" x="-5%" y="-5%" width="110%" height="110%">
-                    <feTurbulence
-                        type="turbulence"
-                        baseFrequency="0.02 0.02"
-                        numOctaves="1"
-                        result="water"
-                    />
-                    <feDisplacementMap
-                        in="SourceGraphic"
-                        in2="water"
-                        scale="3"
-                        result="refracted-fish"
-                    />
-                    <feGaussianBlur in="refracted-fish" stdDeviation="1.8" />
-                </filter>
-            </defs>
-        </svg>
         <canvas ref="fishCanvas" class="canvas koi-fish-canvas"></canvas>
         <div ref="rippleContainer" class="canvas ripple-layer"></div>
         <svg
@@ -265,15 +246,9 @@ export default {
     overflow: hidden;
     background: radial-gradient(circle, #022c38 0%, $bg-dark-blue 100%);
 
-    .filter-definitions {
-        position: absolute;
-        width: 0;
-        height: 0;
-    }
-
     .koi-fish-canvas {
         z-index: 1;
-        filter: url(#fish-refraction) blur(2px) brightness(0.6);
+        filter: brightness(0.6);
         opacity: 0.4;
         pointer-events: none;
     }
