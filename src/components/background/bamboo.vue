@@ -34,7 +34,7 @@
         </g>
 
         <!-- Middle bamboo -->
-        <rect ref="middle-bamboo" x="0" y="0" width="100%" height="100%" fill="url(#bamboo-group-2)" />
+        <rect ref="middle-bamboo" x="-30" y="0" width="150%" height="100%" fill="url(#bamboo-group-2)" />
 
         <!-- Top particles -->
         <g v-for="(p1, index1) in particlesLayer1" :key="'layer1-particle-'+index1" >
