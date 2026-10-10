@@ -211,7 +211,7 @@ export default {
             this.animationTime += this.animationRate / 1000
             this.frameCount += 1
             if (this.frameCount >= this.particleSpawnFrequency) {
-                this.spawnParticle()
+                // this.spawnParticle()
                 this.frameCount = 0
             }
 
