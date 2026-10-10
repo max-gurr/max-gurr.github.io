@@ -8,25 +8,13 @@
           </div>
           <nav class="home-actions" aria-label="Portfolio pages">
             <button class="home-action" type="button" @click="showContent('about')">About me</button>
-            <button class="home-action home-action--primary" type="button" @click="showContent('cv')">Research</button>
+            <button class="home-action home-action--primary" type="button" @click="showContent('research')">Research</button>
             <router-link class="home-action" to="/projects">Projects</router-link>
           </nav>
-          <a class="home-email" href="mailto:maxd.gurr@gmail.com">maxd.gurr@gmail.com</a>
+          <a class="home-email" href="mailto:maxd.gurr@gmail.com"><em>Currently looking for Post-Doc opportunities!</em></a>
         </div>
-        <main v-else-if="activeContent === 'cv'" key="cv" class="content-page page flex-center content-page--embedded">
-          <section class="content-page__panel" aria-labelledby="cv-title">
-            <h1 id="cv-title">CV</h1>
-            <p>Curriculum vitae content coming soon.</p>
-            <button class="content-page__back" type="button" @click="showHome">Back to home</button>
-          </section>
-        </main>
-        <main v-else key="about" class="content-page page flex-center content-page--embedded">
-          <section class="content-page__panel" aria-labelledby="about-title">
-            <h1 id="about-title">About</h1>
-            <p>This is an about page.</p>
-            <button class="content-page__back" type="button" @click="showHome">Back to home</button>
-          </section>
-        </main>
+        <ResearchContent v-else-if="activeContent === 'research'" key="research" @back="showHome" />
+        <AboutContent v-else key="about" @back="showHome" />
       </Transition>
     </div>
     <component v-bind:is="selectedBackground" />
@@ -36,6 +24,8 @@
 
 <script>
 import backgroundSelect from '@/components/background/select.vue';
+import AboutContent from '@/components/AboutContent.vue';
+import ResearchContent from '@/components/ResearchContent.vue';
 // Backgrounds:
 import constellations from '@/components/background/constellations.vue';
 import followers from '@/components/background/followers.vue';
@@ -47,6 +37,8 @@ export default {
   name: 'home-page',
   components: {
     backgroundSelect,
+    AboutContent,
+    ResearchContent,
     constellations,
     followers,
     fish,
