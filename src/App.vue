@@ -1,12 +1,68 @@
 <template>
   <div id="app">
-    <router-view/>
+    <router-view v-slot="{ Component }">
+        <Transition name="content-fade" mode="out-in">
+            <component :is="Component" />
+        </Transition>
+    </router-view>
+    <backgroundSelect :backgrounds="backgroundComponents" @click="setBackground"></backgroundSelect>
+    <component v-bind:is="selectedBackground" />
   </div>
 </template>
 
 <script>
+import backgroundSelect from '@/components/background/select.vue';
+
+// Backgrounds:
+import constellations from '@/components/background/constellations.vue';
+import followers from '@/components/background/followers.vue';
+import fish from '@/components/background/fish.vue';
+import reflections from '@/components/background/reflections.vue';
+import bamboo from '@/components/background/bamboo.vue';
+
 export default {
   name: 'App',
+  components: {
+    backgroundSelect,
+    constellations,
+    followers,
+    fish,
+    reflections,
+    bamboo
+  },
+  data: () => ({
+    selectedBackground: null,
+    backgroundComponents: [ 
+      {
+        value: 'fish',
+        icon: 'fishIcon'
+      },
+      {
+        value: 'constellations',
+        icon: 'constellationsIcon'
+      },
+      {
+        value: 'reflections',
+        icon: 'reflectionsIcon'
+      },
+      {
+        value: 'bamboo',
+        icon: 'bambooIcon'
+      },
+      {
+        value: 'followers',
+        icon: 'followersIcon'
+      }
+    ]
+  }),
+  methods: {
+    setBackground(background) {
+      this.selectedBackground = background;
+    }
+  },
+  mounted() {
+    this.selectedBackground = this.backgroundComponents[0].value;
+  }
 }
 </script>
 
@@ -25,6 +81,18 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   font-size: 16px;
+
+  
+  .content-fade-enter-active,
+  .content-fade-leave-active {
+    transition: opacity 0.3s ease;
+  }
+
+  .content-fade-enter-from,
+  .content-fade-leave-to {
+    opacity: 0;
+  }
+
 }
 
 .page {

@@ -2,7 +2,7 @@
   <main class="content-page page flex-center content-page--embedded sectioned-content">
     <header class="sectioned-content__topbar">
       <h1>{{ title }}</h1>
-      <button class="content-page__back" type="button" @click="$emit('back')">Back</button>
+      <router-link to="/"><button class="content-page__back" type="button">Back</button></router-link>
     </header>
     <div ref="scroller" class="sectioned-content__scroll">
       <div class="sectioned-content__body"><slot /></div>
@@ -34,7 +34,6 @@ export default {
       required: true
     }
   },
-  emits: ['back'],
   data: () => ({
     activeSection: ''
   }),

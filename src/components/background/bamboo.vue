@@ -1,60 +1,65 @@
 <template>
-<div>
-    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas bamboo-canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
+<!--
+    Layers, back to front. Each bamboo layer is its own element so the mouse parallax is a
+    compositor-only transform instead of a repaint of a full-screen pattern fill.
+      1. back particles   (canvas)  layers 3 + 2
+      2. middle bamboo    (svg)
+      3. front particles  (canvas)  layer 1
+      4. top bamboo       (svg)
+-->
+<div class="canvas bamboo-canvas" :style="{ width: width + 'px', height: height + 'px' }">
+    <canvas ref="back-particles" class="bamboo-layer"></canvas>
+
+    <svg ref="middle-layer" class="bamboo-layer bamboo-parallax" xmlns="http://www.w3.org/2000/svg" :viewBox="'0 0 ' + width + ' ' + height" :width="width" :height="height">
         <defs>
-            <!-- Top bamboo pattern -->
-            <pattern id="bamboo-group-1" x="-20" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(14, 10, 20, 0.8)">
-                <Bamboo />
-            </pattern>
             <!-- Back bamboo pattern -->
-            <pattern id="bamboo-group-2" x="50%" y="0" width="100%" height="100%" patternUnits="userSpaceOnUse" fill="rgba(8, 8, 14, 1)">
+            <pattern id="bamboo-group-2" :x="width / 2" y="0" :width="width" :height="height" patternUnits="userSpaceOnUse" fill="rgba(8, 8, 14, 1)">
                 <Bamboo />
             </pattern>
         </defs>
-        <!-- Back particles -->
-        <g v-for="(p3, index3) in particlesLayer3" :key="'layer3-particle-'+index3" >
-            <defs>
-                <radialGradient :id="'layer3-gradientFill-'+index3">
-                    <stop offset="25%" :stop-color="'rgba(255, 150, 100, '+(0.6)+')'" />
-                    <stop offset="100%" stop-color="transparent" />
-                </radialGradient>
-            </defs>
-            <circle :cx="p3.x" :cy="p3.y" :r="particleSize*0.5" :fill="'url(#layer3-gradientFill-'+index3+')'" class="particle" />        
-        </g>
-        
-        <!-- Middle particles -->
-        <g v-for="(p2, index2) in particlesLayer2" :key="'layer2-particle-'+index2" >
-            <defs>
-                <radialGradient :id="'layer2-gradientFill-'+index2">
-                    <stop offset="25%" :stop-color="'rgba(240, 100, 180, '+(maxOpacity/2)+')'" />
-                    <stop offset="100%" stop-color="transparent" />
-                </radialGradient>
-            </defs>
-            <circle :cx="p2.x" :cy="p2.y" :r="particleSize*0.75" :fill="'url(#layer2-gradientFill-'+index2+')'" class="particle" />        
-        </g>
+        <!-- Extends left of the screen so the layer never shows an edge as it shifts right -->
+        <rect :x="-parallaxMargin" y="0" :width="width + parallaxMargin" :height="height" fill="url(#bamboo-group-2)" />
+    </svg>
 
-        <!-- Middle bamboo -->
-        <rect ref="middle-bamboo" x="-30" y="0" width="150%" height="100%" fill="url(#bamboo-group-2)" />
+    <canvas ref="front-particles" class="bamboo-layer"></canvas>
 
-        <!-- Top particles -->
-        <g v-for="(p1, index1) in particlesLayer1" :key="'layer1-particle-'+index1" >
-            <defs>
-                <radialGradient :id="'layer1-gradientFill-'+index1">
-                    <stop offset="25%" :stop-color="'rgba('+(100 + 100*(p1.x/width))+', 100, '+(50*(p1.x/height))+', '+(maxOpacity)+')'" />
-                    <stop offset="100%" stop-color="transparent" />
-                </radialGradient>
-            </defs>
-            <circle :cx="p1.x" :cy="p1.y" :r="particleSize" :fill="'url(#layer1-gradientFill-'+index1+')'" class="particle" />        
-        </g>
-        
-        <!-- Top bamboo -->
-        <rect ref="top-bamboo" x="0" y="0%" width="100%" height="100%" fill="url(#bamboo-group-1)" />
+    <svg ref="top-layer" class="bamboo-layer bamboo-parallax" xmlns="http://www.w3.org/2000/svg" :viewBox="'0 0 ' + width + ' ' + height" :width="width" :height="height">
+        <defs>
+            <!-- Top bamboo pattern -->
+            <pattern id="bamboo-group-1" x="-20" y="0" :width="width" :height="height" patternUnits="userSpaceOnUse" fill="rgba(14, 10, 20, 0.8)">
+                <Bamboo />
+            </pattern>
+        </defs>
+        <rect :x="-parallaxMargin" y="0" :width="width + parallaxMargin" :height="height" fill="url(#bamboo-group-1)" />
     </svg>
 </div>
 </template>
 
 <script>
 import Bamboo from '../../assets/background/bamboo.svg';
+
+const MAX_FPS = 30;                   // particles drift 0.6-1.7px per frame, so 30fps looks the same as 60
+const FRAME_INTERVAL = 1000 / MAX_FPS;
+const TICKS_PER_SECOND = 25;          // the original loop ran every 40ms; speeds were defined per tick
+const MAX_VEL = 2;                    // px per tick for the front layer; slower layers divide this
+const MAX_OPACITY = 0.3;
+const NUM_PARTICLES = 15;             // per layer
+const SIZE_DIVIDER = 15;
+// The particles are soft gradients, so half resolution is indistinguishable and 4x cheaper to fill
+const RENDER_SCALE = 0.5;
+const PARALLAX_TOP = 0.02;            // fraction of the screen width the layers can shift
+const PARALLAX_MIDDLE = 0.03;
+const RESIZE_DEBOUNCE = 150;
+
+// Soft round glow: flat colour in the centre fading to transparent at the edge
+function drawGlow(ctx, x, y, radius, r, g, b, a) {
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    grad.addColorStop(0.25, `rgba(${r}, ${g}, ${b}, ${a})`);
+    grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+}
+
 export default {
     name: 'bamboo-background',
     components: {
@@ -62,121 +67,175 @@ export default {
     },
     props: {
     },
+    // Only what the template needs. Particles and the loop are deliberately NOT reactive.
     data: () => ({
-        particlesLayer1: [],
-        particlesLayer2: [],
-        particlesLayer3: [],
         width: window.innerWidth,
-        height: window.innerHeight,
-        drawCycle: null,
-        maxOpacity: 0.3,
-        maxVel: 2,
-        particleSize: 0,
-        numParticles: 15,
-        animationRate: 40,
+        height: window.innerHeight
     }),
+    computed: {
+        parallaxMargin() {
+            return Math.ceil(Math.max(PARALLAX_TOP, PARALLAX_MIDDLE) * this.width);
+        }
+    },
     created() {
-        window.addEventListener('resize', this.resizeHandler);
-        window.addEventListener('mousemove', this.mousemoveHandler);
+        this.layers = [[], [], []];     // [front, middle, back]
+        this.particleSize = 0;
+        this.ctxBack = null;
+        this.ctxFront = null;
+        this.raf = 0;
+        this.lastFrame = 0;
+        this.resizeTimer = 0;
+        this.mouseX = 0;
+        this.parallaxRaf = 0;
+        this.reduceMotion = false;
     },
     mounted() {
-        // Initialise responsive variables
-        this.resizeHandler();
+        this.reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        this.ctxBack = this.$refs['back-particles'].getContext('2d');
+        this.ctxFront = this.$refs['front-particles'].getContext('2d');
 
-        // Start animation
-        this.drawCycle = setInterval(this.draw.bind(this), this.animationRate);
+        window.addEventListener('resize', this.onResize);
+        if (!this.reduceMotion) {
+            window.addEventListener('mousemove', this.onMouseMove, { passive: true });
+        }
+
+        this.resize();
+
+        if (!this.reduceMotion) {
+            this.lastFrame = performance.now();
+            this.raf = requestAnimationFrame(this.frame);
+        }
+    },
+    beforeUnmount() {
+        cancelAnimationFrame(this.raf);
+        cancelAnimationFrame(this.parallaxRaf);
+        clearTimeout(this.resizeTimer);
+        window.removeEventListener('resize', this.onResize);
+        window.removeEventListener('mousemove', this.onMouseMove);
     },
     methods: {
-        async draw() {
-            await Promise.all(this.particlesLayer1.map(async (p) => {
-                this.updateParticle(p, this.particleSize*1.5);          
-            }));
-            await Promise.all(this.particlesLayer2.map(async (p) => {
-                this.updateParticle(p, this.particleSize);          
-            }));
-            await Promise.all(this.particlesLayer3.map(async (p) => {
-                this.updateParticle(p, this.particleSize);          
-            }));
+        /* ---------- Resize ---------- */
+        onResize() {
+            clearTimeout(this.resizeTimer);
+            this.resizeTimer = setTimeout(this.resize, RESIZE_DEBOUNCE);
         },
-        async resizeHandler() {
+        resize() {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
+            this.particleSize = Math.min(this.width / SIZE_DIVIDER, this.height / SIZE_DIVIDER);
 
-            const divider = 15;
-            this.particleSize = Math.min(this.width/divider, this.height/divider);
-            this.makeParticles();
-        },
-        async mousemoveHandler(e) {
-            const topTranslateX = (1 - e.clientX/this.width) * 2;
-            const middleTranslateX = (e.clientX/this.width) * 3;
-            const backTranslateX = (1 - e.clientX/this.width)
+            for (const [ref, ctx] of [['back-particles', this.ctxBack], ['front-particles', this.ctxFront]]) {
+                const canvas = this.$refs[ref];
+                canvas.width = Math.round(this.width * RENDER_SCALE);
+                canvas.height = Math.round(this.height * RENDER_SCALE);
+                canvas.style.width = this.width + 'px';
+                canvas.style.height = this.height + 'px';
+                ctx.setTransform(RENDER_SCALE, 0, 0, RENDER_SCALE, 0, 0);   // must come after resizing
+            }
 
-            // const topTranslateY = (1 - e.clientY/this.height) * 2;
-            // const middleTranslateY = (e.clientY/this.height) * 4;
-            // const backTranslateY = (1 - e.clientY/this.height) * 6;
-            const middleTranslateY = 0;
-            const backTranslateY = 0;
+            // Keep existing particles on resize; they wrap into the new bounds on their own
+            if (this.layers[0].length === 0) {
+                this.layers = [1, 2, 3].map((index) => this.makeParticleLayer(index));
+            }
 
-            this.$refs['top-bamboo'].style.transform = `translateX(${topTranslateX}%)`;
-            this.$refs['middle-bamboo'].style.transform = `translate(${middleTranslateX}%, ${middleTranslateY}%)`;
-            this.$refs['back-bamboo'].style.transform = `translate(${backTranslateX}%, ${backTranslateY}%)`;
+            // With reduced motion there's no loop, so draw a single still frame
+            if (this.reduceMotion) this.render();
         },
-        makeParticles() {
-            this.particlesLayer1 = this.makeParticleLayer(1, this.numParticles);
-            this.particlesLayer2 = this.makeParticleLayer(2, this.numParticles);
-            this.particlesLayer3 = this.makeParticleLayer(3, this.numParticles);
+
+        /* ---------- Mouse parallax ---------- */
+        onMouseMove(e) {
+            // Record the position and apply it once per frame, however many events fire
+            this.mouseX = e.clientX;
+            if (!this.parallaxRaf) {
+                this.parallaxRaf = requestAnimationFrame(this.applyParallax);
+            }
         },
-        makeParticleLayer(index, numParticles) {
+        applyParallax() {
+            this.parallaxRaf = 0;
+            const w = this.width;
+            const top = PARALLAX_TOP * (w - this.mouseX);          // (1 - x/w) * 2% of the width
+            const middle = PARALLAX_MIDDLE * this.mouseX;          // (x/w) * 3% of the width
+
+            this.$refs['top-layer'].style.transform = `translate3d(${top}px, 0, 0)`;
+            this.$refs['middle-layer'].style.transform = `translate3d(${middle}px, 0, 0)`;
+        },
+
+        /* ---------- Particles ---------- */
+        makeParticleLayer(index) {
             const particles = [];
+            const speed = (MAX_VEL / index) * TICKS_PER_SECOND;     // px per second
 
-            for (let i = 0; i < numParticles; i++) {
-                const xPos = Math.random()*this.width;
-                const yPos = Math.random()*this.height;
-                var xVel = Math.sin(Math.random()*360);
-                var yVel = Math.sin(Math.random()*360);
-
-                if (xVel === 0 && yVel === 0) {
-                    xVel = 1;
-                    yVel = -0.6;
-                }
-
-                const scale = this.maxVel/index;
-                const mag = Math.sqrt(xVel * xVel + yVel * yVel);
-                xVel *= scale/mag;
-                yVel *= scale/mag;
-
+            for (let i = 0; i < NUM_PARTICLES; i++) {
+                const angle = Math.random() * Math.PI * 2;
                 particles.push({
-                    x: xPos,
-                    y: yPos,
-                    xVel: xVel,
-                    yVel: yVel,
-                    size: 0
+                    x: Math.random() * this.width,
+                    y: Math.random() * this.height,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed
                 });
             }
 
             return particles;
         },
-        async updateParticle (p, range) {
-            p.x += p.xVel;
-            p.y += p.yVel;
+        frame(now) {
+            this.raf = requestAnimationFrame(this.frame);
 
-            if (p.x < -range/2) {
-                p.x += (this.width + range);
-            } else if (p.x > this.width + range/2) {
-                p.x -= (this.width + range);
-            }
+            const elapsed = now - this.lastFrame;
+            if (elapsed < FRAME_INTERVAL - 2) return;   // skip frames to hold MAX_FPS
+            this.lastFrame = now;
 
-            if (p.y < -range/2) {
-                p.y += (this.height + range);
-            } else if (p.y > this.height + range/2) {
-                p.y -= (this.height + range);
+            // Clamp so returning to a backgrounded tab doesn't make particles jump
+            this.update(Math.min(elapsed, 100) / 1000);
+            this.render();
+        },
+        update(dt) {
+            const { width, height, particleSize: size, layers } = this;
+            const ranges = [size * 1.5, size, size];
+
+            for (let l = 0; l < layers.length; l++) {
+                const range = ranges[l];
+                const particles = layers[l];
+
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+                    p.x += p.vx * dt;
+                    p.y += p.vy * dt;
+
+                    if (p.x < -range / 2) p.x += width + range;
+                    else if (p.x > width + range / 2) p.x -= width + range;
+
+                    if (p.y < -range / 2) p.y += height + range;
+                    else if (p.y > height + range / 2) p.y -= height + range;
+                }
             }
         },
-    },
-    beforeUnmount() {
-        clearInterval(this.drawCycle);
-        window.removeEventListener('resize', this.resizeHandler);
-        window.removeEventListener('mousemove', this.mousemoveHandler);
+        render() {
+            const { ctxBack, ctxFront, width, height, particleSize: size } = this;
+            const [front, middle, back] = this.layers;
+
+            ctxBack.clearRect(0, 0, width, height);
+            ctxFront.clearRect(0, 0, width, height);
+
+            // Behind the middle bamboo: back layer, then middle layer
+            for (let i = 0; i < back.length; i++) {
+                drawGlow(ctxBack, back[i].x, back[i].y, size * 0.5, 200, 120, 100, 0.6);
+            }
+            for (let i = 0; i < middle.length; i++) {
+                drawGlow(ctxBack, middle[i].x, middle[i].y, size * 0.75, 240, 100, 180, MAX_OPACITY / 2);
+            }
+
+            // Between the middle and top bamboo. Colour shifts with position.
+            for (let i = 0; i < front.length; i++) {
+                const p = front[i];
+                drawGlow(
+                    ctxFront, p.x, p.y, size,
+                    Math.round((p.x / width)),
+                    50,
+                    Math.round((50 * p.x / height)),
+                    MAX_OPACITY
+                );
+            }
+        }
     }
 }
 </script>
@@ -186,5 +245,20 @@ export default {
 
 .bamboo-canvas {
     background: $bg-dark-green;
+    // Clips the bamboo layers that extend past the screen edge for the parallax
+    overflow: hidden;
+
+    .bamboo-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+    }
+
+    // Own compositor layers: JS only changes their transform, so they are never repainted
+    .bamboo-parallax {
+        overflow: visible;
+        will-change: transform;
+    }
 }
 </style>

@@ -93,10 +93,19 @@
 </template>
 
 <script>
-import { markRaw } from 'vue'
 import { createKoiSchool } from './koiFish.js'
 
 const DRAW_SCALE = 1.25
+const FISH_SCALE = 1.5               // extra per-fish scale, applied around each fish's centre
+// Backing-store pixels per CSS pixel. The canvas is blurred by 2px in CSS, so retina
+// resolution is invisible. 1 is visually identical and 4x cheaper than DPR 2.
+const RENDER_SCALE = 1
+const UPDATE_HZ = 60                 // simulation rate, independent of the display's refresh rate
+const STEP_MS = 1000 / UPDATE_HZ
+const MAX_STEPS_PER_FRAME = 5        // stops a catch-up spiral after a long pause
+const RIPPLE_CHANCE_PER_STEP = 0.0015
+const MAX_RIPPLES = 12
+const RESIZE_DEBOUNCE = 150
 
 export default {
     name: 'fish-background',
@@ -110,97 +119,156 @@ export default {
             default: 0.25,
         },
     },
+    // Only what the template needs. Everything the animation loop touches is non-reactive.
     data: () => ({
         width: window.innerWidth,
         height: window.innerHeight,
-        pixelRatio: 1,
-        context: null,
-        fish: markRaw([]),
-        animationFrame: null,
         lilypads: [],
     }),
+    created() {
+        this.fish = []
+        this.ctx = null
+        this.canvasWidth = 0
+        this.canvasHeight = 0
+        this.worldWidth = 0
+        this.worldHeight = 0
+        this.raf = 0
+        this.lastFrame = 0
+        this.accumulator = 0
+        this.resizeTimer = 0
+        this.reduceMotion = false
+    },
     mounted() {
-        window.addEventListener('resize', this.resizeHandler)
-        window.addEventListener('pointerdown', this.makeRipple)
-        this.resizeHandler()
-        this.animationFrame = window.requestAnimationFrame(this.animate)
+        this.ctx = this.$refs.fishCanvas.getContext('2d')
+        this.reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+        window.addEventListener('resize', this.onResize)
+        window.addEventListener('pointerdown', this.makeRipple, { passive: true })
+
+        this.resize()
+
+        if (!this.reduceMotion) {
+            this.lastFrame = performance.now()
+            this.raf = requestAnimationFrame(this.frame)
+        }
+    },
+    beforeUnmount() {
+        cancelAnimationFrame(this.raf)
+        clearTimeout(this.resizeTimer)
+        window.removeEventListener('resize', this.onResize)
+        window.removeEventListener('pointerdown', this.makeRipple)
     },
     methods: {
-        resizeHandler() {
+        /* ---------- Setup ---------- */
+        onResize() {
+            clearTimeout(this.resizeTimer)
+            this.resizeTimer = setTimeout(this.resize, RESIZE_DEBOUNCE)
+        },
+        resize() {
             this.width = window.innerWidth
             this.height = window.innerHeight
-            this.pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
 
             const canvas = this.$refs.fishCanvas
-            canvas.width = Math.round(this.width * this.pixelRatio)
-            canvas.height = Math.round(this.height * this.pixelRatio)
-            this.context = canvas.getContext('2d')
+            this.canvasWidth = Math.round(this.width * RENDER_SCALE)
+            this.canvasHeight = Math.round(this.height * RENDER_SCALE)
+            canvas.width = this.canvasWidth
+            canvas.height = this.canvasHeight
+            canvas.style.width = `${this.width}px`
+            canvas.style.height = `${this.height}px`
 
-            const worldWidth = this.width / DRAW_SCALE
-            const worldHeight = this.height / DRAW_SCALE
+            this.worldWidth = this.width / DRAW_SCALE
+            this.worldHeight = this.height / DRAW_SCALE
             const fishCount = Math.max(6, Math.min(12, Math.round(this.width / 85)))
-            this.fish = markRaw(createKoiSchool(this.context, worldWidth, worldHeight, fishCount))
+            this.fish = createKoiSchool(this.ctx, this.worldWidth, this.worldHeight, fishCount)
             this.makeLilypads()
-        },
-        animate() {
-            const { context } = this
-            context.setTransform(1, 0, 0, 1, 0, 0)
-            context.clearRect(0, 0, this.$refs.fishCanvas.width, this.$refs.fishCanvas.height)
-            context.setTransform(
-                this.pixelRatio * DRAW_SCALE,
-                0,
-                0,
-                this.pixelRatio * DRAW_SCALE,
-                0,
-                0,
-            )
 
-            for (let first = 0; first < this.fish.length; first += 1) {
-                const fish = this.fish[first]
-                for (let second = first + 1; second < this.fish.length; second += 1) {
-                    fish.flockTo(this.fish[second])
-                    this.fish[second].flockTo(fish)
+            // With reduced motion there's no loop, so draw a single still frame
+            if (this.reduceMotion) this.render()
+        },
+
+        /* ---------- Animation loop ---------- */
+        frame(now) {
+            this.raf = requestAnimationFrame(this.frame)
+
+            // Fixed timestep: the simulation advances at UPDATE_HZ whether the display runs
+            // at 60, 120 or 144Hz, and a throttled or backgrounded tab can't cause a jump.
+            this.accumulator += Math.min(now - this.lastFrame, 100)
+            this.lastFrame = now
+
+            let steps = 0
+            while (this.accumulator >= STEP_MS - 1 && steps < MAX_STEPS_PER_FRAME) {
+                this.step()
+                this.accumulator -= STEP_MS
+                steps += 1
+            }
+            if (steps === MAX_STEPS_PER_FRAME) this.accumulator = 0
+
+            // Only redraw when something actually moved
+            if (steps > 0) this.render()
+        },
+        step() {
+            const fish = this.fish
+            const count = fish.length
+
+            for (let first = 0; first < count; first += 1) {
+                for (let second = first + 1; second < count; second += 1) {
+                    fish[first].flockTo(fish[second])
+                    fish[second].flockTo(fish[first])
                 }
             }
 
-            const worldWidth = this.width / DRAW_SCALE
-            const worldHeight = this.height / DRAW_SCALE
-            this.fish.forEach((fish) => {
-                fish.applyFlocking()
-                fish.resetFlocking()
-                fish.update(worldWidth, worldHeight)
-                context.save()
-                context.translate(fish.x, fish.y)
-                context.scale(1.5, 1.5)
-                context.translate(-fish.x, -fish.y)
-                fish.draw()
-                context.restore()
-            })
+            for (let i = 0; i < count; i += 1) {
+                fish[i].applyFlocking()
+                fish[i].resetFlocking()
+                fish[i].update(this.worldWidth, this.worldHeight)
+            }
 
-            if (Math.random() < 0.0015) {
+            if (Math.random() < RIPPLE_CHANCE_PER_STEP) {
                 this.makeRipple({
                     clientX: Math.random() * this.width,
                     clientY: Math.random() * this.height,
                 })
             }
-            this.animationFrame = window.requestAnimationFrame(this.animate)
         },
+        render() {
+            const ctx = this.ctx
+            const fish = this.fish
+            const base = RENDER_SCALE * DRAW_SCALE
+            const scale = base * FISH_SCALE
+            const offset = base - scale
+
+            ctx.setTransform(1, 0, 0, 1, 0, 0)
+            ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
+
+            for (let i = 0; i < fish.length; i += 1) {
+                const f = fish[i]
+                ctx.save()
+                // One matrix instead of translate/scale/translate: scales by FISH_SCALE around the fish
+                ctx.setTransform(scale, 0, 0, scale, offset * f.x, offset * f.y)
+                f.draw()
+                ctx.restore()
+            }
+        },
+
+        /* ---------- Ripples ---------- */
         makeRipple(event) {
+            const container = this.$refs.rippleContainer
+            if (container.childElementCount >= MAX_RIPPLES) return   // ignore click-spam
+
             const ripple = document.createElement('div')
             ripple.className = 'fish-ripple'
             ripple.style.left = `${event.clientX}px`
             ripple.style.top = `${event.clientY}px`
-
-            const container = this.$refs.rippleContainer
-            container.appendChild(ripple)
             ripple.addEventListener('animationend', () => ripple.remove(), { once: true })
+            container.appendChild(ripple)
         },
+
+        /* ---------- Lily pads ---------- */
         makeLilypads() {
             const size = Math.min(this.width / 8, this.height / 8)
             const pads = []
-            const maxAttempts = this.numLilypads * 20
 
-            for (let index = 0; index < this.numLilypads && index < maxAttempts; index += 1) {
+            for (let index = 0; index < this.numLilypads; index += 1) {
                 const padSize = size * (0.75 + Math.random() * 0.5)
                 let pad
                 let attempts = 0
@@ -210,7 +278,7 @@ export default {
                         y: size + Math.random() * Math.max(0, this.height - size * 2),
                         size: padSize,
                         rotation: Math.round(Math.random() * 365),
-                        flower: Math.random() < this.lilypadChance || index == 0,
+                        flower: Math.random() < this.lilypadChance || index === 0,
                     }
                     attempts += 1
                 } while (
@@ -227,11 +295,6 @@ export default {
 
             this.lilypads = pads
         },
-    },
-    beforeUnmount() {
-        window.cancelAnimationFrame(this.animationFrame)
-        window.removeEventListener('resize', this.resizeHandler)
-        window.removeEventListener('pointerdown', this.makeRipple)
     },
 }
 </script>
@@ -259,6 +322,9 @@ export default {
 
         .fish-ripple {
             position: absolute;
+            // Fixed final size; the animation only scales it, so it stays on the compositor
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             animation: fish-ripple-animate 0.8s ease;
             transform: translate(-50%, -50%);
@@ -277,13 +343,11 @@ export default {
 @keyframes fish-ripple-animate {
     0% {
         opacity: 0.2;
-        min-width: 0;
-        min-height: 0;
+        transform: translate(-50%, -50%) scale(0);
     }
     100% {
         opacity: 0;
-        min-width: 100px;
-        min-height: 100px;
+        transform: translate(-50%, -50%) scale(1);
     }
 }
 </style>

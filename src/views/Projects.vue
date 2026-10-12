@@ -73,7 +73,6 @@ export default {
   align-items: stretch;
   padding: 0;
   overflow: hidden;
-  background: radial-gradient(circle at center, #022c38 0%, #000014 75%);
 
   &__header {
     z-index: 2;
