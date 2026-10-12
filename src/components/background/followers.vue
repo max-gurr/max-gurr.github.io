@@ -1,47 +1,54 @@
 <template>
     <div class="canvas follower-canvas" ref="canvasContainer">
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + this.width + ' ' + this.height">
-            <g v-for="(f, followerIndex) in followers" :key="'follower-'+followerIndex">
-                <defs>
-                    <radialGradient :id="'gradientFill-'+followerIndex">
-                        <stop offset="30%" :stop-color="'rgba('+(100 + 80*(f.xAcc+f.yAcc))+', '+ (50 + 155*f.x/width)+', '+(50 + 155*(f.y/height))+', 0.20)'" />
-                        <stop offset="70%" stop-color="transparent" />
-                    </radialGradient>
-                </defs>
-            
-                <circle class="follower" :cx="f.x" :cy="f.y" :r="f.size" :fill="'url(#gradientFill-'+followerIndex+')'"/>
-            </g>
-            <g>
-                <!-- Static background -->
-                <defs>
-                    <radialGradient id='f1'>
-                        <stop offset="0%" stop-color="transparent" />
-                        <stop offset="70%" stop-color="rgba(100, 100, 180, 0.125)" />
-                        <stop offset="100%" stop-color="transparent" />
-                    </radialGradient>
-                    <radialGradient id='f2'>
-                        <stop offset="0%" stop-color="transparent" />
-                        <stop offset="70%" stop-color="rgba(50, 200, 100, 0.125)" />
-                        <stop offset="100%" stop-color="transparent" />
-                    </radialGradient>
-                    <radialGradient id='f3'>
-                        <stop offset="0%" stop-color="transparent" />
-                        <stop offset="70%" stop-color="rgba(200, 100, 125, 0.125)" />
-                        <stop offset="100%" stop-color="transparent" />
-                    </radialGradient>
-                </defs>
-                <!-- Blue circle -->
-                <circle :cx="this.width/1.15" :cy="this.height/4" :r="Math.max(this.width/2.8, this.height/2)" fill="url(#f1)" />
-                <!-- Green circle -->
-                <circle :cx="this.width/10" :cy="this.height/6" :r="Math.max(this.width/3, this.height/2.4)" fill="url(#f2)" />
-                <!-- Red circle -->
-                <circle :cx="this.width/2.2" :cy="this.height" :r="Math.max(this.width/3, this.height/2.2)" fill="url(#f3)" />
-            </g>
+        <!-- Followers: drawn imperatively, no Vue reactivity involved -->
+        <canvas class="canvas" ref="followerCanvas"></canvas>
+
+        <!-- Static background. Only re-renders when the window size changes -->
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="canvas" :viewBox="'0 0 ' + width + ' ' + height">
+            <defs>
+                <radialGradient id='f1'>
+                    <stop offset="0%" stop-color="transparent" />
+                    <stop offset="70%" stop-color="rgba(100, 100, 180, 0.125)" />
+                    <stop offset="100%" stop-color="transparent" />
+                </radialGradient>
+                <radialGradient id='f2'>
+                    <stop offset="0%" stop-color="transparent" />
+                    <stop offset="70%" stop-color="rgba(50, 200, 100, 0.125)" />
+                    <stop offset="100%" stop-color="transparent" />
+                </radialGradient>
+                <radialGradient id='f3'>
+                    <stop offset="0%" stop-color="transparent" />
+                    <stop offset="70%" stop-color="rgba(200, 100, 125, 0.125)" />
+                    <stop offset="100%" stop-color="transparent" />
+                </radialGradient>
+            </defs>
+            <!-- Blue circle -->
+            <circle :cx="width/1.15" :cy="height/4" :r="Math.max(width/2.8, height/2)" fill="url(#f1)" />
+            <!-- Green circle -->
+            <circle :cx="width/10" :cy="height/6" :r="Math.max(width/3, height/2.4)" fill="url(#f2)" />
+            <!-- Red circle -->
+            <circle :cx="width/2.2" :cy="height" :r="Math.max(width/3, height/2.2)" fill="url(#f3)" />
         </svg>
     </div>
 </template>
 
 <script>
+const MAX_FPS = 30;                   // followers move ~1.3px per frame, so 30fps looks the same as 60
+const FRAME_INTERVAL = 1000 / MAX_FPS;
+const TICKS_PER_SECOND = 25;          // the original loop ran every 40ms; all physics is tuned per tick
+const MAX_VEL = 1.6;                  // px per tick
+const MAX_FORCE = 0.5;
+const FOLLOWER_OPACITY = 0.2;
+const BLUR_ADJUSTMENT = 4;            // how close to an edge a follower gets before bouncing
+const SIZE_DIVIDER = 3;
+// The followers are huge, soft gradients, so a quarter of the resolution is indistinguishable
+// and 16x cheaper to fill. Raise towards 1 if you ever see banding.
+const RENDER_SCALE = 0.25;
+const MAX_RIPPLES = 8;
+const RESIZE_DEBOUNCE = 150;
+
+const clampChannel = (v) => Math.max(0, Math.min(255, Math.round(v)));
+
 export default {
     name: 'followers-background',
     props: {
@@ -58,201 +65,252 @@ export default {
             default: 200
         }
     },
+    // Only what the template needs. Followers and the loop are deliberately NOT reactive.
     data: () => ({
         width: window.innerWidth,
-        height: window.innerHeight,
-        drawCycle: null,
-        followers: [],
-        maxVel: 1.6,
-        maxForce: 0.5,
-        mouseX: 0,
-        mouseY: 0,
-        squareMouseRadius: 0,
-        size: 0,
-        frameRate: 40,
-        followerOpacity: 0.2
+        height: window.innerHeight
     }),
     created() {
-        window.addEventListener('resize', this.resizeHandler);
-        window.addEventListener('mousemove', this.mousemoveHandler);
-        window.addEventListener('click', this.clickHandler);
+        this.followers = [];
+        this.size = 0;
+        this.ctx = null;
+        this.raf = 0;
+        this.lastFrame = 0;
+        this.resizeTimer = 0;
+        this.mouseX = 0;
+        this.mouseY = 0;
+        this.mouseMoved = false;
+        this.reduceMotion = false;
     },
     mounted() {
-        this.squareMouseRadius = this.mouseRadius * this.mouseRadius;
-        this.resizeHandler();
+        this.reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        this.ctx = this.$refs.followerCanvas.getContext('2d');
 
-        this.drawCycle = setInterval(this.draw.bind(this), this.frameRate);
-        // window.setTimeout(window.requestAnimationFrame(this.draw.bind(this)), this.frameRate);
+        window.addEventListener('resize', this.onResize);
+        if (!this.reduceMotion) {
+            window.addEventListener('mousemove', this.onMouseMove, { passive: true });
+            window.addEventListener('click', this.onClick);
+        }
+
+        this.resize();
+
+        if (!this.reduceMotion) {
+            this.lastFrame = performance.now();
+            this.raf = requestAnimationFrame(this.frame);
+        }
+    },
+    beforeUnmount() {
+        cancelAnimationFrame(this.raf);
+        clearTimeout(this.resizeTimer);
+        window.removeEventListener('resize', this.onResize);
+        window.removeEventListener('mousemove', this.onMouseMove);
+        window.removeEventListener('click', this.onClick);
     },
     methods: {
-        async draw() {
-            await Promise.all(this.followers.map(async (f) => {
-                this.updateFollower(f);
-                if (this.mouseX > 0 || this.mouseY > 0) {
-                    this.pointTowardsMouse(f);
-                }
-            }));
-
-            // Reset mouse attractor point
-            this.mouseX = 0;
-            this.mouseY = 0;
+        /* ---------- Resize ---------- */
+        onResize() {
+            clearTimeout(this.resizeTimer);
+            this.resizeTimer = setTimeout(this.resize, RESIZE_DEBOUNCE);
         },
-        resizeHandler() {
+        resize() {
+            const previousWidth = this.width;
+            const previousHeight = this.height;
+            const previousSize = this.size;
+
             this.width = window.innerWidth;
             this.height = window.innerHeight;
+            this.size = Math.min(this.maxSize, Math.min(this.width / SIZE_DIVIDER, this.height / SIZE_DIVIDER));
 
-            const divider = 3;
-            this.size = Math.min(this.maxSize, Math.min(this.width/divider, this.height/divider));
+            const canvas = this.$refs.followerCanvas;
+            canvas.width = Math.round(this.width * RENDER_SCALE);
+            canvas.height = Math.round(this.height * RENDER_SCALE);
+            canvas.style.width = this.width + 'px';
+            canvas.style.height = this.height + 'px';
+            this.ctx.setTransform(RENDER_SCALE, 0, 0, RENDER_SCALE, 0, 0);   // must come after resizing
 
-            this.makeFollowers(this.numFollowers);
+            if (this.followers.length === 0) {
+                for (let i = 0; i < this.numFollowers; i++) {
+                    this.followers.push(this.generateFollower());
+                }
+            } else {
+                // Scale the existing followers to the new window instead of reshuffling them
+                const scaleX = this.width / previousWidth;
+                const scaleY = this.height / previousHeight;
+                const scaleSize = previousSize ? this.size / previousSize : 1;
+                for (const f of this.followers) {
+                    f.size *= scaleSize;
+                    const margin = f.size / BLUR_ADJUSTMENT;
+                    f.x = Math.max(margin, Math.min(this.width - margin, f.x * scaleX));
+                    f.y = Math.max(margin, Math.min(this.height - margin, f.y * scaleY));
+                }
+            }
+
+            // With reduced motion there's no loop, so draw a single still frame
+            if (this.reduceMotion) this.render();
         },
-        async mousemoveHandler(e) {
+
+        /* ---------- Input ---------- */
+        onMouseMove(e) {
+            // Just record it; the next frame picks it up
             this.mouseX = e.clientX;
             this.mouseY = e.clientY;
+            this.mouseMoved = true;
         },
-        async clickHandler(e) {
-            const canvas = this.$refs['canvasContainer']
-            const clickElm = document.createElement("div");
-            clickElm.className = "click-ripple";
+        onClick(e) {
+            this.spawnRipple(e.clientX, e.clientY);
 
-            clickElm.style.top = e.clientY+'px';
-            clickElm.style.left = e.clientX+'px';
-
-            clickElm.addEventListener( 'animationend', function() {
-                canvas.removeChild(clickElm);
-            }.bind(this));
-
-            canvas.appendChild(clickElm);
-
-            await Promise.all(this.followers.map(async (f) => {
-                this.repelFromMouse(f, e);
-            }));
-        },
-        async makeFollowers (num) {
-            this.followers = [];
-
-            for (let i = 0; i < num; i++) {
-                const newFollower = await this.generateRandomFollower();
-                this.followers.push(newFollower);
+            const squareRange = this.mouseRadius * this.mouseRadius * 2;
+            for (const f of this.followers) {
+                this.repelFromPoint(f, e.clientX, e.clientY, squareRange);
             }
         },
-        async updateFollower(f) {
-            // Add acc to vel
-            f.xVel += f.xAcc;
-            f.yVel += f.yAcc;
+        spawnRipple(x, y) {
+            const container = this.$refs.canvasContainer;
+            if (container.querySelectorAll('.click-ripple').length >= MAX_RIPPLES) return;   // ignore click-spam
 
-            // Add vel to pos
-            f.x += f.xVel;
-            f.y += f.yVel;
+            const ripple = document.createElement('div');
+            ripple.className = 'click-ripple';
+            ripple.style.top = y + 'px';
+            ripple.style.left = x + 'px';
+            ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+            container.appendChild(ripple);
+        },
 
-            const blurAdjustment = 4;
-            // Adjust x-pos
-            if (f.x < f.size/blurAdjustment) {
+        /* ---------- Animation loop ---------- */
+        frame(now) {
+            this.raf = requestAnimationFrame(this.frame);
+
+            const elapsed = now - this.lastFrame;
+            if (elapsed < FRAME_INTERVAL - 2) return;   // skip frames to hold MAX_FPS
+            this.lastFrame = now;
+
+            // Clamp so returning to a backgrounded tab doesn't make followers jump
+            this.update(Math.min(elapsed, 100) / 1000);
+            this.render();
+        },
+        update(dt) {
+            // The original stepped every 40ms. Everything below is scaled by "ticks" so the
+            // motion is the same however long this frame took.
+            const ticks = dt * TICKS_PER_SECOND;
+            const decay = Math.pow(0.5, ticks);
+            const attract = this.mouseMoved;
+            this.mouseMoved = false;
+
+            const followers = this.followers;
+            for (let i = 0; i < followers.length; i++) {
+                const f = followers[i];
+                this.updateFollower(f, ticks, decay);
+                if (attract) this.pointTowardsMouse(f, ticks);
+            }
+        },
+        updateFollower(f, ticks, decay) {
+            // Add acc to vel, vel to pos
+            f.xVel += f.xAcc * ticks;
+            f.yVel += f.yAcc * ticks;
+            f.x += f.xVel * ticks;
+            f.y += f.yVel * ticks;
+
+            // Bounce off the edges
+            if (f.x < f.size / BLUR_ADJUSTMENT) {
                 f.xVel *= -1;
                 f.x += 1;
-            } else if (f.x > this.width - f.size/blurAdjustment) {
+            } else if (f.x > this.width - f.size / BLUR_ADJUSTMENT) {
                 f.xVel *= -1;
                 f.x -= 1;
             }
-            // Adjust y-pos
-            if (f.y < f.size/blurAdjustment) {
+            if (f.y < f.size / BLUR_ADJUSTMENT) {
                 f.yVel *= -1;
                 f.y += 1;
-            } else if (f.y > this.height - f.size/blurAdjustment) {
+            } else if (f.y > this.height - f.size / BLUR_ADJUSTMENT) {
                 f.yVel *= -1;
                 f.y -= 1;
             }
 
-            // Adjust vel
-            const velMag = Math.sqrt(f.xVel * f.xVel + f.yVel * f.yVel);   
-            if (velMag !== 0) {        
-                f.xVel = this.maxVel * (f.xVel/velMag);
-                f.yVel = this.maxVel * (f.yVel/velMag);
+            // Followers always travel at a constant speed; forces only steer them
+            const velMag = Math.sqrt(f.xVel * f.xVel + f.yVel * f.yVel);
+            if (velMag !== 0) {
+                f.xVel = MAX_VEL * (f.xVel / velMag);
+                f.yVel = MAX_VEL * (f.yVel / velMag);
             }
 
-            // Reset acc
-            f.xAcc /= 2;
-            f.yAcc /= 2;
+            // Fade the acceleration
+            f.xAcc *= decay;
+            f.yAcc *= decay;
         },
-        async pointTowardsMouse(f) {
+        pointTowardsMouse(f, ticks) {
             const xDist = this.mouseX - f.x;
             const yDist = this.mouseY - f.y;
 
-            const posSquare = xDist * xDist + yDist * yDist;
-            if (posSquare < this.squareMouseRadius) {
+            if (xDist * xDist + yDist * yDist < this.mouseRadius * this.mouseRadius) {
                 const xVelDelta = xDist - f.xVel;
                 const yVelDelta = yDist - f.yVel;
-
-                const velMag = Math.sqrt(xVelDelta * xVelDelta + yVelDelta * yVelDelta);            
-                const xForce = this.maxForce * (xVelDelta/velMag);
-                const yForce = this.maxForce * (yVelDelta/velMag);
-
-                f.xAcc += xForce;
-                f.yAcc += yForce;
-            }
-        },
-        async repelFromMouse(f, e) {
-            const xDist = f.x - e.clientX;
-            const yDist = f.y - e.clientY;
-
-            const posSquare = xDist * xDist + yDist * yDist;
-            if (posSquare < this.squareMouseRadius*2) {
-                const xVelDelta = xDist - f.xVel;
-                const yVelDelta = yDist - f.yVel;
-
                 const velMag = Math.sqrt(xVelDelta * xVelDelta + yVelDelta * yVelDelta);
-                const maxMag = (this.mouseRadius/velMag);
-                
-                const xForce = maxMag * 10 * (xVelDelta/velMag);
-                const yForce = maxMag * 10 * (yVelDelta/velMag);
+                if (velMag === 0) return;
 
-                f.xAcc += Math.min(xForce, this.maxForce * 20);
-                f.yAcc += Math.min(yForce, this.maxForce * 20);
+                f.xAcc += MAX_FORCE * ticks * (xVelDelta / velMag);
+                f.yAcc += MAX_FORCE * ticks * (yVelDelta / velMag);
             }
         },
-        async generateRandomFollower() {
-            // Random size
-            const sizeRange = this.size - this.size/4;
-            const size = this.size - Math.random() * sizeRange;
-            
-            // Random position
-            const x = Math.round(Math.random()*this.width);
-            const y = Math.round(Math.random()*this.height);
+        repelFromPoint(f, x, y, squareRange) {
+            const xDist = f.x - x;
+            const yDist = f.y - y;
 
-            // Random velocity
-            let xVel = Math.sin(Math.random()*360);
-            let yVel = Math.sin(Math.random()*360);
+            if (xDist * xDist + yDist * yDist < squareRange) {
+                const xVelDelta = xDist - f.xVel;
+                const yVelDelta = yDist - f.yVel;
+                const velMag = Math.sqrt(xVelDelta * xVelDelta + yVelDelta * yVelDelta);
+                if (velMag === 0) return;
 
-            if (xVel === 0 && yVel === 0) {
-                xVel = 0.5;
-                yVel = 0.5;
+                const maxMag = this.mouseRadius / velMag;
+                const xForce = maxMag * 10 * (xVelDelta / velMag);
+                const yForce = maxMag * 10 * (yVelDelta / velMag);
+
+                f.xAcc += Math.min(xForce, MAX_FORCE * 20);
+                f.yAcc += Math.min(yForce, MAX_FORCE * 20);
             }
+        },
+        render() {
+            const { ctx, followers, width, height } = this;
+            ctx.clearRect(0, 0, width, height);
 
-            // Random fill
-            const r = 0 + Math.round(Math.random() * 200);
-            const g = 100 + Math.round(Math.random() * 155);
-            const b = 100 + Math.round(Math.random() * 155);
-            const fill = 'rgba('+r+', '+g+', '+b+', '+this.followerOpacity+')';
+            for (let i = 0; i < followers.length; i++) {
+                const f = followers[i];
 
-            const newFollower = {
-                x: x,
-                y: y,
-                xVel: xVel,
-                yVel: yVel,
+                // Colour shifts with position, and flashes while a follower is being pushed
+                const r = clampChannel(100 + 80 * (f.xAcc + f.yAcc));
+                const g = clampChannel(50 + 155 * f.x / width);
+                const b = clampChannel(50 + 155 * (f.y / height));
+
+                const grad = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.size);
+                grad.addColorStop(0.3, `rgba(${r}, ${g}, ${b}, ${FOLLOWER_OPACITY})`);
+                grad.addColorStop(0.7, `rgba(${r}, ${g}, ${b}, 0)`);
+
+                // Nothing is visible past 70% of the radius, so only fill that much
+                const reach = f.size * 0.7;
+                ctx.fillStyle = grad;
+                ctx.fillRect(f.x - reach, f.y - reach, reach * 2, reach * 2);
+            }
+        },
+
+        /* ---------- Setup ---------- */
+        generateFollower() {
+            // Random size
+            const sizeRange = this.size - this.size / 4;
+            const size = this.size - Math.random() * sizeRange;
+
+            // Random direction (speed is normalised to MAX_VEL on the first update anyway)
+            const angle = Math.random() * Math.PI * 2;
+
+            return {
+                x: Math.round(Math.random() * this.width),
+                y: Math.round(Math.random() * this.height),
+                xVel: Math.cos(angle) * MAX_VEL,
+                yVel: Math.sin(angle) * MAX_VEL,
                 xAcc: 0,
                 yAcc: 0,
-                fill: fill,
-                size: size
-            }
-
-            return newFollower;
+                size
+            };
         }
-    },
-    beforeUnmount() {
-        clearInterval(this.drawCycle);
-        window.removeEventListener('resize', this.resizeHandler);
-        window.removeEventListener('click', this.clickHandler);
-        window.removeEventListener('mousemove', this.mousemoveHandler);
     }
 }
 </script>
@@ -265,24 +323,26 @@ export default {
 
     .click-ripple {
         position: absolute;
+        // Fixed final size; the animation only scales it, so it stays on the compositor
+        width: 300px;
+        height: 300px;
         border-radius: 50%;
+        pointer-events: none;
         animation: follower-ripple-animate 0.4s;
         transform: translate(-50%, -50%);
         box-shadow: 0px 0px 30px white,
                     inset 0px 0px 30px white;
     }
+}
 
-    @keyframes follower-ripple-animate {
-        1% {
-            opacity: 0.3;
-            width: 0px;
-            height: 0px;
-        }
-        100% {
-            opacity: 0;
-            width: 300px;
-            height: 300px;
-        }
+@keyframes follower-ripple-animate {
+    0% {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1);
     }
 }
 </style>
