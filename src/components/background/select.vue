@@ -73,7 +73,7 @@ export default {
     $bg-color: rgba($node-color, 0.58);
     
     position: absolute;
-    z-index: 97;
+    z-index: 100;
     bottom: 10px;
     left: 10px;
 

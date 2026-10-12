@@ -1,89 +1,34 @@
 <template>
   <div class="home page">
     <div class="home-content-stage">
-      <Transition name="content-fade" mode="out-in">
-        <div v-if="activeContent === 'home'" key="home" class="home-container flex-center">
+        <div key="home" class="home-container flex-center">
           <div class="home-identity">
             <h1>Max Gurr</h1>
           </div>
           <nav class="home-actions" aria-label="Portfolio pages">
-            <button class="home-action" type="button" @click="showContent('about')">About me</button>
-            <button class="home-action home-action--primary" type="button" @click="showContent('research')">Research</button>
+            <router-link to="/About">
+                <button class="home-action" type="button">About me</button>
+            </router-link>
+            <router-link to="/Research">
+                <button class="home-action home-action--primary" type="button">Research</button>
+            </router-link>
             <!-- <router-link class="home-action" to="/projects">Projects</router-link> -->
           </nav>
           <a class="home-email" href="mailto:maxd.gurr@gmail.com"><em>Currently looking for Post-Doc opportunities!</em></a>
         </div>
-        <ResearchContent v-else-if="activeContent === 'research'" key="research" @back="showHome" />
-        <AboutContent v-else key="about" @back="showHome" />
-      </Transition>
     </div>
-    <component v-bind:is="selectedBackground" />
-    <backgroundSelect :backgrounds="backgroundComponents" @click="setBackground"></backgroundSelect>
   </div>
 </template>
 
 <script>
-import backgroundSelect from '@/components/background/select.vue';
 import AboutContent from '@/components/AboutContent.vue';
 import ResearchContent from '@/components/ResearchContent.vue';
-// Backgrounds:
-import constellations from '@/components/background/constellations.vue';
-import followers from '@/components/background/followers.vue';
-import fish from '@/components/background/fish.vue';
-import reflections from '@/components/background/reflections.vue';
-import bamboo from '@/components/background/bamboo.vue';
 
 export default {
   name: 'home-page',
   components: {
-    backgroundSelect,
     AboutContent,
-    ResearchContent,
-    constellations,
-    followers,
-    fish,
-    reflections,
-    bamboo
-  },
-  data: () => ({
-    activeContent: 'home',
-    selectedBackground: null,
-    backgroundComponents: [ 
-      {
-        value: 'fish',
-        icon: 'fishIcon'
-      },
-      {
-        value: 'constellations',
-        icon: 'constellationsIcon'
-      },
-      {
-        value: 'reflections',
-        icon: 'reflectionsIcon'
-      },
-      {
-        value: 'bamboo',
-        icon: 'bambooIcon'
-      },
-      {
-        value: 'followers',
-        icon: 'followersIcon'
-      }
-    ]
-  }),
-  methods: {
-    showContent(content) {
-      this.activeContent = content;
-    },
-    showHome() {
-      this.activeContent = 'home';
-    },
-    setBackground(background) {
-      this.selectedBackground = background;
-    }
-  },
-  mounted() {
-    this.selectedBackground = this.backgroundComponents[0].value;
+    ResearchContent
   }
 }
 </script>
@@ -148,16 +93,6 @@ export default {
       outline: 2px solid $soft-blue;
       outline-offset: 4px;
     }
-  }
-
-  .content-fade-enter-active,
-  .content-fade-leave-active {
-    transition: opacity 0.3s ease;
-  }
-
-  .content-fade-enter-from,
-  .content-fade-leave-to {
-    opacity: 0;
   }
 
   &-actions {
