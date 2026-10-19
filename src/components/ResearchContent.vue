@@ -3,7 +3,10 @@
     <section id="phd-memory-1" class="sectioned-content__section" aria-labelledby="phd-memory-title">
         <h2 id="phd-memory-title">Location Updating Affects Object Recognition in Virtual Reality</h2>
         <div class="research__container">
-            <p class="research__text">Participants studied a collection of objects arranged on a table. After passing through a doorway, participants were less accurate and slower at recognising previously studied objects. Placing recognised objects at the remembered location was as precise when changing locations as when remaining in the same location.</p>
+            <div class="research__text">
+                <h3>CMND Lab - University of Auckland</h3>
+                <p class="research__text">Participants studied a collection of objects arranged on a table. After passing through a doorway, participants were less accurate and slower at recognising previously studied objects. Placing recognised objects at the remembered location was as precise when changing locations as when remaining in the same location.</p>
+            </div>
             <VideoShowcase
                 class="research__video"
                 poster="src/assets/logo.png"
@@ -22,7 +25,10 @@
     <section id="phd-memory-2" class="sectioned-content__section" aria-labelledby="phd-memory-title">
         <h2 id="phd-memory-title">Recency Discrimination Degrades with Increasing Contextual Mismatch</h2>
         <div class="research__container">
-            <p class="research__text">Participants judged collections of objects in six unique houses. Recency discrimination was more accurate between items studied in the same house compared to items studied in separate houses. Further, across-house recency discrimination was more accurate when the two objects were studied with the same judgement task.</p>
+            <div class="research__text">
+                <h3>CMND Lab - University of Auckland</h3>
+                <p>Participants judged collections of objects in six unique houses. Recency discrimination was more accurate between items studied in the same house compared to items studied in separate houses. Further, across-house recency discrimination was more accurate when the two objects were studied with the same judgement task.</p>
+            </div>
             <VideoShowcase
                 class="research__video"
                 poster="src/assets/logo.png"
@@ -40,7 +46,10 @@
     <section id="phd-memory-3" class="sectioned-content__section" aria-labelledby="phd-memory-title">
         <h2 id="phd-memory-title">The Doorway Effect in a Procedural Space Station</h2>
         <div class="research__container">
-            <p class="research__text">In a continuously-generated space station, participants sorted a series of objects into a trash bin or transport box, before carrying the box to another location. <br>Movements were made within a single room, into a separate room, or into a separate room then back into the original room. After changing locations, memory was...</p>
+            <div class="research__text">
+                <h3>CMND Lab - University of Auckland</h3>
+                <p>In a continuously-generated space station, participants sorted a series of objects into a trash bin or transport box, before carrying the box to another location. <br>Movements were made within a single room, into a separate room, or into a separate room then back into the original room. After changing locations, memory was...</p>
+            </div> 
             <VideoShowcase
                 class="research__video"
                 poster="src/assets/logo.png"
@@ -58,8 +67,11 @@
     <section id="singleton-detection" class="sectioned-content__section research-singleton" aria-labelledby="singleton-detection-title">
         <h2 id="phd-memory-title">Singleton Detection</h2>
         <div class="research__container">
-            <p class="research__text">In a detailed greenhouse and an empty room, participants searched for a uniquely-shaped target among an array of four apples & pears.<br>When a non-target fruit was presented in a salient colour, both reach movements and gaze strategies were drawn toward the distracting stimulus. No difference was observed in distractor effects between the richly-detailed and sparsely-detailed rooms.
-            <br><br>For this manuscript, I created a new measure of "reach attraction", which quantifies how a reach trajectory is drawn towards multiple response locations</p>
+            <div class="research__text">
+                <h3>CMND Lab - University of Auckland</h3>
+                <p class="research__text">In a detailed greenhouse and an empty room, participants searched for a uniquely-shaped target among an array of four apples & pears.<br>When a non-target fruit was presented in a salient colour, both reach movements and gaze strategies were drawn toward the distracting stimulus. No difference was observed in distractor effects between the richly-detailed and sparsely-detailed rooms.
+                <br><br>For this manuscript, I created a new measure of "reach attraction", which quantifies how a reach trajectory is drawn towards multiple response locations</p>
+            </div>
             <VideoShowcase
                 class="research__video"
                 poster="src/assets/logo.png"
@@ -74,27 +86,10 @@
             </article>
         </div>
     </section>
-
-    <section id="cmnd-lab" class="sectioned-content__section" aria-labelledby="cmnd-lab-title">
-      <h2 id="cmnd-lab-title">CMND Lab</h2>
-      <h3 class="research-section-subheading">Virtual Reality for Cognitive Psychology</h3>
-      <p>Involved in the operation of the CMND lab since late 2022, creating analysis software, programming Virtual Reality experiences, and collecting in-person participant data.</p>
-      <ul class="research-experiments" aria-label="Experiments">
-        <li>Attention control and inhibition</li>
-        <li>Task switching</li>
-        <li>Visual search</li>
-        <li>Perspective taking</li>
-        <li>Emotion recognition</li>
-        <li>Material perception</li>
-        <li>Sensorimotor control</li>
-        <li>Memory organisation</li>
-      </ul>
-      <h3>Data Analysis</h3>
-      <p>Created a Python graphical user interface for visualising and processing hand- and eye-tracking data from VR experiments. It is now used by students in the lab for their VR investigations.</p>
-    </section>
-
+ 
     <section id="ghost-trio" class="sectioned-content__section" aria-labelledby="ghost-trio-title">
       <h2 id="ghost-trio-title">Ghost Trio</h2>
+        <h3>CMND Lab - University of Auckland</h3>
       <p>Development lead for a Virtual Reality reproduction of Samuel Beckett’s “Ghost Trio”, investigating whether immersion and engagement influence interpretation and understanding of a play.</p>
       <p>Used Unity to model the set and manually animate the movements of each actor.</p>
     </section>
@@ -137,7 +132,6 @@ export default {
       { id: 'phd-memory-2', title: 'Recency Discrimination' },
       { id: 'phd-memory-3', title: 'Doorway Effect' },
       { id: 'singleton-detection', title: 'Singleton Detection' },
-      { id: 'cmnd-lab', title: 'CMND Lab' },
       { id: 'ghost-trio', title: 'Ghost Trio' },
       { id: 'brain-connectivity', title: 'Functional Brain Connectivity Analysis' }
     ]
@@ -151,7 +145,6 @@ export default {
         display: grid;
         gap: 1.5rem;
         grid-template-columns: 1fr;
-
 
         article {
             padding: 1rem 1.25rem;
@@ -190,7 +183,6 @@ export default {
     @media (min-width: 768px) {
         &__container {
             grid-template-columns: 1fr auto;  
-            align-items: center;            // vertically centers text and video against each other
         }
 
         &__text    { grid-column: 1; grid-row: 1; }
@@ -202,7 +194,7 @@ export default {
 
 .sectioned-content__section {
   h3 {
-    margin: 1.25rem 0 0.5rem;
+    margin: 0 0 0.5rem;
     color: #80bde8;
     font-size: 1.05rem;
   }
