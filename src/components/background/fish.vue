@@ -342,7 +342,7 @@ export default {
 
 @keyframes fish-ripple-animate {
     0% {
-        opacity: 0.2;
+        opacity: 0.3;
         transform: translate(-50%, -50%) scale(0);
     }
     100% {
