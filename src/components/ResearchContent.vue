@@ -190,11 +190,6 @@ export default {
     text-align: center;
     box-shadow: inset 0 1px rgba(197, 225, 245, 0.06);
     transition: border-color 0.2s ease, background-color 0.2s ease;
-
-    &:hover {
-      border-color: rgba(128, 189, 232, 0.55);
-      background-color: rgba(128, 189, 232, 0.1);
-    }
   }
 }
 

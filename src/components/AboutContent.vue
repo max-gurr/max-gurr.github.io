@@ -2,9 +2,51 @@
   <SectionedContent title="About Me" :sections="sections" @back="$emit('back')">
     <section id="profile" class="sectioned-content__section" aria-labelledby="profile-title">
       <h2 id="profile-title">Profile</h2>
-      <p>I am a PhD candidate with a keen interest and passion for psychology and technology.</p>
-      <p>With a background in software engineering, I use Virtual Reality to investigate the encoding and organisation of memories.</p>
+      <div class="profile__panel">
+        <p>
+            I am a PhD candidate with a keen interest and passion for psychology and technology.
+            <br><br>
+            With a background in software engineering, I use Virtual Reality to investigate the encoding and organisation of memories.
+            <br><br>
+            Outside of research, I enjoy taking care of my two cats and aquariums.
+        </p>
+        <img class="profile__img" width="500" height="500" src="../assets/pictures/headshot-square.jpg" alt="headshot" />
+    </div>
     </section>
+
+    <section id="publications" class="sectioned-content__section" aria-labelledby="publications-title">
+        <h2 id="publications-title">Publications</h2>
+        <article class="publications__article">
+            <div class="publications__main">
+                <p><b>Measuring the dynamics of attentional capture in hand and eye movements with virtual reality. <span>(2026)</span></b></p>
+                <p>Max D. Gurr, Jeff Moher, Matthew D. Egbert, Christopher D. Erb</p>
+            </div>
+            <div class="publications__side">
+                <span>Behaviour Research Methods</span>
+                <a href="https://doi.org/10.3758/s13428-026-03177-9" target="_blank" rel="noopener noreferrer">Read</a>
+            </div>
+        </article>
+        <article class="publications__article">
+            <div class="publications__main">
+                <p><b>Location Updating Decreases Recognition Success in Immersive Virtual Reality.</b></p>
+                <p>Max D. Gurr, Reece Roberts, Christopher D. Erb</p>
+            </div>
+            <div class="publications__side">
+                <span>Memory & Cognition</span>
+                <a rel="noopener noreferrer">Under Review</a>
+            </div>
+        </article>
+        <article class="publications__article">
+            <div class="publications__main">
+                <p><b>Recency Discrimination Depends on Multiple Forms of Context in Virtual Reality</b></p>
+                <p>Max D. Gurr, Reece Roberts, Christopher D. Erb</p>
+            </div>
+            <div class="publications__side">
+                <span>In Development</span>
+            </div>
+        </article>
+    </section>
+
 
     <section id="teaching" class="sectioned-content__section" aria-labelledby="teaching-title">
       <h2 id="teaching-title">Teaching</h2>
@@ -125,6 +167,73 @@ export default {
 </script>
 
 <style lang="scss">
+.profile {
+    &__panel {
+        display: flex;
+        min-height: 6rem;
+        flex-direction: row;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    &__img {
+        max-width: 25%;
+        width: auto;
+        height: auto;
+        align-self: flex-start;
+    }
+}
+
+.publications {
+    &__article {
+        padding: 10px 0;
+        display: flex;
+        align-items: stretch;
+
+        & + & {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(128, 189, 232, 0.2);
+        }
+        
+        h3 {
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    &__side {
+        margin-left: auto;
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: space-between;
+        
+        h3 {
+            padding: 0px;
+        }
+
+        a {
+            flex: 0 0 auto;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid rgba(128, 189, 232, 0.35);
+            border-radius: 999px;
+            text-decoration: none;
+
+            &:hover {
+                background: rgba(128, 189, 232, 0.12);
+            }
+        }
+
+        span {
+        display: block;
+        margin-top: 0.2rem;
+        color: rgba(197, 225, 245, 0.65);
+        font-weight: 400;
+        }
+    }
+}
+
 .about-experience {
   & + & {
     margin-top: 1.5rem;
@@ -346,6 +455,21 @@ export default {
 }
 
 @media (max-width: 560px) {
+  .profile {
+    &__panel {
+        flex-direction: column;
+    }
+
+    &__img {
+        max-width: 250px;
+        margin: 0 auto;
+    }
+}   
+
+.publications__article {
+    flex-direction: row;
+}
+
   .about-education__degrees {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 0.5rem;
