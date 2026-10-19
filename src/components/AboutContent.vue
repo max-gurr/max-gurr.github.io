@@ -157,6 +157,7 @@ export default {
   data: () => ({
     sections: [
       { id: 'profile', title: 'Profile' },
+      { id: 'publications', title: 'Publications' },
       { id: 'teaching', title: 'Teaching' },
       { id: 'work-experience', title: 'Work Experience' },
       { id: 'education', title: 'Education' },

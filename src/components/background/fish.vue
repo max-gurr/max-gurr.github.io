@@ -103,7 +103,7 @@ const RENDER_SCALE = 1
 const UPDATE_HZ = 60                 // simulation rate, independent of the display's refresh rate
 const STEP_MS = 1000 / UPDATE_HZ
 const MAX_STEPS_PER_FRAME = 5        // stops a catch-up spiral after a long pause
-const RIPPLE_CHANCE_PER_STEP = 0.0015
+const RIPPLE_CHANCE_PER_STEP = 0.01
 const MAX_RIPPLES = 12
 const RESIZE_DEBOUNCE = 150
 
