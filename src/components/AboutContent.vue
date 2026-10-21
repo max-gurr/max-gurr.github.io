@@ -3,14 +3,18 @@
     <section id="profile" class="sectioned-content__section" aria-labelledby="profile-title">
       <h2 id="profile-title">Profile</h2>
       <div class="profile__panel">
+        <img class="profile__img" width="500" height="500" src="../assets/pictures/headshot-square.jpg" alt="headshot" />
         <p>
             I am a PhD candidate with a keen interest and passion for psychology and technology.
             <br><br>
-            With a background in software engineering, I use Virtual Reality to investigate the encoding and organisation of memories.
+            Although my background has largely focused on software engineering, I quickly discovered that research into cognitive psychology was a uniquely engaging and creative means to use my coding experience.
+            <br><br>My research focuses on using Virtual Reality as an immersive and powerful tool for collecting behavioural data. 
+            I design experiments to isolate the moments our episodic memories are formed, and inference the long-term organisation of these memory networks.
+            
+            <br>However, I also enjoy involving myself in other areas of psychology, and have designed Virtual Reality investigations ranging from attention capture to perspective taking. 
             <br><br>
             Outside of research, I enjoy taking care of my two cats and aquariums.
         </p>
-        <img class="profile__img" width="500" height="500" src="../assets/pictures/headshot-square.jpg" alt="headshot" />
     </div>
     </section>
 
@@ -170,10 +174,7 @@ export default {
 <style lang="scss">
 .profile {
     &__panel {
-        display: flex;
         min-height: 6rem;
-        flex-direction: row;
-        justify-content: center;
         gap: 0.5rem;
     }
 
@@ -181,7 +182,8 @@ export default {
         max-width: 25%;
         width: auto;
         height: auto;
-        align-self: flex-start;
+        margin: 0px 0px 10px 10px;
+        float: right;
     }
 }
 
@@ -458,6 +460,7 @@ export default {
 @media (max-width: 560px) {
   .profile {
     &__panel {
+        display: flex;
         flex-direction: column;
     }
 
