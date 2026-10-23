@@ -1,7 +1,7 @@
 <template>
   <div class="research__showcase">
     <button class="research__showcase-trigger" type="button" :aria-label="label" :disabled="!videoId" @click="open">
-      <img :src="poster" :alt="alt" />
+      <img :src="pictureAsset" :alt="alt" />
       <span v-if="videoId != null" class="research__showcase-play" aria-hidden="true">▶</span>
     </button>
 
@@ -50,6 +50,9 @@ export default {
         playsinline: '1'
       })
       return `https://www.youtube-nocookie.com/embed/${this.videoId}?${params}`
+    },
+    pictureAsset() {
+        return new URL(`../assets/pictures/${this.poster}`, import.meta.url).href
     }
   },
   methods: {
