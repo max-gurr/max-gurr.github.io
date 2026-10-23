@@ -9,8 +9,8 @@
             </div>
             <VideoShowcase
                 class="research__video"
-                poster="src/assets/logo.png"
-                :video="memoryVideo"
+                poster="src/assets/pictures/tableMemory-Thumbnail.jpg"
+                videoId="H6rQINZGB8c"
                 alt="Screenshot of the virtual reality experiment"
                 label="Play video: location updating experiment"
             />
@@ -31,8 +31,8 @@
             </div>
             <VideoShowcase
                 class="research__video"
-                poster="src/assets/logo.png"
-                :video="memoryVideo"
+                poster="src/assets/pictures/ContextMemory-Thumbnail.jpg"
+                videoId="8c7SN5yQijQ"
                 alt="Screenshot of the virtual reality experiment"
                 label="Play video: location updating experiment"
             />
@@ -52,8 +52,8 @@
             </div> 
             <VideoShowcase
                 class="research__video"
-                poster="src/assets/logo.png"
-                :video="memoryVideo"
+                poster="src/assets/pictures/DoorwayMemory-Thumbnail.jpg"
+                videoId="ecmw7EQOlpg"
                 alt="Screenshot of the virtual reality experiment"
                 label="Play video: location updating experiment"
             />
@@ -74,8 +74,8 @@
             </div>
             <VideoShowcase
                 class="research__video"
-                poster="src/assets/logo.png"
-                :video="memoryVideo"
+                poster="src/assets/pictures/Singleton-Thumbnail.jpg"
+                videoId="yivNUNFVjlg"
                 alt="Screenshot of the virtual reality experiment"
                 label="Play video: location updating experiment"
             />
