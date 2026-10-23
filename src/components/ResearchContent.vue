@@ -9,7 +9,7 @@
             </div>
             <VideoShowcase
                 class="research__video"
-                poster="src/assets/pictures/tableMemory-Thumbnail.jpg"
+                poster="tableMemory-Thumbnail.jpg"
                 videoId="H6rQINZGB8c"
                 alt="Screenshot of the virtual reality experiment"
                 label="Play video: location updating experiment"
@@ -31,7 +31,7 @@
             </div>
             <VideoShowcase
                 class="research__video"
-                poster="src/assets/pictures/ContextMemory-Thumbnail.jpg"
+                poster="ContextMemory-Thumbnail.jpg"
                 videoId="8c7SN5yQijQ"
                 alt="Screenshot of the virtual reality experiment"
                 label="Play video: location updating experiment"
@@ -48,11 +48,12 @@
         <div class="research__container">
             <div class="research__text">
                 <h3>CMND Lab - University of Auckland</h3>
-                <p>In a continuously-generated space station, participants sorted a series of objects into a trash bin or transport box, before carrying the box to another location. <br>Movements were made within a single room, into a separate room, or into a separate room then back into the original room. After changing locations, memory was...</p>
+                <p>In a continuously-generated space station, participants sorted a series of objects into a trash bin or transport box, before carrying the box to another location. <br>Movements were made within a single room, into a separate room, or into a separate room then back into the original room. 
+                    <br>Results to come!</p>
             </div> 
             <VideoShowcase
                 class="research__video"
-                poster="src/assets/pictures/DoorwayMemory-Thumbnail.jpg"
+                poster="DoorwayMemory-Thumbnail.jpg"
                 videoId="ecmw7EQOlpg"
                 alt="Screenshot of the virtual reality experiment"
                 label="Play video: location updating experiment"
@@ -74,7 +75,7 @@
             </div>
             <VideoShowcase
                 class="research__video"
-                poster="src/assets/pictures/Singleton-Thumbnail.jpg"
+                poster="Singleton-Thumbnail.jpg"
                 videoId="yivNUNFVjlg"
                 alt="Screenshot of the virtual reality experiment"
                 label="Play video: location updating experiment"
