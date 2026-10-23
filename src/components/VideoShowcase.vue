@@ -1,8 +1,8 @@
 <template>
   <div class="research__showcase">
-    <button class="research__showcase-trigger" type="button" :aria-label="label" @click="open">
+    <button class="research__showcase-trigger" type="button" :aria-label="label" :disabled="!videoId" @click="open">
       <img :src="poster" :alt="alt" />
-      <span class="research__showcase-play" aria-hidden="true">▶</span>
+      <span v-if="videoId != null" class="research__showcase-play" aria-hidden="true">▶</span>
     </button>
 
     <dialog
@@ -15,9 +15,16 @@
       <button class="research__modal-close" type="button" aria-label="Close video" @click="close">
         &times;
       </button>
-      <video ref="video" controls preload="none" playsinline>
-        <source :src="video" :type="videoType" />
-      </video>
+      <div class="research__modal-frame">
+        <iframe
+          v-if="isOpen && videoId != null"
+          :src="embedUrl"
+          :title="label"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin"
+        ></iframe>
+      </div>
     </dialog>
   </div>
 </template>
@@ -27,7 +34,7 @@ export default {
   name: 'video-showcase',
   props: {
     poster: { type: String, required: true },
-    videoSrc: { type: String, required: true },
+    videoId: { type: String, default: null },
     alt: { type: String, default: '' },
     label: { type: String, default: 'Play video' },
     videoType: { type: String, default: 'video/mp4' }
@@ -35,20 +42,31 @@ export default {
   data: () => ({
     isOpen: false
   }),
+  computed: {
+    embedUrl() {
+      const params = new URLSearchParams({
+        autoplay: '1',
+        rel: '0',
+        playsinline: '1'
+      })
+      return `https://www.youtube-nocookie.com/embed/${this.videoId}?${params}`
+    }
+  },
   methods: {
     open() {
-      this.$refs.dialog.showModal()
-      this.isOpen = true
-      this.$refs.video.play().catch(() => {}) // ignore if autoplay is blocked
+        if (!this.videoId) return
+        this.isOpen = true // mounts the iframe, which starts loading
+        this.$refs.dialog.showModal()
     },
     close() {
       this.$refs.dialog.close()
     },
     // fires for every close method (button, Esc, backdrop)
     onClose() {
-      this.isOpen = false
-      this.$refs.video.pause()
-      this.$refs.video.currentTime = 0
+      // wait for the fade-out to finish before removing the iframe
+      setTimeout(() => {
+        this.isOpen = false
+      }, 350)
     },
     // click landed on the dialog itself, i.e. the backdrop
     onDialogClick(e) {
@@ -76,6 +94,16 @@ export default {
     cursor: pointer;
     overflow: hidden;
 
+    &:disabled {
+        cursor: default;
+    }
+
+    &:not(:disabled):hover img,
+    &:not(:disabled):focus-visible img {
+        transform: scale(1.03);
+        filter: brightness(0.8);
+    }
+
     img {
       margin: 0 auto;
       display: block;
@@ -83,12 +111,6 @@ export default {
       max-width: 300px;
       height: auto;
       transition: transform 0.3s ease, filter 0.3s ease;
-    }
-
-    &:hover img,
-    &:focus-visible img {
-      transform: scale(1.03);
-      filter: brightness(0.8);
     }
 
     &:focus-visible {
@@ -158,12 +180,19 @@ export default {
         }
     }
 
-    video {
-        display: block;
+    &-frame {
+        aspect-ratio: 16 / 9;
         width: 100%;
-        height: auto;
         max-height: 85vh;
         border-radius: 0.75rem;
+        overflow: hidden;
+
+        iframe {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
     }
   }
 
