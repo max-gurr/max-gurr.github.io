@@ -22,10 +22,9 @@
         <h2 id="publications-title">Publications</h2>
         <article class="publications__article">
             <div class="publications__main">
-                <p><b>Measuring the dynamics of attentional capture in hand and eye movements with virtual reality. <span>(2026)</span></b></p>
-                <p>Max D. Gurr, Jeff Moher, Matthew D. Egbert, Christopher D. Erb</p>
+                <p><b>Measuring the dynamics of attentional capture in hand and eye movements with virtual reality <span>(2026)</span></b>. Max D. Gurr, Jeff Moher, Matthew D. Egbert, Christopher D. Erb</p>
             </div>
-            <div class="publications__side">
+            <div class="publications__link">
                 <span>Behaviour Research Methods</span>
                 <a href="https://doi.org/10.3758/s13428-026-03177-9" target="_blank" rel="noopener noreferrer">Read</a>
             </div>
@@ -35,9 +34,9 @@
                 <p><b>Location Updating Decreases Recognition Success in Immersive Virtual Reality.</b></p>
                 <p>Max D. Gurr, Reece Roberts, Christopher D. Erb</p>
             </div>
-            <div class="publications__side">
+            <div class="publications__link">
                 <span>Memory & Cognition</span>
-                <a rel="noopener noreferrer">Under Review</a>
+                <span><i>Under Review</i></span>
             </div>
         </article>
         <article class="publications__article">
@@ -45,7 +44,7 @@
                 <p><b>Recency Discrimination Depends on Multiple Forms of Context in Virtual Reality</b></p>
                 <p>Max D. Gurr, Reece Roberts, Christopher D. Erb</p>
             </div>
-            <div class="publications__side">
+            <div class="publications__link">
                 <span>In Development</span>
             </div>
         </article>
@@ -189,9 +188,6 @@ export default {
 
 .publications {
     &__article {
-        padding: 10px 0;
-        display: flex;
-        align-items: stretch;
 
         & + & {
             margin-top: 1.5rem;
@@ -229,10 +225,25 @@ export default {
         }
 
         span {
-        display: block;
-        margin-top: 0.2rem;
-        color: rgba(197, 225, 245, 0.65);
-        font-weight: 400;
+            display: block;
+            margin-top: 0.2rem;
+            color: rgba(197, 225, 245, 0.65);
+            font-weight: 400;
+        }
+    }
+
+    &__link {
+        margin-top: 0.5rem;
+        padding: 1rem 1.25rem;
+        border-left: 3px solid #80bde8;
+        border-radius: 0 0.75rem 0.75rem 0;
+        background: rgba(128, 189, 232, 0.08);
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+
+        a {
+            float: right;
         }
     }
 }
