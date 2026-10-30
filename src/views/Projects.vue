@@ -1,10 +1,6 @@
 <template>
   <main class="projects-page page">
-    <header class="projects-page__header">
-      <h1>Projects</h1>
-      <router-link class="content-page__back" to="/">Back</router-link>
-    </header>
-
+    <SiteNav title="Projects" />
     <nav class="projects-page__categories" aria-label="Project categories" role="tablist">
       <button
         id="data-tab"
@@ -14,7 +10,7 @@
         aria-controls="data-panel"
         :class="{ 'projects-page__category--active': activeCategory === 'data' }"
         @click="activeCategory = 'data'"
-      >Data Analysis</button>
+      >Data</button>
       <button
         id="games-tab"
         type="button"
@@ -23,7 +19,7 @@
         aria-controls="games-panel"
         :class="{ 'projects-page__category--active': activeCategory === 'games' }"
         @click="activeCategory = 'games'"
-      >Games</button>
+      >Other</button>
     </nav>
 
     <div class="projects-page__scroll">
@@ -34,7 +30,10 @@
         role="tabpanel"
         aria-labelledby="data-tab"
       >
-        <DataAnalysisPlaceholder />
+<!--------------- DATA PROJECTS ------------->
+
+
+<!------------------------------------------->
       </section>
       <section
         v-else
@@ -43,24 +42,34 @@
         role="tabpanel"
         aria-labelledby="games-tab"
       >
-        <GamesPlaceholder />
+<!--------------- MISC PROJECTS ------------->
+        <ProjectCard title="Boids" link="games/boids"/>
+<!------------------------------------------->
       </section>
     </div>
   </main>
 </template>
 
 <script>
-import DataAnalysisPlaceholder from '@/projects/data/PlaceholderProject.vue';
-import GamesPlaceholder from '@/projects/games/PlaceholderProject.vue';
+import ProjectCard from '@/projects/ProjectCard.vue';
+import SiteNav from '../components/SiteNav.vue';
 
 export default {
   name: 'projects-page',
   components: {
-    DataAnalysisPlaceholder,
-    GamesPlaceholder
+    SiteNav,
+    ProjectCard,
   },
   data: () => ({
-    activeCategory: 'data'
+    activeCategory: 'games',
+    sections: [
+      { id: 'profile', title: 'Profile' },
+      { id: 'publications', title: 'Publications' },
+      { id: 'teaching', title: 'Teaching' },
+      { id: 'work-experience', title: 'Work Experience' },
+      { id: 'education', title: 'Education' },
+      { id: 'contact', title: 'Contact' }
+    ]
   })
 }
 </script>
@@ -178,6 +187,7 @@ export default {
   color: $light-grey;
   text-align: left;
   backdrop-filter: blur(10px);
+    text-decoration: none;
 
   &__content {
     align-self: center;
@@ -186,7 +196,8 @@ export default {
 
   h2 {
     margin: 0.5rem 0 0.75rem;
-    color: $light-grey;
+    color: $soft-blue;
+    text-transform: uppercase;
     font-size: 1.5rem;
   }
 

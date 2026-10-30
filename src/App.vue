@@ -1,12 +1,12 @@
 <template>
   <div id="app">
     <router-view v-slot="{ Component }">
-        <Transition name="content-fade" mode="out-in">
-            <component :is="Component" />
-        </Transition>
+        <component :is="Component" />
     </router-view>
-    <backgroundSelect :backgrounds="backgroundComponents" @click="setBackground"></backgroundSelect>
-    <component v-bind:is="selectedBackground" />
+    <div v-if="showBackground">
+        <backgroundSelect :backgrounds="backgroundComponents" @click="setBackground"></backgroundSelect>
+        <component v-bind:is="selectedBackground" />
+    </div>
   </div>
 </template>
 
@@ -20,6 +20,8 @@ import fish from '@/components/background/fish.vue';
 import reflections from '@/components/background/reflections.vue';
 import bamboo from '@/components/background/bamboo.vue';
 
+import { useRoute } from 'vue-router'
+
 export default {
   name: 'App',
   components: {
@@ -31,6 +33,7 @@ export default {
     bamboo
   },
   data: () => ({
+    route: useRoute(),
     selectedBackground: null,
     backgroundComponents: [ 
       {
@@ -55,6 +58,11 @@ export default {
       }
     ]
   }),
+  computed: {
+    showBackground() {
+        return !this.route.matched.some(r => r.meta.hideBackground)
+    }
+  },
   methods: {
     setBackground(background) {
       this.selectedBackground = background;
@@ -101,6 +109,7 @@ export default {
   height: 100vh;
   overflow: hidden;
   display: flex;
+  flex-direction: column;
 }
 
 .canvas {

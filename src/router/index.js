@@ -20,6 +20,14 @@ const routes = [
     path: '/projects',
     name: 'Projects',
     component: () => import('../views/Projects.vue')
+  },
+  {
+    path: '/projects/games',
+    name: 'Games',
+    meta: { hideBackground: true },
+    children: [
+        { path: 'boids', component: () => import('../projects/games/Boids.vue')}
+    ]
   }
 ]
 

@@ -16,10 +16,6 @@ function vectorAngle(x, y) {
     return Math.atan2(y, x)
 }
 
-function clampColour(value) {
-    return Math.max(0, Math.min(255, Math.round(value)))
-}
-
 function constrainVector(x, y, min, max) {
     const magnitude = vectorLength(x, y)
     if (magnitude === 0) return [0, 0]
@@ -155,6 +151,12 @@ export class KoiFish {
         this.updatePosition()
         this.resetFlocking()
         this.tick = Math.random() * Math.PI
+
+        this.bodyColour = `rgb(
+            ${Math.random() * 255},
+            100,
+            150
+        )`
     }
 
     constructJoints(x, y, angle, count) {
@@ -306,9 +308,7 @@ export class KoiFish {
             this.driveJoint(index)
         }
         this.updatePosition()
-        this.bodyColour = `rgb(${clampColour(50 + 80 * (this.velocityX + this.velocityY))}, `
-            + `${clampColour(255 * this.x / width)}, ${clampColour(255 * this.y / height)})`
-
+       
         const acceleration = vectorLength(this.accelerationX, this.accelerationY)
         this.tick = (this.tick + 0.05 + acceleration * 6) % (Math.PI * 2)
         this.accelerationX = 0

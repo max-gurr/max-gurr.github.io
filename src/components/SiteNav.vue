@@ -1,17 +1,23 @@
 <template>
-  <nav class="site-nav" aria-label="Site">
-    <router-link
-      v-for="link in visibleLinks"
-      :key="link.to"
-      :to="link.to"
-      class="site-nav__link"
-    >{{ link.label }}</router-link>
-  </nav>
+    <header class="topbar">
+        <h1>{{ title }}</h1>
+        <nav class="site-nav" aria-label="Site">
+            <router-link
+            v-for="link in visibleLinks"
+            :key="link.to"
+            :to="link.to"
+            class="site-nav__link"
+            >{{ link.label }}</router-link>
+        </nav>
+  </header>
 </template>
 
 <script>
 export default {
   name: 'site-nav',
+  props: {
+    title: {type: String, required: true},
+  },
   data: () => ({
     links: [
       { label: 'Home', to: '/' },
@@ -31,7 +37,26 @@ export default {
 
 <style lang="scss">
 @use '../assets/variables.scss' as *;
+.topbar {
+    z-index: 2;
+    display: flex;
+    min-height: 5.5rem;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem clamp(1.5rem, 7vw, 6rem);
+    border-bottom: 1px solid rgba($soft-blue, 0.24);
+    background: rgba($bg-dark-blue, 0.68);
+    backdrop-filter: blur(12px);
 
+    h1 {
+      margin: 0;
+      color: $light-grey;
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-variant: small-caps;
+      letter-spacing: 0.04em;
+    }
+  }
 .site-nav {
   display: flex;
   align-items: center;

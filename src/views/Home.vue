@@ -1,4 +1,5 @@
 <template>
+    <Transition name="content-fade" mode="out-in" appear>
   <div class="home page">
     <div class="home-content-stage">
         <div key="home" class="home-container flex-center">
@@ -18,18 +19,12 @@
         </div>
     </div>
   </div>
+  </Transition>
 </template>
 
 <script>
-import AboutContent from '@/components/AboutContent.vue';
-import ResearchContent from '@/components/ResearchContent.vue';
-
 export default {
-  name: 'home-page',
-  components: {
-    AboutContent,
-    ResearchContent
-  }
+  name: 'home-page'
 }
 </script>
 

@@ -107,6 +107,10 @@ const RIPPLE_CHANCE_PER_STEP = 0.01
 const MAX_RIPPLES = 12
 const RESIZE_DEBOUNCE = 150
 
+function clampColour(value) {
+    return Math.max(0, Math.min(255, Math.round(value)))
+}
+
 export default {
     name: 'fish-background',
     props: {
@@ -220,6 +224,13 @@ export default {
             for (let i = 0; i < count; i += 1) {
                 fish[i].applyFlocking()
                 fish[i].resetFlocking()
+                
+                 fish[i].bodyColour = `rgb(
+                    ${clampColour(50 + 80 * (fish[i].velocityX + fish[i].velocityY))}, 
+                    ${clampColour(255 * fish[i].x / this.worldWidth)}, 
+                    ${clampColour(255 * fish[i].y / this.worldHeight)}
+                )`
+
                 fish[i].update(this.worldWidth, this.worldHeight)
             }
 

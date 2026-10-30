@@ -1,10 +1,6 @@
 <template>
   <main class="content-page page flex-center content-page--embedded sectioned-content">
-    <header class="sectioned-content__topbar">
-      <h1>{{ title }}</h1>
-      <site-nav />
-    </header>
-    <div ref="scroller" class="sectioned-content__scroll">
+        <div ref="scroller" class="sectioned-content__scroll">
       <div class="sectioned-content__body"><slot /></div>
     </div>
     <nav class="sectioned-content__toc" aria-label="On this page">
@@ -22,16 +18,10 @@
 </template>
 
 <script>
-import SiteNav from './SiteNav.vue';
 
 export default {
   name: 'sectioned-content',
-  components: { SiteNav },
   props: {
-    title: {
-      type: String,
-      required: true
-    },
     sections: {
       type: Array,
       required: true
@@ -82,27 +72,6 @@ export default {
   justify-content: flex-start;
   padding: 0;
   overflow: hidden;
-
-  &__topbar {
-    z-index: 2;
-    display: flex;
-    min-height: 5.5rem;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem clamp(1.5rem, 7vw, 6rem);
-    border-bottom: 1px solid rgba($soft-blue, 0.24);
-    background: rgba($bg-dark-blue, 0.68);
-    backdrop-filter: blur(12px);
-
-    h1 {
-      margin: 0;
-      color: $light-grey;
-      font-size: clamp(1.75rem, 4vw, 2.5rem);
-      font-variant: small-caps;
-      letter-spacing: 0.04em;
-    }
-  }
 
   &__scroll {
     width: 100%;

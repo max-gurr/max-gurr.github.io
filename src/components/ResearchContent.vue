@@ -1,5 +1,5 @@
 <template>
-  <SectionedContent title="Research" :sections="sections" @back="$emit('back')">
+  <SectionedContent :sections="sections" @back="$emit('back')">
     <section id="phd-memory-1" class="sectioned-content__section" aria-labelledby="phd-memory-title">
         <h2 id="phd-memory-title">Location Updating Affects Object Recognition in Virtual Reality</h2>
         <div class="research__container">

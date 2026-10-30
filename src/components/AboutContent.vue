@@ -1,5 +1,5 @@
 <template>
-  <SectionedContent title="About Me" :sections="sections" @back="$emit('back')">
+  <SectionedContent :sections="sections" @back="$emit('back')">
     <section id="profile" class="sectioned-content__section" aria-labelledby="profile-title">
       <h2 id="profile-title">Profile</h2>
       <div class="profile__panel">

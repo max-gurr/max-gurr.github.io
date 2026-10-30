@@ -1,16 +1,21 @@
 <template>
-  <div class="page">
-    <ResearchContent key="research"/>
-  </div>
+    <Transition name="content-fade" mode="out-in" appear>
+    <div class="page">
+        <SiteNav title="Research"/>
+        <ResearchContent key="research"/>
+    </div>
+  </Transition>
 </template>
 
 <script>
 import ResearchContent from '@/components/ResearchContent.vue';
+import SiteNav from '@/components/SiteNav.vue';
 
 export default {
   name: 'research-page',
   components: {
-    ResearchContent
+    ResearchContent,
+    SiteNav
   }
 }
 </script>
