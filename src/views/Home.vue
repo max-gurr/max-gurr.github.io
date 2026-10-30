@@ -6,10 +6,10 @@
             <h1>Max Gurr</h1>
           </div>
           <nav class="home-actions" aria-label="Portfolio pages">
-            <router-link to="/About">
-                <button class="home-action" type="button">About me</button>
+            <router-link to="/about">
+                <button class="home-action" type="button">About Me</button>
             </router-link>
-            <router-link to="/Research">
+            <router-link to="/research">
                 <button class="home-action home-action--primary" type="button">Research</button>
             </router-link>
             <!-- <router-link class="home-action" to="/projects">Projects</router-link> -->

@@ -2,7 +2,7 @@
   <main class="content-page page flex-center content-page--embedded sectioned-content">
     <header class="sectioned-content__topbar">
       <h1>{{ title }}</h1>
-      <router-link to="/"><button class="content-page__back" type="button">Back</button></router-link>
+      <site-nav />
     </header>
     <div ref="scroller" class="sectioned-content__scroll">
       <div class="sectioned-content__body"><slot /></div>
@@ -22,8 +22,11 @@
 </template>
 
 <script>
+import SiteNav from './SiteNav.vue';
+
 export default {
   name: 'sectioned-content',
+  components: { SiteNav },
   props: {
     title: {
       type: String,
@@ -98,21 +101,6 @@ export default {
       font-size: clamp(1.75rem, 4vw, 2.5rem);
       font-variant: small-caps;
       letter-spacing: 0.04em;
-    }
-
-    .content-page__back {
-      margin: 0;
-      padding: 0.65rem 1rem;
-      border: 1px solid rgba($soft-blue, 0.5);
-      border-radius: 999px;
-      color: $light-grey;
-      transition: background-color 0.2s ease, border-color 0.2s ease;
-
-      &:hover {
-        border-color: $soft-blue;
-        background: rgba($light-grey, 0.1);
-        text-decoration: none;
-      }
     }
   }
 
