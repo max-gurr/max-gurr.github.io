@@ -2,28 +2,28 @@
     <Transition name="content-fade" mode="out-in" appear>
   <main class="projects-page page">
     <SiteNav title="Projects" />
-    <nav class="projects-page__categories" aria-label="Project categories" role="tablist">
-    <!--
-    <button
-        id="data-tab"
-        type="button"
-        role="tab"
-        :aria-selected="activeCategory === 'data'"
-        aria-controls="data-panel"
-        :class="{ 'projects-page__category--active': activeCategory === 'data' }"
-        @click="activeCategory = 'data'"
-      >Data</button>
-      -->  
-      <button
-        id="games-tab"
-        type="button"
-        role="tab"
-        :aria-selected="activeCategory === 'games'"
-        aria-controls="games-panel"
-        :class="{ 'projects-page__category--active': activeCategory === 'games' }"
-        @click="activeCategory = 'games'"
-      >Other</button>
-    </nav>
+        
+     <!--   <nav class="projects-page__categories" aria-label="Project categories" role="tablist">
+            <button
+            id="data-tab"
+            type="button"
+            role="tab"
+            :aria-selected="activeCategory === 'data'"
+            aria-controls="data-panel"
+            :class="{ 'projects-page__category--active': activeCategory === 'data' }"
+            @click="activeCategory = 'data'"
+        >Data</button>
+        <button
+            id="games-tab"
+            type="button"
+            role="tab"
+            :aria-selected="activeCategory === 'games'"
+            aria-controls="games-panel"
+            :class="{ 'projects-page__category--active': activeCategory === 'games' }"
+            @click="activeCategory = 'games'"
+        >Other</button>
+        </nav>      -->  
+
 
     <div class="projects-page__scroll">
       <section
@@ -35,7 +35,6 @@
       >
 <!--------------- DATA PROJECTS ------------->
 
-
 <!------------------------------------------->
       </section>
       <section
@@ -46,7 +45,7 @@
         aria-labelledby="games-tab"
       >
 <!--------------- MISC PROJECTS ------------->
-        <ProjectCard title="Flocking Simulation" link="/projects/games/boids" svg="koi_thumbnail"/>
+        <ProjectCard title="Boids: Flocking Simulation" link="/projects/games/boids" svg="koi_thumbnail"/>
 <!------------------------------------------->
       </section>
     </div>

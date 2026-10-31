@@ -91,9 +91,9 @@ class Joint {
         const context = this.context
         context.save()
         this.transformToJoint()
-        const tailY = Math.round(-width / 3)
-        const tailSize = Math.round(width * 1.5)
-        const tailStretch = Math.round(width / 4)
+        const tailY = -width / 3
+        const tailSize = width * 1.5
+        const tailStretch = width / 4
 
         context.beginPath()
         context.moveTo(0, tailY)
@@ -163,6 +163,8 @@ export class KoiFish {
             length += jointLength
         }
 
+        length += count
+
         this.length = length
         return joints
     }
@@ -208,8 +210,8 @@ export class KoiFish {
 
     update(width, height) {
         // Wrap to other side of screen
-        const boundary = this.length * 1.15
-        const offset = this.length * 1.5
+        const boundary = this.length * 1.5
+        const offset = this.length * 1.75
         let xOffset = 0
         let yOffset = 0
         if (this.x < -boundary) xOffset = width + offset
@@ -327,12 +329,16 @@ export class KoiFish {
 	}
 }
 
+export function createKoiFish(context, width, height) {
+    const jointCount = Math.round(Math.random() * 2 + 3)
+    const border = 50
+    const x = width / 2 + (Math.random() * 2 - 1) * Math.max(0, width / 2 - border)
+    const y = height / 2 + (Math.random() * 2 - 1) * Math.max(0, height / 2 - border)
+    return new KoiFish(context, x, y, jointCount)
+}
+
 export function createKoiSchool(context, width, height, count) {
     return Array.from({ length: count }, () => {
-        const jointCount = Math.round(Math.random() * 2 + 3)
-        const border = 50
-        const x = width / 2 + (Math.random() * 2 - 1) * Math.max(0, width / 2 - border)
-        const y = height / 2 + (Math.random() * 2 - 1) * Math.max(0, height / 2 - border)
-        return new KoiFish(context, x, y, jointCount)
+        return createKoiFish(context, width, height)
     })
 }
