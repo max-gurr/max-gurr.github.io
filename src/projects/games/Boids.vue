@@ -21,6 +21,34 @@ const STEP_MS = 1000 / UPDATE_HZ
 const MAX_STEPS_PER_FRAME = 5        // stops a catch-up spiral after a long pause
 const RESIZE_DEBOUNCE = 150
 
+let bodyColours = [
+	'rgb(255, 255, 255)', 
+	'rgb(255, 255, 255)', 
+	'rgb(255, 255, 255)', 
+	'rgb(255, 255, 255)', 
+	'rgb(255, 128, 0)',
+	'rgb(255, 128, 0)',
+	'rgb(255, 128, 0)',
+	'rgb(255, 128, 0)',
+	'rgb(255, 128, 0)',
+	'rgb(240 210 20)',
+	'rgb(240 210 20)',
+	'rgb(240 210 20)',
+	'rgb(240 210 20)',
+	'rgb(100 100 110)',
+	'rgb(230 60 80)'
+];
+let dotColours = [
+	'rgb(255, 255, 255)', 
+	'rgb(20, 40, 30)', 
+	'rgb(255, 128, 0)', 
+	'rgb(249, 226, 15)',
+	'null',
+	'null',
+	'null',
+];
+
+
 export default {
     name: 'boids-game',
     components: { SiteNav },
@@ -84,6 +112,13 @@ export default {
             this.worldHeight = this.height / DRAW_SCALE
             const fishCount = Math.max(6, Math.min(12, Math.round(this.width / 85)))
             this.fish = createKoiSchool(this.ctx, this.worldWidth, this.worldHeight, fishCount)
+            
+            for (let f = 0; f < this.fish.length; f += 1) {
+                // Assign colours
+                const bodyColour = bodyColours[parseInt(Math.random() * bodyColours.length)];
+                this.fish[f].setBodyColour(bodyColour);
+                this.fish[f].setDotColours(dotColours);
+            }
 
             // With reduced motion there's no loop, so draw a single still frame
             if (this.reduceMotion) this.render()
@@ -164,6 +199,7 @@ export default {
         z-index: 1;
         pointer-events: none;
         filter: blur(1px);
+        opacity: 0.65;
     }
 }
 </style>

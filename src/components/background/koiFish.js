@@ -1,10 +1,10 @@
 const MAX_VELOCITY = 1.25
 const MIN_VELOCITY = 0.5
 const MAX_FORCE = 0.004
-const NEIGHBOUR_RADIUS = 50
-const NEIGHBOUR_ANGLE_MAX = Math.PI / 1.75
+const NEIGHBOUR_RADIUS = 60
+const NEIGHBOUR_ANGLE_MAX = Math.PI / 1.5
 const NEIGHBOUR_ANGLE_COS = Math.cos(NEIGHBOUR_ANGLE_MAX)
-const SEPARATION_RADIUS = NEIGHBOUR_RADIUS * 0.75
+const SEPARATION_RADIUS = NEIGHBOUR_RADIUS * 0.70
 const NEIGHBOUR_RADIUS_SQUARED = NEIGHBOUR_RADIUS * NEIGHBOUR_RADIUS
 const SEPARATION_RADIUS_SQUARED = SEPARATION_RADIUS * SEPARATION_RADIUS
 const NEIGHBOUR_ANGLE_COS_SQUARED = NEIGHBOUR_ANGLE_COS * NEIGHBOUR_ANGLE_COS
@@ -135,6 +135,21 @@ class Joint {
         context.restore()
     }
 
+	drawPoint(size) {       
+        const context = this.context
+        context.save()
+
+		size = Math.round(size)
+		this.context.beginPath()
+
+		this.context.moveTo(this.x, this.y)
+		this.context.arc(this.x, this.y, size, 0, 2*Math.PI)
+
+		this.context.closePath()
+		this.context.fill()
+        
+        context.restore()
+	}
 }
 
 export class KoiFish {
@@ -157,6 +172,8 @@ export class KoiFish {
             100,
             150
         )`
+        
+	    this.dotColours = [];
     }
 
     constructJoints(x, y, angle, count) {
@@ -217,16 +234,6 @@ export class KoiFish {
             this.alignmentY += neighbour.velocityY
             this.cohesionX += neighbour.x
             this.cohesionY += neighbour.y
-
-            const tailX = this.x - neighbour.tailX
-            const tailY = this.y - neighbour.tailY
-            const tailDistanceSquared = tailX * tailX + tailY * tailY
-            if (tailDistanceSquared > 0 && tailDistanceSquared <= SEPARATION_RADIUS_SQUARED) {
-                const tailDistance = Math.sqrt(tailDistanceSquared)
-                const magnitude = NEIGHBOUR_RADIUS - tailDistance
-                this.separationX += magnitude * tailX / tailDistance
-                this.separationY += magnitude * tailY / tailDistance
-            }
         }
 
         if (distanceSquared <= SEPARATION_RADIUS_SQUARED) {
@@ -267,6 +274,8 @@ export class KoiFish {
 
     update(width, height) {
         const boundary = this.length * 1.15
+        
+        // Wrap to other side of screen
         const offset = this.length * 1.5
         let xOffset = 0
         let yOffset = 0
@@ -276,6 +285,7 @@ export class KoiFish {
         else if (this.y > height + boundary) yOffset = -(height + offset)
         if (xOffset || yOffset) this.joints.forEach((joint) => joint.update(xOffset, yOffset))
 
+        // Avoid edges of screen - pushes fish towards a circular swim path
         const xDistance = (width / 2 - this.x) / Math.max(1, width / 2)
         const yDistance = (height / 2 - this.y) / Math.max(1, height / 2)
         const angle = vectorAngle(xDistance, yDistance) + Math.PI / 3
@@ -310,9 +320,13 @@ export class KoiFish {
         this.updatePosition()
        
         const acceleration = vectorLength(this.accelerationX, this.accelerationY)
-        this.tick = (this.tick + 0.05 + acceleration * 6) % (Math.PI * 2)
+
         this.accelerationX = 0
         this.accelerationY = 0
+        
+        // Update swim ticker
+        const tickIncrement = 0.05 * 8 / (this.joints.length * 2)
+        this.tick = (this.tick + tickIncrement + acceleration * 6) % (Math.PI * 2)
     }
 
     driveJoint(index) {
@@ -342,6 +356,7 @@ export class KoiFish {
             else if (count > 4 && index === 3) joint.drawFins(width * 0.9)
         }
 
+        // Draw body segments
         context.beginPath()
         context.moveTo(this.x, this.y)
         for (let index = 0; index < count; index += 1) {
@@ -354,12 +369,46 @@ export class KoiFish {
         context.fill()
         context.stroke()
 
+        this.drawDots();
     }
+
+	drawDots() {
+		// Go through each stored dot colour
+		for (let i = 0; i < this.dotColours.length; i++) {
+			if (this.dotColours[i] == "null") {
+				continue;
+			}
+			
+			this.context.fillStyle = this.dotColours[i];
+			this.context.strokeStyle = this.dotColours[i];
+
+			// Adjust size based on position from head
+			const sizeFactor = this.joints.length - i;
+			const sizeIncrement = 0.75;
+			const minSize = 0.25;
+
+			const size = minSize + sizeIncrement * sizeFactor;
+
+			this.joints[i].drawPoint(size);
+		}
+	}
+
+	setBodyColour(newColour) {
+		this.bodyColour = newColour;
+	}
+
+	setDotColours(colourList) {
+		for (let i = 0; i < this.joints.length-1; i++) {
+			// Pick a random colour 
+			const randomColour = colourList[parseInt(Math.random() * colourList.length)];
+			this.dotColours[i] = randomColour;
+		}
+	}
 }
 
 export function createKoiSchool(context, width, height, count) {
     return Array.from({ length: count }, () => {
-        const jointCount = gaussianRandom(3, 5)
+        const jointCount = Math.round(Math.random() * 2 + 3)
         const border = 50
         const x = width / 2 + (Math.random() * 2 - 1) * Math.max(0, width / 2 - border)
         const y = height / 2 + (Math.random() * 2 - 1) * Math.max(0, height / 2 - border)
