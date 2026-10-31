@@ -50,6 +50,32 @@
         </article>
     </section>
 
+    <section id="education" class="sectioned-content__section" aria-labelledby="education-title">
+      <h2 id="education-title">Education</h2>
+      <p class="about-education__institution">University of Auckland</p>
+      <div class="about-education__degrees">
+        <div class="about-education__degree">Bachelor of Engineering (First Class Honours): Software Engineering</div>
+        <div class="about-education__degree">Bachelor of Science: Psychology</div>
+        <span class="about-education__gpa">GPA <strong>8.5</strong></span>
+      </div>
+      <div class="about-education__achievements">
+        <h3>Achievements</h3>
+        <div class="about-achievements">
+          <div class="about-achievement">
+            <span>PhD Scholarship</span>
+            <span class="about-achievement__year">2023</span>
+          </div>
+          <div class="about-achievement">
+            <span>Engineering Dean’s Honours List</span>
+            <span class="about-achievement__year">2018 - 2021</span>
+          </div>
+          <div class="about-achievement">
+            <span>Top Achiever Scholarship</span>
+            <span class="about-achievement__year">2017</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section id="teaching" class="sectioned-content__section" aria-labelledby="teaching-title">
       <h2 id="teaching-title">Teaching</h2>
@@ -105,32 +131,6 @@
       </article>
     </section>
 
-    <section id="education" class="sectioned-content__section" aria-labelledby="education-title">
-      <h2 id="education-title">Education</h2>
-      <p class="about-education__institution">University of Auckland</p>
-      <div class="about-education__degrees">
-        <div class="about-education__degree">Bachelor of Engineering (First Class Honours): Software Engineering</div>
-        <div class="about-education__degree">Bachelor of Science: Psychology</div>
-        <span class="about-education__gpa">GPA <strong>8.5</strong></span>
-      </div>
-      <div class="about-education__achievements">
-        <h3>Achievements</h3>
-        <div class="about-achievements">
-          <div class="about-achievement">
-            <span>PhD Scholarship</span>
-            <span class="about-achievement__year">2023</span>
-          </div>
-          <div class="about-achievement">
-            <span>Engineering Dean’s Honours List</span>
-            <span class="about-achievement__year">2018 - 2021</span>
-          </div>
-          <div class="about-achievement">
-            <span>Top Achiever Scholarship</span>
-            <span class="about-achievement__year">2017</span>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <section id="contact" class="sectioned-content__section" aria-labelledby="contact-title">
       <h2 id="contact-title">Contact</h2>
@@ -161,9 +161,9 @@ export default {
     sections: [
       { id: 'profile', title: 'Profile' },
       { id: 'publications', title: 'Publications' },
+        { id: 'education', title: 'Education' },
       { id: 'teaching', title: 'Teaching' },
       { id: 'work-experience', title: 'Work Experience' },
-      { id: 'education', title: 'Education' },
       { id: 'contact', title: 'Contact' }
     ]
   })
