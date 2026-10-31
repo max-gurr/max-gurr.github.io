@@ -9,7 +9,8 @@
 
 <script>
 import { createKoiSchool } from '@/components/background/koiFish.js'
-import SiteNav from '../../components/SiteNav.vue'
+import SiteNav from '@/components/SiteNav.vue'
+import MathUtil from '@/util/MathUtil.js'
 
 const DRAW_SCALE = 1.25
 const FISH_SCALE = 1.5               // extra per-fish scale, applied around each fish's centre
@@ -30,24 +31,35 @@ let bodyColours = [
 	'rgb(255, 128, 0)',
 	'rgb(255, 128, 0)',
 	'rgb(255, 128, 0)',
-	'rgb(255, 128, 0)',
 	'rgb(240 210 20)',
 	'rgb(240 210 20)',
 	'rgb(240 210 20)',
 	'rgb(240 210 20)',
-	'rgb(100 100 110)',
-	'rgb(230 60 80)'
+	'rgb(100 100 110)'
 ];
 let dotColours = [
 	'rgb(255, 255, 255)', 
 	'rgb(20, 40, 30)', 
 	'rgb(255, 128, 0)', 
 	'rgb(249, 226, 15)',
+	'rgb(200 40 60)',
 	'null',
 	'null',
 	'null',
 ];
 
+const NEIGHBOUR_RADIUS = 60
+const NEIGHBOUR_ANGLE_MAX = Math.PI / 1.5
+const NEIGHBOUR_ANGLE_COS = Math.cos(NEIGHBOUR_ANGLE_MAX)
+const SEPARATION_RADIUS = NEIGHBOUR_RADIUS * 0.70
+const NEIGHBOUR_RADIUS_SQUARED = NEIGHBOUR_RADIUS * NEIGHBOUR_RADIUS
+const SEPARATION_RADIUS_SQUARED = SEPARATION_RADIUS * SEPARATION_RADIUS
+const NEIGHBOUR_ANGLE_COS_SQUARED = NEIGHBOUR_ANGLE_COS * NEIGHBOUR_ANGLE_COS
+
+const ALIGNMENT_SCALE = 0.7
+const COHESION_SCALE = 0.9
+const SEPARATION_SCALE = 2
+const BORDER_SCALE = 0.8
 
 export default {
     name: 'boids-game',
@@ -70,13 +82,16 @@ export default {
         this.lastFrame = 0
         this.accumulator = 0
         this.resizeTimer = 0
-        this.reduceMotion = false
+        this.reduceMotion = false,
+        this.numBoids = 0
     },
     mounted() {
         this.ctx = this.$refs.boidsCanvas.getContext('2d')
         this.reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
         window.addEventListener('resize', this.onResize)
+
+        this.numBoids = Math.max(6, Math.min(12, Math.round(window.innerWidth / 85)))
 
         this.resize()
 
@@ -110,8 +125,8 @@ export default {
 
             this.worldWidth = this.width / DRAW_SCALE
             this.worldHeight = this.height / DRAW_SCALE
-            const fishCount = Math.max(6, Math.min(12, Math.round(this.width / 85)))
-            this.fish = createKoiSchool(this.ctx, this.worldWidth, this.worldHeight, fishCount)
+
+            this.fish = createKoiSchool(this.ctx, this.worldWidth, this.worldHeight, this.numBoids)
             
             for (let f = 0; f < this.fish.length; f += 1) {
                 // Assign colours
@@ -150,18 +165,88 @@ export default {
 
             for (let first = 0; first < count; first += 1) {
                 for (let second = first + 1; second < count; second += 1) {
-                    fish[first].flockTo(fish[second])
-                    fish[second].flockTo(fish[first])
+                    this.flockTo(fish[first], fish[second])
+                    this.flockTo(fish[second], fish[first])
                 }
             }
 
             for (let i = 0; i < count; i += 1) {
-                fish[i].applyFlocking()
+                this.applyFlocking(fish[i])
                 fish[i].resetFlocking()
-                fish[i].update(this.worldWidth, this.worldHeight)
+                fish[i].avoidBorder(this.worldWidth, this.worldHeight, BORDER_SCALE)
+                fish[i].update(this.worldWidth, this.worldHeight, BORDER_SCALE)
             }
 
         },
+        flockTo(actor, neighbour) {
+            const dx = neighbour.x - actor.x
+            const dy = neighbour.y - actor.y
+            const distanceSquared = dx * dx + dy * dy
+            if (distanceSquared === 0 || distanceSquared >= NEIGHBOUR_RADIUS_SQUARED) return
+
+            actor.neighbourCount += 1
+            const viewDot = dx * actor.velocityX + dy * actor.velocityY
+            const viewDotSquared = viewDot * viewDot
+            const withinView = NEIGHBOUR_ANGLE_COS >= 0
+                ? viewDot >= 0
+                    && viewDotSquared >= NEIGHBOUR_ANGLE_COS_SQUARED * distanceSquared * actor.velocitySquared
+                : viewDot >= 0
+                    || viewDotSquared <= NEIGHBOUR_ANGLE_COS_SQUARED * distanceSquared * actor.velocitySquared
+
+            if (withinView) {
+                actor.alignmentX += neighbour.velocityX
+                actor.alignmentY += neighbour.velocityY
+                actor.cohesionX += neighbour.x
+                actor.cohesionY += neighbour.y
+            }
+
+            if (distanceSquared <= SEPARATION_RADIUS_SQUARED) {
+                const distance = Math.sqrt(distanceSquared)
+                actor.separationCount += 1
+                const magnitude = NEIGHBOUR_RADIUS - distance
+                actor.separationX -= magnitude * dx / distance
+                actor.separationY -= magnitude * dy / distance
+            }
+        },
+        
+        applyFlocking(actor) {
+            if (actor.neighbourCount === 0) return
+            this.applyAlignment(
+                actor, 
+                actor.alignmentX / actor.neighbourCount, 
+                actor.alignmentY / actor.neighbourCount, 
+                ALIGNMENT_SCALE
+            )
+            this.applyCohesion(
+                actor, 
+                actor.cohesionX / 
+                actor.neighbourCount, 
+                actor.cohesionY / actor.neighbourCount, 
+                COHESION_SCALE
+            )
+
+            if (actor.separationCount > 0) {
+                this.applySeparation(
+                    actor, 
+                    actor.separationX / actor.separationCount, 
+                    actor.separationY / actor.separationCount, 
+                    SEPARATION_SCALE
+                )
+            }
+        },
+
+        applyAlignment(actor, x, y, scale) {
+            actor.addForce(x - actor.velocityX, y - actor.velocityY, scale)
+        },
+
+        applyCohesion(actor, x, y, scale) {
+            actor.addForce(x - actor.x - actor.velocityX, y - actor.y - actor.velocityY, scale)
+        },
+
+        applySeparation(actor, x, y, scale) {
+            actor.addForce(x - actor.velocityX, y - actor.velocityY, scale)
+        },
+
         render() {
             const ctx = this.ctx
             const fish = this.fish
@@ -178,6 +263,7 @@ export default {
                 // One matrix instead of translate/scale/translate: scales by FISH_SCALE around the fish
                 ctx.setTransform(scale, 0, 0, scale, offset * f.x, offset * f.y)
                 f.draw()
+                f.drawDots()
                 ctx.restore()
             }
         }
@@ -199,7 +285,7 @@ export default {
         z-index: 1;
         pointer-events: none;
         filter: blur(1px);
-        opacity: 0.65;
+        opacity: 0.7;
     }
 }
 </style>

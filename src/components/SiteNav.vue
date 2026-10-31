@@ -22,7 +22,8 @@ export default {
     links: [
       { label: 'Home', to: '/' },
       { label: 'About', to: '/about' },
-      { label: 'Research', to: '/research' }
+      { label: 'Research', to: '/research' },
+      { label: 'Projects', to: '/projects'}
     ]
   }),
   computed: {

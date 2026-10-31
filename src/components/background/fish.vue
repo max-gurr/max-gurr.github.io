@@ -107,6 +107,19 @@ const RIPPLE_CHANCE_PER_STEP = 0.01
 const MAX_RIPPLES = 12
 const RESIZE_DEBOUNCE = 150
 
+const NEIGHBOUR_RADIUS = 50
+const NEIGHBOUR_ANGLE_MAX = Math.PI / 1.5
+const NEIGHBOUR_ANGLE_COS = Math.cos(NEIGHBOUR_ANGLE_MAX)
+const SEPARATION_RADIUS = NEIGHBOUR_RADIUS * 0.70
+const NEIGHBOUR_RADIUS_SQUARED = NEIGHBOUR_RADIUS * NEIGHBOUR_RADIUS
+const SEPARATION_RADIUS_SQUARED = SEPARATION_RADIUS * SEPARATION_RADIUS
+const NEIGHBOUR_ANGLE_COS_SQUARED = NEIGHBOUR_ANGLE_COS * NEIGHBOUR_ANGLE_COS
+
+const ALIGNMENT_SCALE = 0.7
+const COHESION_SCALE = 0.9
+const SEPARATION_SCALE = 2
+const BORDER_SCALE = 0.75
+
 function clampColour(value) {
     return Math.max(0, Math.min(255, Math.round(value)))
 }
@@ -216,13 +229,14 @@ export default {
 
             for (let first = 0; first < count; first += 1) {
                 for (let second = first + 1; second < count; second += 1) {
-                    fish[first].flockTo(fish[second])
-                    fish[second].flockTo(fish[first])
+                    this.flockTo(fish[first], fish[second])
+                    this.flockTo(fish[second], fish[first])
                 }
             }
 
             for (let i = 0; i < count; i += 1) {
-                fish[i].applyFlocking()
+                this.applyFlocking(fish[i])
+
                 fish[i].resetFlocking()
                 
                  fish[i].bodyColour = `rgb(
@@ -230,7 +244,8 @@ export default {
                     ${clampColour(255 * fish[i].x / this.worldWidth)}, 
                     ${clampColour(255 * fish[i].y / this.worldHeight)}
                 )`
-
+                
+                fish[i].avoidBorder(this.worldWidth, this.worldHeight, BORDER_SCALE);
                 fish[i].update(this.worldWidth, this.worldHeight)
             }
 
@@ -241,6 +256,76 @@ export default {
                 })
             }
         },
+        
+        flockTo(actor, neighbour) {
+            const dx = neighbour.x - actor.x
+            const dy = neighbour.y - actor.y
+            const distanceSquared = dx * dx + dy * dy
+            if (distanceSquared === 0 || distanceSquared >= NEIGHBOUR_RADIUS_SQUARED) return
+
+            actor.neighbourCount += 1
+            const viewDot = dx * actor.velocityX + dy * actor.velocityY
+            const viewDotSquared = viewDot * viewDot
+            const withinView = NEIGHBOUR_ANGLE_COS >= 0
+                ? viewDot >= 0
+                    && viewDotSquared >= NEIGHBOUR_ANGLE_COS_SQUARED * distanceSquared * actor.velocitySquared
+                : viewDot >= 0
+                    || viewDotSquared <= NEIGHBOUR_ANGLE_COS_SQUARED * distanceSquared * actor.velocitySquared
+
+            if (withinView) {
+                actor.alignmentX += neighbour.velocityX
+                actor.alignmentY += neighbour.velocityY
+                actor.cohesionX += neighbour.x
+                actor.cohesionY += neighbour.y
+            }
+
+            if (distanceSquared <= SEPARATION_RADIUS_SQUARED) {
+                const distance = Math.sqrt(distanceSquared)
+                actor.separationCount += 1
+                const magnitude = NEIGHBOUR_RADIUS - distance
+                actor.separationX -= magnitude * dx / distance
+                actor.separationY -= magnitude * dy / distance
+            }
+        },
+        
+        applyFlocking(actor) {
+            if (actor.neighbourCount === 0) return
+            this.applyAlignment(
+                actor, 
+                actor.alignmentX / actor.neighbourCount, 
+                actor.alignmentY / actor.neighbourCount, 
+                ALIGNMENT_SCALE
+            )
+            this.applyCohesion(
+                actor, 
+                actor.cohesionX / 
+                actor.neighbourCount, 
+                actor.cohesionY / actor.neighbourCount, 
+                COHESION_SCALE
+            )
+
+            if (actor.separationCount > 0) {
+                this.applySeparation(
+                    actor, 
+                    actor.separationX / actor.separationCount, 
+                    actor.separationY / actor.separationCount, 
+                    SEPARATION_SCALE
+                )
+            }
+        },
+
+        applyAlignment(actor, x, y, scale) {
+            actor.addForce(x - actor.velocityX, y - actor.velocityY, scale)
+        },
+
+        applyCohesion(actor, x, y, scale) {
+            actor.addForce(x - actor.x - actor.velocityX, y - actor.y - actor.velocityY, scale)
+        },
+
+        applySeparation(actor, x, y, scale) {
+            actor.addForce(x - actor.velocityX, y - actor.velocityY, scale)
+        },
+
         render() {
             const ctx = this.ctx
             const fish = this.fish
@@ -323,7 +408,7 @@ export default {
     .koi-fish-canvas {
         z-index: 1;
         filter: blur(2px);
-        opacity: 0.25;
+        opacity: 0.3;
         pointer-events: none;
     }
 

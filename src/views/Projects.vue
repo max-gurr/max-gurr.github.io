@@ -1,8 +1,10 @@
 <template>
+    <Transition name="content-fade" mode="out-in" appear>
   <main class="projects-page page">
     <SiteNav title="Projects" />
     <nav class="projects-page__categories" aria-label="Project categories" role="tablist">
-      <button
+    <!--
+    <button
         id="data-tab"
         type="button"
         role="tab"
@@ -11,6 +13,7 @@
         :class="{ 'projects-page__category--active': activeCategory === 'data' }"
         @click="activeCategory = 'data'"
       >Data</button>
+      -->  
       <button
         id="games-tab"
         type="button"
@@ -43,22 +46,23 @@
         aria-labelledby="games-tab"
       >
 <!--------------- MISC PROJECTS ------------->
-        <ProjectCard title="Boids" link="games/boids"/>
+        <ProjectCard title="Flocking Simulation" link="/projects/games/boids" svg="koi_thumbnail"/>
 <!------------------------------------------->
       </section>
     </div>
   </main>
+  </Transition>
 </template>
 
 <script>
 import ProjectCard from '@/projects/ProjectCard.vue';
-import SiteNav from '../components/SiteNav.vue';
+import SiteNav from '@/components/SiteNav.vue';
 
 export default {
   name: 'projects-page',
   components: {
     SiteNav,
-    ProjectCard,
+    ProjectCard
   },
   data: () => ({
     activeCategory: 'games',
@@ -169,7 +173,7 @@ export default {
 
   &__grid {
     display: grid;
-    width: min(100%, 72rem);
+    width: min(100%, 65rem);
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
     gap: 1.25rem;
     margin: 0 auto;
@@ -219,7 +223,8 @@ export default {
     width: 100%;
     height: 100%;
     min-height: 16rem;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
     border-left: 1px solid rgba($soft-blue, 0.18);
     border-radius: 0 1rem 1rem 0;
     background: rgba($soft-blue, 0.08);

@@ -1,36 +1,8 @@
 const MAX_VELOCITY = 1.25
 const MIN_VELOCITY = 0.5
-const MAX_FORCE = 0.004
-const NEIGHBOUR_RADIUS = 60
-const NEIGHBOUR_ANGLE_MAX = Math.PI / 1.5
-const NEIGHBOUR_ANGLE_COS = Math.cos(NEIGHBOUR_ANGLE_MAX)
-const SEPARATION_RADIUS = NEIGHBOUR_RADIUS * 0.70
-const NEIGHBOUR_RADIUS_SQUARED = NEIGHBOUR_RADIUS * NEIGHBOUR_RADIUS
-const SEPARATION_RADIUS_SQUARED = SEPARATION_RADIUS * SEPARATION_RADIUS
-const NEIGHBOUR_ANGLE_COS_SQUARED = NEIGHBOUR_ANGLE_COS * NEIGHBOUR_ANGLE_COS
-function vectorLength(x, y) {
-    return Math.hypot(x, y)
-}
+const MAX_FORCE = 0.005
 
-function vectorAngle(x, y) {
-    return Math.atan2(y, x)
-}
-
-function constrainVector(x, y, min, max) {
-    const magnitude = vectorLength(x, y)
-    if (magnitude === 0) return [0, 0]
-
-    const desiredMagnitude = Math.max(min, Math.min(max, magnitude))
-    return [desiredMagnitude * x / magnitude, desiredMagnitude * y / magnitude]
-}
-
-function gaussianRandom(start, end) {
-    let sample = 0
-    for (let index = 0; index < 5; index += 1) {
-        sample += Math.random()
-    }
-    return Math.floor(start + sample / 5 * (end - start + 1))
-}
+import MathUtil from "@/util/MathUtil"
 
 class Joint {
     constructor(context, x, y, length, angle) {
@@ -59,7 +31,7 @@ class Joint {
     }
 
     followParent() {
-        this.angle = vectorAngle(this.x - this.parent.x, this.y - this.parent.y)
+        this.angle = MathUtil.vectorAngle(this.x - this.parent.x, this.y - this.parent.y)
         this.calculatePosition()
     }
 
@@ -214,68 +186,29 @@ export class KoiFish {
         this.separationY = 0
     }
 
-    flockTo(neighbour) {
-        const dx = neighbour.x - this.x
-        const dy = neighbour.y - this.y
-        const distanceSquared = dx * dx + dy * dy
-        if (distanceSquared === 0 || distanceSquared >= NEIGHBOUR_RADIUS_SQUARED) return
-
-        this.neighbourCount += 1
-        const viewDot = dx * this.velocityX + dy * this.velocityY
-        const viewDotSquared = viewDot * viewDot
-        const withinView = NEIGHBOUR_ANGLE_COS >= 0
-            ? viewDot >= 0
-                && viewDotSquared >= NEIGHBOUR_ANGLE_COS_SQUARED * distanceSquared * this.velocitySquared
-            : viewDot >= 0
-                || viewDotSquared <= NEIGHBOUR_ANGLE_COS_SQUARED * distanceSquared * this.velocitySquared
-
-        if (withinView) {
-            this.alignmentX += neighbour.velocityX
-            this.alignmentY += neighbour.velocityY
-            this.cohesionX += neighbour.x
-            this.cohesionY += neighbour.y
-        }
-
-        if (distanceSquared <= SEPARATION_RADIUS_SQUARED) {
-            const distance = Math.sqrt(distanceSquared)
-            this.separationCount += 1
-            const magnitude = NEIGHBOUR_RADIUS - distance
-            this.separationX -= magnitude * dx / distance
-            this.separationY -= magnitude * dy / distance
-        }
-    }
-
-    applyFlocking() {
-        if (this.neighbourCount === 0) return
-        this.applyAlignment(this.alignmentX / this.neighbourCount, this.alignmentY / this.neighbourCount)
-        this.applyCohesion(this.cohesionX / this.neighbourCount, this.cohesionY / this.neighbourCount)
-        if (this.separationCount > 0) {
-            this.applySeparation(this.separationX / this.separationCount, this.separationY / this.separationCount)
-        }
-    }
-
-    applyAlignment(x, y) {
-        this.addForce(x - this.velocityX, y - this.velocityY, 0.7)
-    }
-
-    applyCohesion(x, y) {
-        this.addForce(x - this.x - this.velocityX, y - this.y - this.velocityY, 0.9)
-    }
-
-    applySeparation(x, y) {
-        this.addForce(x - this.velocityX, y - this.velocityY, 2)
-    }
-
     addForce(x, y, scale) {
-        const [forceX, forceY] = constrainVector(x, y, 0, MAX_FORCE)
+        const [forceX, forceY] = MathUtil.constrainVector(x, y, 0, MAX_FORCE)
         this.accelerationX += forceX * scale
         this.accelerationY += forceY * scale
     }
 
+    avoidBorder(width, height, scale) {
+        // Avoid edges of screen - pushes fish towards a circular swim path
+        const xDistance = (width / 2 - this.x) / Math.max(1, width / 2)
+        const yDistance = (height / 2 - this.y) / Math.max(1, height / 2)
+        const angle = MathUtil.vectorAngle(xDistance, yDistance) + Math.PI / 3
+        const [borderX, borderY] = MathUtil.constrainVector(
+            MathUtil.vectorLength(xDistance, yDistance) * Math.cos(angle),
+            MathUtil.vectorLength(xDistance, yDistance) * Math.sin(angle),
+            0,
+            MAX_FORCE,
+        )
+        this.addForce(borderX, borderY, scale);
+    }
+
     update(width, height) {
-        const boundary = this.length * 1.15
-        
         // Wrap to other side of screen
+        const boundary = this.length * 1.15
         const offset = this.length * 1.5
         let xOffset = 0
         let yOffset = 0
@@ -285,22 +218,11 @@ export class KoiFish {
         else if (this.y > height + boundary) yOffset = -(height + offset)
         if (xOffset || yOffset) this.joints.forEach((joint) => joint.update(xOffset, yOffset))
 
-        // Avoid edges of screen - pushes fish towards a circular swim path
-        const xDistance = (width / 2 - this.x) / Math.max(1, width / 2)
-        const yDistance = (height / 2 - this.y) / Math.max(1, height / 2)
-        const angle = vectorAngle(xDistance, yDistance) + Math.PI / 3
-        const [borderX, borderY] = constrainVector(
-            vectorLength(xDistance, yDistance) * Math.cos(angle),
-            vectorLength(xDistance, yDistance) * Math.sin(angle),
-            0,
-            MAX_FORCE,
-        )
-        this.accelerationX += borderX
-        this.accelerationY += borderY
 
+        // Regular physics step
         this.velocityX += this.accelerationX
         this.velocityY += this.accelerationY
-        const velocity = constrainVector(
+        const velocity = MathUtil.constrainVector(
             this.velocityX,
             this.velocityY,
             MIN_VELOCITY,
@@ -309,9 +231,10 @@ export class KoiFish {
         this.velocityX = velocity[0]
         this.velocityY = velocity[1]
         this.velocitySquared = this.velocityX * this.velocityX + this.velocityY * this.velocityY
-
+        
+        // Inverse kinematics
         this.joints[0].update(this.velocityX, this.velocityY)
-        this.joints[0].angle = vectorAngle(this.velocityX, this.velocityY) + Math.PI
+        this.joints[0].angle = MathUtil.vectorAngle(this.velocityX, this.velocityY) + Math.PI
         this.driveJoint(0)
         for (let index = 1; index < this.joints.length; index += 1) {
             this.joints[index].followParent()
@@ -319,7 +242,7 @@ export class KoiFish {
         }
         this.updatePosition()
        
-        const acceleration = vectorLength(this.accelerationX, this.accelerationY)
+        const acceleration = MathUtil.vectorLength(this.accelerationX, this.accelerationY)
 
         this.accelerationX = 0
         this.accelerationY = 0
@@ -332,10 +255,10 @@ export class KoiFish {
     driveJoint(index) {
         const count = this.joints.length
         const angle = this.tick - Math.PI / count * (index + 1)
-        const acceleration = vectorLength(this.accelerationX, this.accelerationY)
+        const acceleration = MathUtil.vectorLength(this.accelerationX, this.accelerationY)
         const startSize = 0.02 / count
         const sizeIncrement = 0.03 / count + acceleration / 2
-        const velocity = vectorLength(this.velocityX, this.velocityY)
+        const velocity = MathUtil.vectorLength(this.velocityX, this.velocityY)
         const velocityScale = 0.5 * (velocity - MIN_VELOCITY) / (MAX_VELOCITY - MIN_VELOCITY) + MIN_VELOCITY
         this.joints[index].driveAngle((startSize + sizeIncrement * index) * velocityScale, angle)
     }
@@ -368,8 +291,6 @@ export class KoiFish {
         context.closePath()
         context.fill()
         context.stroke()
-
-        this.drawDots();
     }
 
 	drawDots() {
